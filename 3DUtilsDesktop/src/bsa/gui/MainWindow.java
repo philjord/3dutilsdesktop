@@ -1,11 +1,9 @@
-package bsa;
+package bsa.gui;
 
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -14,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -24,29 +21,21 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import archive.ArchiveEntry;
-import bsa.gui.ArchiveNode;
-import bsa.gui.BSAFileSetWithStatus;
-import bsa.gui.FileNode;
-import bsa.gui.FolderNode;
-import bsa.gui.StatusDialog;
+import archive.ArchiveFile;
+import archive.DBException;
 import bsa.tasks.ArchiveFileFilter;
+import bsa.tasks.CreateTask;
+import bsa.tasks.ExtractTask;
+import bsa.tasks.LoadTask;
 import bsa.tasks.Main;
 
-// Referenced classes of package FO3Archive:
-//	            ArchiveNode, ArchiveFileFilter, StatusDialog, CreateTask, 
-//	            ArchiveFile, LoadTask, FolderNode, FileNode, 
-//	            ExtractTask, Main
-
-public class BSAContentDisplayTest extends JFrame implements ActionListener
+public class MainWindow extends JFrame implements ActionListener
 {
-	public static boolean LOAD_ALL = true;
 
 	private boolean windowMinimized;
 
@@ -54,15 +43,11 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 
 	private DefaultTreeModel treeModel;
 
-	private BSAFileSetWithStatus bsaFileSet;
+	private ArchiveFile archiveFile;
 
-	private JCheckBoxMenuItem cbMenuItem = new JCheckBoxMenuItem("Load all BSA Archives");
-
-	private JCheckBoxMenuItem sopErrMenuItem = new JCheckBoxMenuItem("SOP errors only");
-
-	public BSAContentDisplayTest()
+	public MainWindow()
 	{
-		super("BSA test display");
+		super("Fallout 3 Archive Utility");
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
 		String propValue = Main.properties.getProperty("window.main.position");
@@ -87,11 +72,11 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		menuBar.setOpaque(true);
 		JMenu menu = new JMenu("File");
 		menu.setMnemonic(70);
-		boolean loadAll = Boolean.parseBoolean(Main.properties.getProperty("load.all"));
-		cbMenuItem.setSelected(loadAll);
-		menu.add(cbMenuItem);
-		menu.add(sopErrMenuItem);
-		JMenuItem menuItem = new JMenuItem("Open Archive");
+		JMenuItem menuItem = new JMenuItem("New Archive");
+		menuItem.setActionCommand("new");
+		menuItem.addActionListener(this);
+		menu.add(menuItem);
+		menuItem = new JMenuItem("Open Archive");
 		menuItem.setActionCommand("open");
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
@@ -106,20 +91,12 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		menuBar.add(menu);
 		menu = new JMenu("Action");
 		menu.setMnemonic(65);
-		menuItem = new JMenuItem("Display Selected Files");
-		menuItem.setActionCommand("display selected");
+		menuItem = new JMenuItem("Extract Selected Files");
+		menuItem.setActionCommand("extract selected");
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
-		menuItem = new JMenuItem("Display All Files");
-		menuItem.setActionCommand("display all");
-		menuItem.addActionListener(this);
-		menu.add(menuItem);
-		menuItem = new JMenuItem("Verify Selected Files");
-		menuItem.setActionCommand("verify selected");
-		menuItem.addActionListener(this);
-		menu.add(menuItem);
-		menuItem = new JMenuItem("Verify All Files");
-		menuItem.setActionCommand("verify all");
+		menuItem = new JMenuItem("Extract All Files");
+		menuItem.setActionCommand("extract all");
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
 		menuBar.add(menu);
@@ -140,24 +117,6 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		contentPane.add(scrollPane);
 		setContentPane(contentPane);
 		addWindowListener(new ApplicationWindowListener());
-
-		tree.addMouseListener(new MouseAdapter()
-		{
-			public void mouseClicked(MouseEvent e)
-			{
-				if (e.getClickCount() == 2)
-				{
-					try
-					{
-						displayFiles(false, false);
-					}
-					catch (Throwable exc)
-					{
-						Main.logException("Exception while processing action event", exc);
-					}
-				}
-			}
-		});
 	}
 
 	public void actionPerformed(ActionEvent ae)
@@ -165,7 +124,9 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		try
 		{
 			String action = ae.getActionCommand();
-			if (action.equals("open"))
+			if (action.equals("new"))
+				newFile();
+			else if (action.equals("open"))
 				openFile();
 			else if (action.equals("close"))
 				closeFile();
@@ -173,14 +134,10 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 				exitProgram();
 			else if (action.equals("about"))
 				aboutProgram();
-			else if (action.equals("display selected"))
-				displayFiles(false, false);
-			else if (action.equals("display all"))
-				displayFiles(true, false);
-			else if (action.equals("verify selected"))
-				displayFiles(false, true);
-			else if (action.equals("verify all"))
-				displayFiles(true, true);
+			else if (action.equals("extract selected"))
+				extractFiles(false);
+			else if (action.equals("extract all"))
+				extractFiles(true);
 		}
 		catch (Throwable exc)
 		{
@@ -188,7 +145,100 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		}
 	}
 
-	private void openFile() throws IOException
+	private void newFile() throws InterruptedException, IOException, DBException
+	{
+		closeFile();
+		String currentDirectory = Main.properties.getProperty("current.directory");
+		JFileChooser chooser;
+		if (currentDirectory != null)
+		{
+			File dirFile = new File(currentDirectory);
+			if (dirFile.exists() && dirFile.isDirectory())
+				chooser = new JFileChooser(dirFile);
+			else
+				chooser = new JFileChooser();
+		}
+		else
+		{
+			chooser = new JFileChooser();
+		}
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.setDialogTitle("New Archive File");
+		chooser.setApproveButtonText("Create");
+		chooser.setFileFilter(new ArchiveFileFilter());
+		if (chooser.showOpenDialog(this) != 0)
+			return;
+		File file = chooser.getSelectedFile();
+		Main.properties.setProperty("current.directory", file.getParent());
+		if (file.exists())
+		{
+			int option = JOptionPane.showConfirmDialog(this, file.getPath() + " already exists.  Do you want to overwrite it?",
+					"File already exists", 0);
+			if (option != 0)
+				return;
+			if (!file.delete())
+			{
+				JOptionPane.showMessageDialog(this, "Unable to delete " + file.getPath(), "Delete failed", 0);
+				return;
+			}
+		}
+		String extractDirectory = Main.properties.getProperty("extract.directory");
+		File dirFile;
+		if (extractDirectory != null)
+		{
+			dirFile = new File(extractDirectory);
+			if (dirFile.exists() && dirFile.isDirectory())
+				chooser = new JFileChooser(dirFile);
+			else
+				chooser = new JFileChooser();
+		}
+		else
+		{
+			chooser = new JFileChooser();
+		}
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.setDialogTitle("Select Source Directory");
+		chooser.setApproveButtonText("Select");
+		chooser.setFileSelectionMode(1);
+		if (chooser.showOpenDialog(this) != 0)
+			return;
+		dirFile = chooser.getSelectedFile();
+		Main.properties.setProperty("extract.directory", dirFile.getPath());
+		StatusDialog statusDialog = new StatusDialog(this, "Creating " + file.getPath());
+		CreateTask createTask = new CreateTask(file, dirFile, statusDialog);
+		createTask.start();
+		int status = statusDialog.showDialog();
+		createTask.join();
+		if (status != 1)
+			return;
+		if (!file.exists())
+		{
+			JOptionPane.showMessageDialog(this, "No files were included in the archive", "Archive empty", 1);
+			return;
+		}
+
+		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(file);
+
+		ArchiveNode archiveNode = new ArchiveNode(archiveFile2);
+		statusDialog = new StatusDialog(this, "Loading " + archiveFile2.getName());
+		LoadTask loadTask = new LoadTask(archiveFile2, archiveNode, statusDialog);
+		loadTask.start();
+		status = statusDialog.showDialog();
+		loadTask.join();
+		if (status == 1)
+		{
+			this.archiveFile = archiveFile2;
+			treeModel = new DefaultTreeModel(archiveNode);
+			tree.setModel(treeModel);
+		}
+		else
+		{
+			archiveFile2.close();
+		}
+
+	}
+
+	private void openFile() throws InterruptedException, IOException, DBException
 	{
 		closeFile();
 		String currentDirectory = Main.properties.getProperty("current.directory");
@@ -212,54 +262,48 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		{
 			File file = chooser.getSelectedFile();
 			Main.properties.setProperty("current.directory", file.getParent());
-
-			Main.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
-
-			if (cbMenuItem.isSelected())
+			ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(file);
+			ArchiveNode archiveNode = new ArchiveNode(archiveFile2);
+			StatusDialog statusDialog = new StatusDialog(this, "Loading " + archiveFile2.getName());
+			LoadTask loadTask = new LoadTask(archiveFile2, archiveNode, statusDialog);
+			loadTask.start();
+			int status = statusDialog.showDialog();
+			loadTask.join();
+			if (status == 1)
 			{
-				bsaFileSet = new BSAFileSetWithStatus(file.getParent(), true, true);
+				this.archiveFile = archiveFile2;
+				treeModel = new DefaultTreeModel(archiveNode);
+				tree.setModel(treeModel);
 			}
 			else
 			{
-				bsaFileSet = new BSAFileSetWithStatus(file.getAbsolutePath(), false, true);
+				archiveFile2.close();
 			}
-
-			DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-			for (MutableTreeNode node : bsaFileSet.nodes)
-			{
-				root.add(node);
-			}
-
-			treeModel = new DefaultTreeModel(root);
-			tree.setModel(treeModel);
-
 		}
 	}
 
 	private void closeFile() throws IOException
 	{
-		if (bsaFileSet != null)
+		if (archiveFile != null)
 		{
-			bsaFileSet.close();
-			bsaFileSet = null;
+			archiveFile.close();
+			archiveFile = null;
 		}
 		treeModel = new DefaultTreeModel(new ArchiveNode());
 		tree.setModel(treeModel);
 	}
 
-	private void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException
+	private void extractFiles(boolean extractAllFiles) throws InterruptedException
 	{
-		if (bsaFileSet == null)
+		if (archiveFile == null)
 		{
 			JOptionPane.showMessageDialog(this, "You must open an archive file", "No archive file", 0);
 			return;
 		}
-		StatusDialog statusDialog = new StatusDialog(this, "Displaying files from " + bsaFileSet.getName());
-
 		List<ArchiveEntry> entries = null;
-		if (displayAllFiles)
+		if (extractAllFiles)
 		{
-			entries = bsaFileSet.getEntries(statusDialog);
+			entries = archiveFile.getEntries();
 		}
 		else
 		{
@@ -287,11 +331,34 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 			}
 
 		}
-
-		DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly, sopErrMenuItem.isSelected());
-		displayTask.start();
-		statusDialog.showDialog();
-		displayTask.join();
+		String extractDirectory = Main.properties.getProperty("extract.directory");
+		JFileChooser chooser;
+		if (extractDirectory != null)
+		{
+			File dirFile = new File(extractDirectory);
+			if (dirFile.exists() && dirFile.isDirectory())
+				chooser = new JFileChooser(dirFile);
+			else
+				chooser = new JFileChooser();
+		}
+		else
+		{
+			chooser = new JFileChooser();
+		}
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.setDialogTitle("Select Destination Directory");
+		chooser.setApproveButtonText("Select");
+		chooser.setFileSelectionMode(1);
+		if (chooser.showOpenDialog(this) == 0)
+		{
+			File dirFile = chooser.getSelectedFile();
+			Main.properties.setProperty("extract.directory", dirFile.getPath());
+			StatusDialog statusDialog = new StatusDialog(this, "Extracting files from " + archiveFile.getName());
+			ExtractTask extractTask = new ExtractTask(dirFile, archiveFile, entries, statusDialog);
+			extractTask.start();
+			statusDialog.showDialog();
+			extractTask.join();
+		}
 	}
 
 	private void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries)
@@ -329,7 +396,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 
 	private void aboutProgram()
 	{
-		String info = "<html>Phil's reworking of the fallout BSA file manager<br>";
+		String info = "<html>Fallout 3 Archive Utility Version 1.0<br>";
 		info += "<br>User name: ";
 		info += System.getProperty("user.name");
 		info += "<br>Home directory: ";
@@ -349,7 +416,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		info += "<br>Java class path: ";
 		info += System.getProperty("java.class.path");
 		info += "</html>";
-		JOptionPane.showMessageDialog(this, info.toString(), "About This Utility", 1);
+		JOptionPane.showMessageDialog(this, info.toString(), "About Fallout 3 Archive Utility", 1);
 	}
 
 	private class ApplicationWindowListener extends WindowAdapter

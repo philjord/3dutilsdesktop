@@ -8,22 +8,22 @@ import javax.media.j3d.Texture;
 import javax.swing.SwingUtilities;
 
 import archive.ArchiveEntry;
-import archive.Main;
+import bsa.gui.BSAFileSetWithStatus;
+import bsa.gui.StatusDialog;
 import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
-import gui.StatusDialog;
+import bsa.tasks.Main;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
-import set.BSAFileSet;
 import tools.ddstexture.DDSTextureLoader;
 import tools.ddstexture.utils.DDSTextureLoaderTester;
 import utils.source.DummyTextureSource;
 
 public class DisplayTask extends Thread
 {
-	private BSAFileSet bsaFileSet;
+	private BSAFileSetWithStatus bsaFileSet;
 
 	private List<ArchiveEntry> entries;
 
@@ -34,7 +34,7 @@ public class DisplayTask extends Thread
 	private boolean sopErrOnly;
 	private boolean completed;
 
-	public DisplayTask(BSAFileSet bsaFileSet, List<ArchiveEntry> entries, StatusDialog statusDialog, boolean verifyOnly, boolean sopErrOnly)
+	public DisplayTask(BSAFileSetWithStatus bsaFileSet, List<ArchiveEntry> entries, StatusDialog statusDialog, boolean verifyOnly, boolean sopErrOnly)
 	{
 		completed = false;
 		this.bsaFileSet = bsaFileSet;

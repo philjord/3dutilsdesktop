@@ -7,7 +7,7 @@ import java.util.Properties;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import archive.Main;
+import bsa.tasks.Main;
 
 public class BSADisplayMain extends Main
 {
