@@ -21,5 +21,6 @@
 	<classpathentry kind="lib" path="/external_jars/external jars/lwjgl-2.8.5/jar/jinput.jar"/>
 	<classpathentry kind="lib" path="/external_jars/external jars/lwjgl-2.8.5/jar/lwjgl_util.jar"/>
 	<classpathentry kind="lib" path="/external_jars/external jars/lwjgl-2.8.5/jar/lwjgl.jar" sourcepath="E:/downloads&amp;installs/develop/java/jogamp/jogamp-all-platforms/jogl-java-src.zip"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ESEAndroid"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
