@@ -36,6 +36,7 @@ import awt.tools3d.resolution.QueryProperties;
 import nif.BgsmSource;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
+import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.gui.util.ControllerInvokerThread;
 import nif.gui.util.NiObjectDisplayTable;
 import nif.gui.util.NifFileDisplayTable;
@@ -107,14 +108,14 @@ public class NifDisplayTester
 	public NifDisplayTester()
 	{
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
-		//jogl recomends for non phones 
-		System.setProperty("jogl.disable.opengles", "true");
 
 		//DDS requires no installed java3D
 		if (QueryProperties.checkForInstalledJ3d())
 		{
 			System.exit(0);
 		}
+		
+		NiGeometryAppearanceFactoryShader.setAsDefault();
 
 		//win.setVisible(true);
 		//win.setLocation(400, 0);

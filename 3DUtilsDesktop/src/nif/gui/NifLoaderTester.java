@@ -16,7 +16,7 @@ import utils.source.file.FileMeshSource;
 
 public class NifLoaderTester
 {
-	private static final boolean NO_J3D = true;
+	private static final boolean NO_J3D = false;
 	private static Preferences prefs;
 
 	private static int filesProcessed = 0;

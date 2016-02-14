@@ -41,6 +41,7 @@ import awt.tools3d.resolution.GraphicsSettings;
 import awt.tools3d.resolution.QueryProperties;
 import awt.tools3d.resolution.ScreenResolution;
 import nif.NifToJ3d;
+import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.character.NifCharacter;
 import nif.character.NifCharacterTes3;
 import nif.character.NifJ3dSkeletonRoot;
@@ -97,8 +98,7 @@ public class KfDisplayTester
 	public KfDisplayTester()
 	{
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
-		//jogl recomends for non phones 
-		System.setProperty("jogl.disable.opengles", "true");
+ 
 
 		//DDS requires no installed java3D
 		if (QueryProperties.checkForInstalledJ3d())
@@ -106,6 +106,8 @@ public class KfDisplayTester
 			System.exit(0);
 		}
 
+		NiGeometryAppearanceFactoryShader.setAsDefault();
+		
 		//win.setVisible(true);
 		win.setLocation(400, 0);
 		win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
