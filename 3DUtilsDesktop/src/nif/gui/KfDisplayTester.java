@@ -48,7 +48,7 @@ import nif.character.NifJ3dSkeletonRoot;
 import nif.gui.util.SpinTransform;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.tes3.J3dNiSequenceStreamHelper;
-import tools.ddstexture.DDSTextureLoader;
+import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;

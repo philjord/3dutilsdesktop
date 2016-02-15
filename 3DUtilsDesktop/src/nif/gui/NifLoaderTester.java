@@ -9,7 +9,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import nif.BgsmSource;
 import nif.NifFile;
 import nif.NifToJ3d;
-import tools.ddstexture.DDSTextureLoader;
+import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import utils.source.DummyTextureSource;
 import utils.source.file.FileMeshSource;

@@ -43,7 +43,7 @@ import nif.gui.util.NifFileDisplayTable;
 import nif.gui.util.NifFileDisplayTree;
 import nif.gui.util.SpinTransform;
 import nif.j3d.J3dNiAVObject;
-import tools.ddstexture.DDSTextureLoader;
+import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.Utils3D;
@@ -107,14 +107,15 @@ public class NifDisplayTester
 
 	public NifDisplayTester()
 	{
-		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
 
 		//DDS requires no installed java3D
 		if (QueryProperties.checkForInstalledJ3d())
 		{
 			System.exit(0);
 		}
-		
+		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
+		//ASTC or DDS
+		FileTextureSource.compressionType = FileTextureSource.CompressionType.DDS;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 
 		//win.setVisible(true);
@@ -124,7 +125,7 @@ public class NifDisplayTester
 		Canvas3D canvas3D = new Canvas3D();
 
 		//win.getContentPane().add(canvas3D);
-		
+
 		simpleUniverse = new SimpleUniverse(canvas3D);
 		/*		GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
 						true);
@@ -221,25 +222,25 @@ public class NifDisplayTester
 
 		simpleUniverse.getCanvas().getGLWindow().addKeyListener(new KeyHandler());
 
-	/*	JMenuBar menuBar = new JMenuBar();
-		menuBar.setOpaque(true);
-		JMenu menu = new JMenu("File");
-		menu.setMnemonic(70);
-		menuBar.add(menu);
-
-		menu.add(setGraphics);
-		setGraphics.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				GraphicsSettings gs2 = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win,
-						false, true, true);
-
-				simpleUniverse.getCanvas().getView().setSceneAntialiasingEnable(gs2.isAaRequired());
-				DDSTextureLoader.setAnisotropicFilterDegree(gs2.getAnisotropicFilterDegree());
-				System.out.println("filtering will require newly loaded textures remember");
-			}
-		});*/
+		/*	JMenuBar menuBar = new JMenuBar();
+			menuBar.setOpaque(true);
+			JMenu menu = new JMenu("File");
+			menu.setMnemonic(70);
+			menuBar.add(menu);
+		
+			menu.add(setGraphics);
+			setGraphics.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{
+					GraphicsSettings gs2 = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win,
+							false, true, true);
+		
+					simpleUniverse.getCanvas().getView().setSceneAntialiasingEnable(gs2.isAaRequired());
+					DDSTextureLoader.setAnisotropicFilterDegree(gs2.getAnisotropicFilterDegree());
+					System.out.println("filtering will require newly loaded textures remember");
+				}
+			});*/
 
 		//win.setJMenuBar(menuBar);
 		//win.setVisible(true);

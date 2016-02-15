@@ -17,7 +17,7 @@ import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
-import tools.ddstexture.DDSTextureLoader;
+import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.ddstexture.utils.DDSTextureLoaderTester;
 import utils.source.DummyTextureSource;
 
