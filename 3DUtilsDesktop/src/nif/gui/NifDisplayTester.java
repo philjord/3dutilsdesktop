@@ -115,8 +115,9 @@ public class NifDisplayTester
 		}
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
 		//ASTC or DDS
-		FileTextureSource.compressionType = FileTextureSource.CompressionType.DDS;
+		//FileTextureSource.compressionType = FileTextureSource.CompressionType.KTX;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
+		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 
 		//win.setVisible(true);
 		//win.setLocation(400, 0);
@@ -432,6 +433,10 @@ public class NifDisplayTester
 			simpleCameraHandler.viewBounds(nif.getVisualRoot().getBounds());
 
 			spinTransform.setEnable(spin);
+			BranchGroup bgc = new BranchGroup();
+			bgc.setCapability(BranchGroup.ALLOW_DETACH);
+			bgc.addChild(new Cube(0.01f));
+			modelGroup.addChild(bgc);
 
 		}
 		else
