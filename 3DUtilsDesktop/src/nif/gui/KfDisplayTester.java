@@ -1,7 +1,5 @@
 package nif.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -19,8 +17,6 @@ import javax.media.j3d.Light;
 import javax.media.j3d.TransformGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -37,9 +33,7 @@ import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
-import awt.tools3d.resolution.GraphicsSettings;
 import awt.tools3d.resolution.QueryProperties;
-import awt.tools3d.resolution.ScreenResolution;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.character.NifCharacter;
@@ -77,7 +71,7 @@ public class KfDisplayTester
 
 	private static Preferences prefs;
 
-	public JMenuItem setGraphics = new JMenuItem("Set Graphics");
+	//public JMenuItem setGraphics = new JMenuItem("Set Graphics");
 
 	private SimpleCameraHandler simpleCameraHandler;
 
@@ -93,7 +87,7 @@ public class KfDisplayTester
 
 	private Background background = new Background();
 
-	private JFrame win = new JFrame("Nif model");
+	//private JFrame win = new JFrame("Nif model");
 
 	public KfDisplayTester()
 	{
@@ -109,8 +103,8 @@ public class KfDisplayTester
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		
 		//win.setVisible(true);
-		win.setLocation(400, 0);
-		win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		//win.setLocation(400, 0);
+		//win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		Canvas3D canvas3D = new Canvas3D();
 
@@ -125,7 +119,9 @@ public class KfDisplayTester
 
 		//win.setVisible(true);
 		canvas3D.getGLWindow().setSize(800, 600);
+		DDSTextureLoader.setAnisotropicFilterDegree(8);
 		canvas3D.addNotify();
+		
 		spinTransformGroup.addChild(rotateTransformGroup);
 		rotateTransformGroup.addChild(modelGroup);
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(), modelGroup,
@@ -177,11 +173,11 @@ public class KfDisplayTester
 
 		simpleUniverse.addBranchGraph(bg);
 
-		simpleUniverse.getViewer().getView().setBackClipDistance(50000);//big cos it's only 1 nif file anyway
+		simpleUniverse.getViewer().getView().setBackClipDistance(5000);
 
 		simpleUniverse.getCanvas().getGLWindow().addKeyListener(new KeyHandler());
 
-		JMenuBar menuBar = new JMenuBar();
+	/*	JMenuBar menuBar = new JMenuBar();
 		menuBar.setOpaque(true);
 		JMenu menu = new JMenu("File");
 		menu.setMnemonic(70);
@@ -202,7 +198,7 @@ public class KfDisplayTester
 		});
 
 		win.setJMenuBar(menuBar);
-		win.setVisible(true);
+		win.setVisible(true);*/
 
 		try
 		{
@@ -227,7 +223,7 @@ public class KfDisplayTester
 				}
 			});
 
-			skeletonFc.showOpenDialog(win);
+			skeletonFc.showOpenDialog(null);
 
 			if (skeletonFc.getSelectedFile() != null)
 			{
@@ -241,7 +237,7 @@ public class KfDisplayTester
 				skinFc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				skinFc.setMultiSelectionEnabled(true);
 				skinFc.setFileFilter(new FileNameExtensionFilter("Nif files", "nif"));
-				skinFc.showOpenDialog(win);
+				skinFc.showOpenDialog(null);
 
 				if (skinFc.getSelectedFile() != null)
 				{

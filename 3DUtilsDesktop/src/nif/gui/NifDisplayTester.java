@@ -32,7 +32,9 @@ import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
+import archive.BSArchiveSet;
 import awt.tools3d.resolution.QueryProperties;
+import bsa.source.BsaTextureSource;
 import nif.BgsmSource;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
@@ -105,6 +107,9 @@ public class NifDisplayTester
 
 	//private JFrame win = new JFrame("Nif model");
 
+	private MeshSource meshSource = null;
+	private TextureSource textureSource = null;
+
 	public NifDisplayTester()
 	{
 
@@ -118,6 +123,13 @@ public class NifDisplayTester
 		//FileTextureSource.compressionType = FileTextureSource.CompressionType.KTX;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
+
+		meshSource = new FileMeshSource();
+		//textureSource = new FileTextureSource();
+
+		//Test for android
+		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
+		textureSource = new BsaTextureSource(bsaFileSet);
 
 		//win.setVisible(true);
 		//win.setLocation(400, 0);
@@ -365,7 +377,7 @@ public class NifDisplayTester
 		}
 		else if (f.isFile())
 		{
-			showNif(f.getAbsolutePath(), new FileMeshSource(), new FileTextureSource());
+			showNif(f.getAbsolutePath(), meshSource, textureSource);
 		}
 
 		System.out.println("done");
