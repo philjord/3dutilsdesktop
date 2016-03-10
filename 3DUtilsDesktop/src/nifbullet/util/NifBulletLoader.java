@@ -29,10 +29,10 @@ public class NifBulletLoader
 	// Gravity
 	private static Vector3f gravity = new Vector3f(0f, 0f, -9.81f);
 
-	protected static Clock clock = new Clock();
+	 
 
 	// this is the most important class
-	protected static DynamicsWorld dynamicsWorld = null;
+	private static DynamicsWorld dynamicsWorld = null;
 
 	private static BroadphaseInterface broadphase;
 

@@ -5,7 +5,6 @@ import java.awt.event.KeyEvent;
 
 import com.bulletphysics.dynamics.character.KinematicCharacterController;
 
-import nifbullet.NavigationProcessorBullet;
 import nifbullet.NavigationProcessorBullet.NbccProvider;
 
 public class JumpKeyListener extends KeyAdapter

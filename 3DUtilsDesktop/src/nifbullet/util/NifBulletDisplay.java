@@ -8,6 +8,15 @@ import javax.media.j3d.BranchGroup;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.vecmath.Vector3f;
 
+import com.bulletphysics.collision.broadphase.BroadphaseInterface;
+import com.bulletphysics.collision.broadphase.DbvtBroadphase;
+import com.bulletphysics.collision.dispatch.CollisionDispatcher;
+import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
+import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
+import com.bulletphysics.dynamics.DynamicsWorld;
+import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
+import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
+
 import nativeLinker.LWJGLLinker;
 import nif.gui.NifKfFileFilter;
 import nif.gui.util.ControllerInvokerThread;
@@ -20,16 +29,6 @@ import tools.swing.DetailsFileChooser;
 import tools3d.universe.HeadlessUniverse;
 import utils.source.file.FileMeshSource;
 
-import com.bulletphysics.collision.broadphase.BroadphaseInterface;
-import com.bulletphysics.collision.broadphase.DbvtBroadphase;
-import com.bulletphysics.collision.dispatch.CollisionDispatcher;
-import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
-import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
-import com.bulletphysics.dynamics.DynamicsWorld;
-import com.bulletphysics.dynamics.constraintsolver.ConstraintSolver;
-import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
-import com.bulletphysics.linearmath.Clock;
-
 public class NifBulletDisplay
 {
 
@@ -38,10 +37,10 @@ public class NifBulletDisplay
 	// Gravity
 	private static Vector3f gravity = new Vector3f(0f, 0f, -9.81f);
 
-	protected static Clock clock = new Clock();
+	//private static Clock clock = new Clock();
 
 	// this is the most important class
-	protected static DynamicsWorld dynamicsWorld = null;
+	private static DynamicsWorld dynamicsWorld = null;
 
 	private static BroadphaseInterface broadphase;
 
