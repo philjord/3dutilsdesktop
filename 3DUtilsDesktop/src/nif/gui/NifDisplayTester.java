@@ -13,6 +13,7 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.Group;
 import javax.media.j3d.Light;
+import javax.media.j3d.Node;
 import javax.media.j3d.PointLight;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
@@ -53,7 +54,6 @@ import tools3d.utils.leafnode.Cube;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
-import utils.source.file.FileTextureSource;
 
 public class NifDisplayTester
 {
@@ -128,8 +128,8 @@ public class NifDisplayTester
 		//textureSource = new FileTextureSource();
 
 		//Test for android
-		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
-		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind" }, true, false);
+		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
+		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind" }, true, false);
 		textureSource = new BsaTextureSource(bsaFileSet);
 
 		//win.setVisible(true);
@@ -439,6 +439,7 @@ public class NifDisplayTester
 
 			if (showVisual && nif != null)
 			{
+				nif.getVisualRoot().setCapability(Node.ALLOW_BOUNDS_READ);
 				vbg.addChild(nif.getVisualRoot());
 				modelGroup.addChild(vbg);
 			}

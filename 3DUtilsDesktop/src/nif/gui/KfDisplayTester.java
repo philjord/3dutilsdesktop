@@ -14,10 +14,10 @@ import javax.media.j3d.Canvas3D;
 import javax.media.j3d.DirectionalLight;
 import javax.media.j3d.Group;
 import javax.media.j3d.Light;
+import javax.media.j3d.Node;
 import javax.media.j3d.TransformGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.WindowConstants;
@@ -319,6 +319,7 @@ public class KfDisplayTester
 		// now add the root to the scene so the controller sequence is live
 
 		NifCharacter nifCharacter = new NifCharacter(skeletonNifFile, skinNifFiles2, mediaSources, idleAnimations);
+		nifCharacter.setCapability(Node.ALLOW_BOUNDS_READ);
 		bg.addChild(nifCharacter);
 
 		modelGroup.addChild(bg);
@@ -339,6 +340,7 @@ public class KfDisplayTester
 		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
 
 		final NifCharacterTes3 nifCharacter = new NifCharacterTes3(skeletonNifFile, skinNifFiles2, mediaSources);
+		nifCharacter.setCapability(Node.ALLOW_BOUNDS_READ);
 		bg.addChild(nifCharacter);
 
 		modelGroup.addChild(bg);
