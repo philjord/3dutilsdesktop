@@ -35,6 +35,7 @@ import esmmanager.common.data.plugin.PluginSubrecord;
 
 public class PluginDisplayDialog extends JFrame implements ActionListener, TreeExpansionListener
 {
+	public static boolean SHOW_ALL = true;// if false hide WRLD CELL and DIAL
 	public static void main(String[] args)
 	{
 		String generalEsmFile = EsmFileLocations.getGeneralEsmFile();
@@ -45,7 +46,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		Plugin plugin = new Plugin(pluginFile);
 		try
 		{
-			plugin.load(true);
+			plugin.load(!SHOW_ALL);
 
 			PluginDisplayDialog displayDialog = new PluginDisplayDialog(plugin);
 			displayDialog.setTitle("Display of " + pluginFile.getName());
@@ -206,7 +207,8 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 				if (group.getGroupType() == 0)
 				{
 					String groupRecordType = group.getGroupRecordType();
-					if (!groupRecordType.equals("WRLD") && !groupRecordType.equals("CELL") && !groupRecordType.equals("DIAL"))
+					
+					if (SHOW_ALL || (!groupRecordType.equals("WRLD") && !groupRecordType.equals("CELL") && !groupRecordType.equals("DIAL")))
 					{
 						String editorID = record.getEditorID();
 						Enumeration<?> nodes = groupNode.children();

@@ -9,6 +9,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import nif.BgsmSource;
 import nif.NifFile;
 import nif.NifToJ3d;
+import nif.appearance.NiGeometryAppearanceFactoryShader;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import utils.source.DummyTextureSource;
@@ -24,6 +25,8 @@ public class NifLoaderTester
 	public static void main(String[] args)
 	{
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
+		NiGeometryAppearanceFactoryShader.setAsDefault();
+		
 		prefs = Preferences.userNodeForPackage(NifLoaderTester.class);
 		String baseDir = prefs.get("NifToJ3dTester.baseDir", System.getProperty("user.dir"));
 
@@ -179,6 +182,7 @@ public class NifLoaderTester
 		}
 		catch (Exception ex)
 		{
+			System.out.println("Exception in ");
 			ex.printStackTrace();
 		}
 	}
