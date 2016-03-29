@@ -110,9 +110,9 @@ public class EsmFormatAnalyzer
 		{
 			for (InteriorCELLTopGroup interiorCELLTopGroup : esmManager.getInteriorCELLTopGroups())
 			{
-				c = interiorCELLTopGroup.interiorCELLByFormId.values().size();
+				c = interiorCELLTopGroup.getAllInteriorCELLFormIds().size();
 				System.out.println("interiorCELLTopGroup.interiorCELLByFormId.values() count = " + c);
-				for (CELLPointer cp : interiorCELLTopGroup.interiorCELLByFormId.values())
+				for (CELLPointer cp : interiorCELLTopGroup.getAllInteriorCELLFormIds())
 				{
 					PluginRecord pr2 = esmManager.getInteriorCELL(cp.formId);
 					applyRecord(pr2, true, false);
@@ -145,7 +145,8 @@ public class EsmFormatAnalyzer
 
 			}
 
-			for (WRLDTopGroup wRLDTopGroup : esmManager.getWRLDTopGroups())
+			//FIXME: this is busted as all WRLD cells can no longer be got, a -2000 to 2000 x and y is nedded
+		/*	for (WRLDTopGroup wRLDTopGroup : esmManager.getWRLDTopGroups())
 			{
 				c = wRLDTopGroup.WRLDExtBlockCELLByFormId.values().size();
 				System.out.println("wRLDTopGroup.WRLDExtBlockCELLByFormId.values() count = " + c);
@@ -179,7 +180,7 @@ public class EsmFormatAnalyzer
 					c++;
 				}
 
-			}
+			}*/
 		}
 		printoutStats(esmManager);
 	}
@@ -193,7 +194,8 @@ public class EsmFormatAnalyzer
 		for (RecordStats rs : sortedRecsMap.values())
 		{
 			String desc = PluginGroup.typeMap.get(rs.type);
-			String r = "" + rs.type + " n=" + rs.count + " " + (rs.appearsInIntCELL ? "int" : "") + " " + (rs.appearsInExtCELL ? "ext" : "");
+			String r = "" + rs.type + " n=" + rs.count + " " + (rs.appearsInIntCELL ? "int" : "") + " "
+					+ (rs.appearsInExtCELL ? "ext" : "");
 			r += " (" + desc + ")";
 			DefaultMutableTreeNode recNode = new DefaultMutableTreeNode(r);
 			root.add(recNode);
@@ -201,7 +203,8 @@ public class EsmFormatAnalyzer
 
 			for (SubrecordStats srs : rs.subrecordStatsList.values())
 			{
-				String sr = "\t" + srs.subrecordType + " n=" + srs.count + (srs.count == rs.count ? " M" : "") + " " + srs.minLength + "-" + srs.maxLength + " " + (srs.isString ? "isString" : "");
+				String sr = "\t" + srs.subrecordType + " n=" + srs.count + (srs.count == rs.count ? " M" : "") + " " + srs.minLength + "-"
+						+ srs.maxLength + " " + (srs.isString ? "isString" : "");
 
 				if (srs.hasOrderOf.size() == 1)
 				{
@@ -348,7 +351,8 @@ public class EsmFormatAnalyzer
 
 	private static Map<String, SubrecordStats> getSortedSubsMap()
 	{
-		List<Map.Entry<String, SubrecordStats>> entries = new ArrayList<Map.Entry<String, SubrecordStats>>(allSubrecordStatsList.entrySet());
+		List<Map.Entry<String, SubrecordStats>> entries = new ArrayList<Map.Entry<String, SubrecordStats>>(
+				allSubrecordStatsList.entrySet());
 		Collections.sort(entries, new Comparator<Map.Entry<String, SubrecordStats>>() {
 			public int compare(Map.Entry<String, SubrecordStats> a, Map.Entry<String, SubrecordStats> b)
 			{
