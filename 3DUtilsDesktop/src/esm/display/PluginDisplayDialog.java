@@ -36,10 +36,12 @@ import esmmanager.common.data.plugin.PluginSubrecord;
 public class PluginDisplayDialog extends JFrame implements ActionListener, TreeExpansionListener
 {
 	public static boolean SHOW_ALL = true;// if false hide WRLD CELL and DIAL
+
 	public static void main(String[] args)
 	{
 		String generalEsmFile = EsmFileLocations.getGeneralEsmFile();
 
+		long startTime = System.currentTimeMillis();
 		System.out.println("loading file " + generalEsmFile);
 
 		File pluginFile = new File(generalEsmFile);
@@ -53,6 +55,8 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 			displayDialog.setSize(800, 800);
 			displayDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			displayDialog.setVisible(true);
+
+			System.out.println("Finished loading in " + (System.currentTimeMillis() - startTime));
 		}
 		catch (PluginException e)
 		{
@@ -93,8 +97,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		displayPane.setLayout(new GridLayout(1, 1));
 		treePane.add(displayPane);
 
-		pluginTree.addTreeSelectionListener(new TreeSelectionListener()
-		{
+		pluginTree.addTreeSelectionListener(new TreeSelectionListener() {
 
 			@Override
 			public void valueChanged(TreeSelectionEvent e)
@@ -186,8 +189,8 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		return root;
 	}
 
-	private void createGroupChildren(DefaultMutableTreeNode groupNode, PluginGroup group) throws DataFormatException, IOException,
-			PluginException
+	private void createGroupChildren(DefaultMutableTreeNode groupNode, PluginGroup group)
+			throws DataFormatException, IOException, PluginException
 	{
 		for (PluginRecord record : group.getRecordList())
 		{
@@ -207,7 +210,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 				if (group.getGroupType() == 0)
 				{
 					String groupRecordType = group.getGroupRecordType();
-					
+
 					if (SHOW_ALL || (!groupRecordType.equals("WRLD") && !groupRecordType.equals("CELL") && !groupRecordType.equals("DIAL")))
 					{
 						String editorID = record.getEditorID();
