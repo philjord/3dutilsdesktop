@@ -8,6 +8,7 @@ import javax.media.j3d.Texture;
 import javax.swing.SwingUtilities;
 
 import archive.ArchiveEntry;
+import archive.displayables.DisplayableArchiveEntry;
 import bsa.gui.BSAFileSetWithStatus;
 import bsa.gui.StatusDialog;
 import bsa.source.BsaMeshSource;
@@ -57,9 +58,9 @@ public class DisplayTask extends Thread
 		{
 			try
 			{
-				InputStream in = entry.getArchiveFile().getInputStream(entry);
+				InputStream in = ((DisplayableArchiveEntry) entry).getArchiveFile().getInputStream(entry);
 
-				String fileName = entry.getName();
+				String fileName = ((DisplayableArchiveEntry) entry).getName();
 
 				int sep = fileName.lastIndexOf('.');
 				if (sep >= 0)

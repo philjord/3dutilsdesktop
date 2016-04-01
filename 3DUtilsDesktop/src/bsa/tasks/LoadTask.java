@@ -1,8 +1,3 @@
-// Decompiled by DJ v3.6.6.79 Copyright 2004 Atanas Neshkov  Date: 5/27/2009 3:52:54 PM
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   LoadTask.java
-
 package bsa.tasks;
 
 import java.io.IOException;
@@ -16,14 +11,11 @@ import javax.swing.tree.TreeNode;
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
 import archive.DBException;
+import archive.displayables.Displayable;
 import bsa.gui.ArchiveNode;
 import bsa.gui.FileNode;
 import bsa.gui.FolderNode;
 import bsa.gui.StatusDialog;
-
-// Referenced classes of package FO3Archive:
-//            ArchiveEntry, FolderNode, FileNode, DBException, 
-//            ArchiveFile, Main, ArchiveNode, StatusDialog
 
 public class LoadTask extends Thread
 {
@@ -60,14 +52,14 @@ public class LoadTask extends Thread
 			{
 				HashMap<String, FolderNode> foldersByName = new HashMap<String, FolderNode>();
 
-				archiveFile.load();
+				archiveFile.load(true);
 				List<ArchiveEntry> entries = archiveFile.getEntries();
 				DefaultMutableTreeNode parentNode;
 
 				for (ArchiveEntry entry : entries)
 				{
 					parentNode = archiveNode;
-					String path = entry.getFolderName();
+					String path = ((Displayable) entry).getFolderName();
 					if (foldersByName.get(path) != null)
 					{
 						parentNode = foldersByName.get(path);
@@ -156,7 +148,7 @@ public class LoadTask extends Thread
 			}
 			else
 			{
-				archiveFile.load();
+				archiveFile.load(true);
 			}
 
 			completed = true;

@@ -1,8 +1,3 @@
-// Decompiled by DJ v3.6.6.79 Copyright 2004 Atanas Neshkov  Date: 5/27/2009 3:52:54 PM
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   CreateTask.java
-
 package bsa.tasks;
 
 import java.io.EOFException;
@@ -20,12 +15,9 @@ import javax.swing.SwingUtilities;
 import archive.ArchiveEntry;
 import archive.DBException;
 import archive.HashCode;
+import archive.displayables.DisplayableArchiveEntry;
 import bsa.gui.StatusDialog;
 import tools.io.MappedByteBufferRAF;
-
-// Referenced classes of package FO3Archive:
-//            DBException, ArchiveEntry, Main, HashCode, 
-//            StatusDialog
 
 public class CreateTask extends Thread
 {
@@ -122,8 +114,7 @@ public class CreateTask extends Thread
 				Main.logException("I/O error while cleaning up", exc);
 			}
 		}
-		SwingUtilities.invokeLater(new Runnable()
-		{
+		SwingUtilities.invokeLater(new Runnable() {
 			public void run()
 			{
 				statusDialog.closeDialog(completed);
@@ -167,7 +158,7 @@ public class CreateTask extends Thread
 			throw new DBException("Maximum file name length is 254 characters");
 		}
 
-		ArchiveEntry entry = new ArchiveEntry(null, folderName, fileName);
+		DisplayableArchiveEntry entry = new DisplayableArchiveEntry(null, folderName, fileName);
 		boolean insert = true;
 
 		int count = entries.size();
@@ -178,7 +169,8 @@ public class CreateTask extends Thread
 			int diff = entry.compareTo(listEntry);
 			if (diff == 0)
 			{
-				throw new DBException("Hash collision: '" + entry.getName() + "' and '" + listEntry.getName() + "'");
+				throw new DBException(
+						"Hash collision: '" + entry.getName() + "' and '" + ((DisplayableArchiveEntry) listEntry).getName() + "'");
 			}
 			if (diff < 0)
 			{
@@ -348,7 +340,7 @@ public class CreateTask extends Thread
 
 		for (ArchiveEntry entry : entries)
 		{
-			String fileName = entry.getFileName();
+			String fileName = ((DisplayableArchiveEntry) entry).getFileName();
 			byte[] nameBuffer = fileName.getBytes();
 			if (nameBuffer.length != fileName.length())
 			{
@@ -369,7 +361,7 @@ public class CreateTask extends Thread
 
 			try
 			{
-				File file = new File(dirFile.getPath() + "\\" + entry.getName());
+				File file = new File(dirFile.getPath() + "\\" + ((DisplayableArchiveEntry) entry).getName());
 				int residualLength = (int) file.length();
 				entry.setFileOffset(out.getFilePointer());
 				entry.setFileLength(residualLength);
@@ -377,7 +369,7 @@ public class CreateTask extends Thread
 
 				if ((archiveFlags & 0x100) != 0)
 				{
-					byte nameBuffer2[] = entry.getName().getBytes();
+					byte nameBuffer2[] = ((DisplayableArchiveEntry) entry).getName().getBytes();
 					buffer[0] = (byte) nameBuffer2.length;
 					out.write(buffer, 0, 1);
 					out.write(nameBuffer2);
@@ -471,7 +463,7 @@ public class CreateTask extends Thread
 				int count;
 				if ((archiveFlags & 0x100) != 0)
 				{
-					count = entry.getName().getBytes().length + 1;
+					count = ((DisplayableArchiveEntry) entry).getName().getBytes().length + 1;
 				}
 				else
 				{

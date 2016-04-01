@@ -1,8 +1,3 @@
-// Decompiled by DJ v3.6.6.79 Copyright 2004 Atanas Neshkov  Date: 5/27/2009 3:52:54 PM
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   ExtractTask.java
-
 package bsa.tasks;
 
 import java.io.File;
@@ -15,10 +10,8 @@ import javax.swing.SwingUtilities;
 
 import archive.ArchiveEntry;
 import archive.ArchiveFile;
+import archive.displayables.DisplayableArchiveEntry;
 import bsa.gui.StatusDialog;
-
-// Referenced classes of package FO3Archive:
-//            ArchiveEntry, ArchiveFile, StatusDialog, Main
 
 public class ExtractTask extends Thread
 {
@@ -52,7 +45,8 @@ public class ExtractTask extends Thread
 			int currentProgress = 0;
 			for (ArchiveEntry entry : entries)
 			{
-				String folderPath = (new StringBuilder()).append(basePath).append("\\").append(entry.getFolderName()).toString();
+				String folderPath = (new StringBuilder()).append(basePath).append("\\")
+						.append(((DisplayableArchiveEntry) entry).getFolderName()).toString();
 				File folderFile = new File(folderPath);
 				if (!folderFile.exists())
 				{
@@ -63,7 +57,8 @@ public class ExtractTask extends Thread
 					folderFile.delete();
 					folderFile.mkdir();
 				}
-				String filePath = (new StringBuilder()).append(basePath).append("\\").append(entry.getName()).toString();
+				String filePath = (new StringBuilder()).append(basePath).append("\\").append(((DisplayableArchiveEntry) entry).getName())
+						.toString();
 				File file = new File(filePath);
 				if (file.exists())
 				{
@@ -98,8 +93,7 @@ public class ExtractTask extends Thread
 		{
 			Main.logException("Exception while extracting files", exc);
 		}
-		SwingUtilities.invokeLater(new Runnable()
-		{
+		SwingUtilities.invokeLater(new Runnable() {
 			public void run()
 			{
 				statusDialog.closeDialog(completed);

@@ -1,16 +1,9 @@
-// Decompiled by DJ v3.6.6.79 Copyright 2004 Atanas Neshkov  Date: 5/27/2009 3:52:54 PM
-// Home Page : http://members.fortunecity.com/neshkov/dj.html  - Check often for new version!
-// Decompiler options: packimports(3) 
-// Source File Name:   FileNode.java
-
 package bsa.gui;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import archive.ArchiveEntry;
-
-// Referenced classes of package FO3Archive:
-//            ArchiveEntry
+import archive.displayables.DisplayableArchiveEntry;
 
 public class FileNode extends DefaultMutableTreeNode implements Comparable<FileNode>
 {
@@ -30,19 +23,20 @@ public class FileNode extends DefaultMutableTreeNode implements Comparable<FileN
 	public boolean equals(Object obj)
 	{
 		boolean equal = false;
-		if (obj != null && (obj instanceof FileNode) && entry.getFileName().equals(((FileNode) obj).getEntry().getFileName()))
+		if (obj != null && (obj instanceof FileNode) && ((DisplayableArchiveEntry) entry).getFileName()
+				.equals(((DisplayableArchiveEntry) ((FileNode) obj).getEntry()).getFileName()))
 			equal = true;
 		return equal;
 	}
 
 	public int compareTo(FileNode compare)
 	{
-		return entry.getFileName().compareTo(compare.getEntry().getFileName());
+		return ((DisplayableArchiveEntry) entry).getFileName().compareTo(((DisplayableArchiveEntry) compare.getEntry()).getFileName());
 	}
 
 	public String toString()
 	{
-		return entry.getFileName();
+		return ((DisplayableArchiveEntry) entry).getFileName();
 	}
 
 }

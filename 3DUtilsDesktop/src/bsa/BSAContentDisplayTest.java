@@ -39,11 +39,6 @@ import bsa.gui.StatusDialog;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.Main;
 
-// Referenced classes of package FO3Archive:
-//	            ArchiveNode, ArchiveFileFilter, StatusDialog, CreateTask, 
-//	            ArchiveFile, LoadTask, FolderNode, FileNode, 
-//	            ExtractTask, Main
-
 public class BSAContentDisplayTest extends JFrame implements ActionListener
 {
 	public static boolean LOAD_ALL = true;
