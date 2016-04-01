@@ -21,7 +21,7 @@ import esmmanager.common.PluginException;
 import esmmanager.common.data.plugin.PluginGroup;
 import esmmanager.common.data.plugin.PluginRecord;
 import esmmanager.common.data.record.Record;
-import esmmanager.loader.CELLPointer;
+import esmmanager.loader.CELLDIALPointer;
 import esmmanager.loader.ESMManager;
 import esmmanager.loader.IESMManager;
 import esmmanager.loader.InteriorCELLTopGroup;
@@ -112,7 +112,7 @@ public class EsmFormatAnalyzer
 			{
 				c = interiorCELLTopGroup.getAllInteriorCELLFormIds().size();
 				System.out.println("interiorCELLTopGroup.interiorCELLByFormId.values() count = " + c);
-				for (CELLPointer cp : interiorCELLTopGroup.getAllInteriorCELLFormIds())
+				for (CELLDIALPointer cp : interiorCELLTopGroup.getAllInteriorCELLFormIds())
 				{
 					PluginRecord pr2 = esmManager.getInteriorCELL(cp.formId);
 					applyRecord(pr2, true, false);
