@@ -54,7 +54,7 @@ public class SoundExporter
 	private static void exportSounds(IESMManager esmManager, BufferedWriter outputFile) throws IOException
 	{
 		int idx = 0;
-		for (Integer formId : esmManager.getTypeToFormIdMap().get("SOUN"))
+		for (int formId : esmManager.getAllFormIds())
 		{
 			Record rec = esmManager.getRecord(formId);
 			if (rec.getRecordType().equals("SOUN"))
