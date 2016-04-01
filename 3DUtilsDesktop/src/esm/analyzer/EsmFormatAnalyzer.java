@@ -25,7 +25,6 @@ import esmmanager.loader.CELLDIALPointer;
 import esmmanager.loader.ESMManager;
 import esmmanager.loader.IESMManager;
 import esmmanager.loader.InteriorCELLTopGroup;
-import esmmanager.loader.WRLDTopGroup;
 
 public class EsmFormatAnalyzer
 {
@@ -92,9 +91,9 @@ public class EsmFormatAnalyzer
 	public static void analyze(ESMManager esmManager) throws DataFormatException, IOException, PluginException
 	{
 
-		int c = esmManager.getAllFormIds().size();
+		int c = esmManager.getAllFormIds().length;
 		System.out.println("master getAllFormIds count = " + c);
-		for (Integer formId : esmManager.getAllFormIds())
+		for (int formId : esmManager.getAllFormIds())
 		{
 			Record rec = esmManager.getRecord(formId);
 			recordStatsList.applyRecord(rec, false, false, allSubrecordStatsList);
