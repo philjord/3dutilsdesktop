@@ -9,11 +9,11 @@ public class SubrecordStatsList extends LinkedHashMap<String, SubrecordStats>
 	public void applySub(Subrecord sub, String inRec, int orderNo)
 	{
 		// are we updating or creating
-		SubrecordStats subrecordStats = get(sub.getType());
+		SubrecordStats subrecordStats = get(sub.getSubrecordType());
 		if (subrecordStats == null)
 		{
-			subrecordStats = new SubrecordStats(sub.getType());
-			put(sub.getType(), subrecordStats);
+			subrecordStats = new SubrecordStats(sub.getSubrecordType());
+			put(sub.getSubrecordType(), subrecordStats);
 		}
 
 		subrecordStats.applySub(sub, inRec, orderNo);

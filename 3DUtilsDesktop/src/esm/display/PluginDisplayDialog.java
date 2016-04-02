@@ -32,6 +32,8 @@ import esmmanager.common.data.plugin.Plugin;
 import esmmanager.common.data.plugin.PluginGroup;
 import esmmanager.common.data.plugin.PluginRecord;
 import esmmanager.common.data.plugin.PluginSubrecord;
+import esmmanager.common.data.record.Record;
+import esmmanager.common.data.record.Subrecord;
 
 public class PluginDisplayDialog extends JFrame implements ActionListener, TreeExpansionListener
 {
@@ -192,8 +194,9 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 	private void createGroupChildren(DefaultMutableTreeNode groupNode, PluginGroup group)
 			throws DataFormatException, IOException, PluginException
 	{
-		for (PluginRecord record : group.getRecordList())
+		for (Record r : group.getRecordList())
 		{
+			PluginRecord record = (PluginRecord) r;
 			DefaultMutableTreeNode recordNode = new DefaultMutableTreeNode(record);
 			boolean insertNode = false;
 			int index = 0;
@@ -242,9 +245,9 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 
 	}
 
-	private void createRecordChildren(DefaultMutableTreeNode recordNode, PluginRecord record)
+	private static void createRecordChildren(DefaultMutableTreeNode recordNode, PluginRecord record)
 	{
-		for (PluginSubrecord subrecord : record.getSubrecords())
+		for (Subrecord subrecord : record.getSubrecords())
 		{
 			DefaultMutableTreeNode subrecordNode = new DefaultMutableTreeNode(subrecord);
 			recordNode.add(subrecordNode);

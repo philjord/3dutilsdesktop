@@ -1,6 +1,6 @@
 package esm.analyzer;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import esmmanager.common.data.record.Record;
 import esmmanager.common.data.record.Subrecord;
@@ -28,13 +28,13 @@ public class RecordStats
 		appearsInExtCELL = appearsInExtCELL || exterior;
 		count++;
 
-		ArrayList<Subrecord> subs = rec.getSubrecords();
+		List<Subrecord> subs = rec.getSubrecords();
 		for (int i = 0; i < subs.size(); i++)
 		{
 			Subrecord sub = subs.get(i);
 
 			// heaps of madness in some records
-			if (sub.getType().endsWith("0TX") || sub.getType().endsWith("IAD"))
+			if (sub.getSubrecordType().endsWith("0TX") || sub.getSubrecordType().endsWith("IAD"))
 				continue;
 
 			subrecordStatsList.applySub(sub, rec.getRecordType(), i);

@@ -119,15 +119,15 @@ public class EsmFormatAnalyzer
 					PluginGroup cellChildren = esmManager.getInteriorCELLChildren(cp.formId);
 					if (cellChildren != null)
 					{
-						for (PluginRecord pgs : cellChildren.getRecordList())
+						for (Record pgs : cellChildren.getRecordList())
 						{
 							// children are in groups of temp and persist (and dist)
-							for (PluginRecord pgr : ((PluginGroup) pgs).getRecordList())
+							for (Record pgr : ((PluginGroup) pgs).getRecordList())
 							{
 								applyRecord(pgr, true, false);
 								if (pgr instanceof PluginGroup)
 								{
-									for (PluginRecord pr : ((PluginGroup) pgr).getRecordList())
+									for (Record pr : ((PluginGroup) pgr).getRecordList())
 									{
 										applyRecord(pr, true, false);
 									}
@@ -145,41 +145,41 @@ public class EsmFormatAnalyzer
 			}
 
 			//FIXME: this is busted as all WRLD cells can no longer be got, a -2000 to 2000 x and y is nedded
-		/*	for (WRLDTopGroup wRLDTopGroup : esmManager.getWRLDTopGroups())
-			{
-				c = wRLDTopGroup.WRLDExtBlockCELLByFormId.values().size();
-				System.out.println("wRLDTopGroup.WRLDExtBlockCELLByFormId.values() count = " + c);
-				for (CELLPointer cp : wRLDTopGroup.WRLDExtBlockCELLByFormId.values())
+			/*	for (WRLDTopGroup wRLDTopGroup : esmManager.getWRLDTopGroups())
 				{
-					PluginRecord pr2 = esmManager.getWRLDExtBlockCELL(cp.formId);
-					applyRecord(pr2, false, true);
-
-					PluginGroup cellChildren = esmManager.getWRLDExtBlockCELLChildren(cp.formId);
-					if (cellChildren != null)
+					c = wRLDTopGroup.WRLDExtBlockCELLByFormId.values().size();
+					System.out.println("wRLDTopGroup.WRLDExtBlockCELLByFormId.values() count = " + c);
+					for (CELLPointer cp : wRLDTopGroup.WRLDExtBlockCELLByFormId.values())
 					{
-						for (PluginRecord pgs : cellChildren.getRecordList())
+						PluginRecord pr2 = esmManager.getWRLDExtBlockCELL(cp.formId);
+						applyRecord(pr2, false, true);
+			
+						PluginGroup cellChildren = esmManager.getWRLDExtBlockCELLChildren(cp.formId);
+						if (cellChildren != null)
 						{
-							// children are in groups of temp and persist (and dist)
-							for (PluginRecord pgr : ((PluginGroup) pgs).getRecordList())
+							for (PluginRecord pgs : cellChildren.getRecordList())
 							{
-								applyRecord(pgr, true, false);
-								if (pgr instanceof PluginGroup)
+								// children are in groups of temp and persist (and dist)
+								for (PluginRecord pgr : ((PluginGroup) pgs).getRecordList())
 								{
-									for (PluginRecord pr : ((PluginGroup) pgr).getRecordList())
+									applyRecord(pgr, true, false);
+									if (pgr instanceof PluginGroup)
 									{
-										applyRecord(pr, false, true);
+										for (PluginRecord pr : ((PluginGroup) pgr).getRecordList())
+										{
+											applyRecord(pr, false, true);
+										}
 									}
 								}
 							}
 						}
+						if (c % 1000 == 0)
+							System.out.println("analyzed " + c);
+			
+						c++;
 					}
-					if (c % 1000 == 0)
-						System.out.println("analyzed " + c);
-
-					c++;
-				}
-
-			}*/
+			
+				}*/
 		}
 		printoutStats(esmManager);
 	}
@@ -395,22 +395,19 @@ public class EsmFormatAnalyzer
 	 * @throws DataFormatException
 	 * @throws PluginException
 	 */
-	public static void applyRecord(PluginRecord pr, boolean interior, boolean exterior) throws DataFormatException, PluginException
+	public static void applyRecord(Record pr, boolean interior, boolean exterior) throws DataFormatException, PluginException
 	{
 		if (recordsDone.contains(pr.getFormID()))
 			return;
 
 		recordsDone.add(pr.getFormID());
 
-		Record rec = new Record(pr);
-		//	allRecords.add(rec);
-
-		recordStatsList.applyRecord(rec, interior, exterior, allSubrecordStatsList);
+		recordStatsList.applyRecord(pr, interior, exterior, allSubrecordStatsList);
 
 		if (pr instanceof PluginGroup)
 		{
 			PluginGroup pg = (PluginGroup) pr;
-			for (PluginRecord pr2 : pg.getRecordList())
+			for (Record pr2 : pg.getRecordList())
 			{
 				applyRecord(pr2, interior, exterior);
 			}
