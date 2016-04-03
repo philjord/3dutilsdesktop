@@ -129,8 +129,8 @@ public class NifDisplayTester
 
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
-		BSArchiveSet bsaFileSet = new BSArchiveSet(
-				new String[] { "F:\\game_media\\Morrowind", "F:\\game_media\\Oblivion", "F:\\game_media\\Fallout3", "F:\\game_media\\Skyrim", }, true, false);
+		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind", "F:\\game_media\\Oblivion",
+				"F:\\game_media\\Fallout3", "F:\\game_media\\Skyrim", }, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 
 		//win.setVisible(true);
