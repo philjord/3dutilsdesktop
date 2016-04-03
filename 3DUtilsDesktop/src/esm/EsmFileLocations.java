@@ -20,6 +20,7 @@ public class EsmFileLocations
 	private static String SKYRIM_ESM_FILE = null;
 
 	private static Preferences prefs;
+
 	static
 	{
 		prefs = Preferences.userNodeForPackage(EsmFileLocations.class);
@@ -126,9 +127,16 @@ public class EsmFileLocations
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fc.setSelectedFile(new File(defaultFile));
 		fc.setDialogTitle(title);
-		fc.showOpenDialog(null);
-		File sf = fc.getSelectedFile();
-		return sf;
+		int result = fc.showOpenDialog(null);
+		if (result == JFileChooser.APPROVE_OPTION)
+		{
+			File sf = fc.getSelectedFile();
+			return sf;
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 }

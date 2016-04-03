@@ -42,35 +42,37 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 	public static void main(String[] args)
 	{
 		String generalEsmFile = EsmFileLocations.getGeneralEsmFile();
-
-		long startTime = System.currentTimeMillis();
-		System.out.println("loading file " + generalEsmFile);
-
-		File pluginFile = new File(generalEsmFile);
-		Plugin plugin = new Plugin(pluginFile);
-		try
+		if (generalEsmFile != null)
 		{
-			plugin.load(!SHOW_ALL);
+			long startTime = System.currentTimeMillis();
+			System.out.println("loading file " + generalEsmFile);
 
-			PluginDisplayDialog displayDialog = new PluginDisplayDialog(plugin);
-			displayDialog.setTitle("Display of " + pluginFile.getName());
-			displayDialog.setSize(800, 800);
-			displayDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			displayDialog.setVisible(true);
+			File pluginFile = new File(generalEsmFile);
+			Plugin plugin = new Plugin(pluginFile);
+			try
+			{
+				plugin.load(!SHOW_ALL);
 
-			System.out.println("Finished loading in " + (System.currentTimeMillis() - startTime));
-		}
-		catch (PluginException e)
-		{
-			e.printStackTrace();
-		}
-		catch (DataFormatException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
+				PluginDisplayDialog displayDialog = new PluginDisplayDialog(plugin);
+				displayDialog.setTitle("Display of " + pluginFile.getName());
+				displayDialog.setSize(800, 800);
+				displayDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				displayDialog.setVisible(true);
+
+				System.out.println("Finished loading in " + (System.currentTimeMillis() - startTime));
+			}
+			catch (PluginException e)
+			{
+				e.printStackTrace();
+			}
+			catch (DataFormatException e)
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
