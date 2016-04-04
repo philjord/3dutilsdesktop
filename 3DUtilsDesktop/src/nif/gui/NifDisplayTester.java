@@ -440,13 +440,15 @@ public class NifDisplayTester
 
 			if (showVisual && nif != null)
 			{
-				nif.getVisualRoot().setCapability(Node.ALLOW_BOUNDS_READ);				
+				vbg.setCapability(Node.ALLOW_BOUNDS_READ);				
 				vbg.addChild(nif.getVisualRoot());
+				
+				vbg.outputTraversal();
 				vbg.compile();// oddly this does NOT get called automatically
 				modelGroup.addChild(vbg);
 			}
 
-			simpleCameraHandler.viewBounds(nif.getVisualRoot().getBounds());
+			simpleCameraHandler.viewBounds(vbg.getBounds());
 
 			spinTransform.setEnable(spin);
 			BranchGroup bgc = new BranchGroup();
