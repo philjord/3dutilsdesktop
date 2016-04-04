@@ -440,8 +440,9 @@ public class NifDisplayTester
 
 			if (showVisual && nif != null)
 			{
-				nif.getVisualRoot().setCapability(Node.ALLOW_BOUNDS_READ);
+				nif.getVisualRoot().setCapability(Node.ALLOW_BOUNDS_READ);				
 				vbg.addChild(nif.getVisualRoot());
+				vbg.compile();// oddly this does NOT get called automatically
 				modelGroup.addChild(vbg);
 			}
 
