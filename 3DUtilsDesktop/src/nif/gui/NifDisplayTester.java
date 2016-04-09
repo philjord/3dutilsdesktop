@@ -130,7 +130,7 @@ public class NifDisplayTester
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
 		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind", "F:\\game_media\\Oblivion",
-				"F:\\game_media\\Fallout3", "F:\\game_media\\Skyrim", }, true);
+				"F:\\game_media\\Fallout3", "F:\\game_media\\Skyrim", "F:\\game_media\\Fallout4", }, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 
 		//win.setVisible(true);
@@ -236,6 +236,7 @@ public class NifDisplayTester
 		simpleUniverse.getViewer().getView().setBackClipDistance(5000);
 
 		simpleUniverse.getCanvas().getGLWindow().addKeyListener(new KeyHandler());
+		simpleUniverse.getCanvas().getGLWindow().setPosition(500, 20);
 
 		/*	JMenuBar menuBar = new JMenuBar();
 			menuBar.setOpaque(true);
@@ -443,7 +444,7 @@ public class NifDisplayTester
 				vbg.setCapability(Node.ALLOW_BOUNDS_READ);				
 				vbg.addChild(nif.getVisualRoot());
 				
-				vbg.outputTraversal();
+				//vbg.outputTraversal();
 				vbg.compile();// oddly this does NOT get called automatically
 				modelGroup.addChild(vbg);
 			}
