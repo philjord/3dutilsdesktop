@@ -39,7 +39,7 @@ public class NifLoaderTester
 					public void run()
 					{
 						processDir(dir);
-						System.out.println("Processing " + dir + "complete");
+						System.out.println("Processing " + dir + " complete");
 
 						//h 320204330	 230.75745
 						//0001 0011 0001 0101 1110 1110 0010 1010

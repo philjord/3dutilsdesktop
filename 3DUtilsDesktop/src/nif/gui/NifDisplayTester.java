@@ -1,6 +1,5 @@
 package nif.gui;
 
-import java.awt.GridLayout;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.prefs.Preferences;
@@ -19,7 +18,6 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.WakeupCondition;
 import javax.media.j3d.WakeupOnElapsedFrames;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -41,11 +39,9 @@ import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.gui.util.ControllerInvokerThread;
-import nif.gui.util.NiObjectDisplayTable;
-import nif.gui.util.NifFileDisplayTable;
-import nif.gui.util.NifFileDisplayTree;
 import nif.gui.util.SpinTransform;
 import nif.j3d.J3dNiAVObject;
+import nif.shaders.NiGeometryAppearanceShader;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
@@ -95,11 +91,11 @@ public class NifDisplayTester
 
 	private JSplitPane splitterH = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-	private NiObjectDisplayTable niObjectDisplayTable = new NiObjectDisplayTable();
+//	private NiObjectDisplayTable niObjectDisplayTable = new NiObjectDisplayTable();
 
-	private NifFileDisplayTable nifFileDisplayTable = new NifFileDisplayTable(niObjectDisplayTable);
+//	private NifFileDisplayTable nifFileDisplayTable = new NifFileDisplayTable(niObjectDisplayTable);
 
-	private NifFileDisplayTree nifFileDisplayTree = new NifFileDisplayTree(niObjectDisplayTable);
+//	private NifFileDisplayTree nifFileDisplayTree = new NifFileDisplayTree(niObjectDisplayTable);
 
 	private SimpleUniverse simpleUniverse;
 
@@ -129,17 +125,31 @@ public class NifDisplayTester
 
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
-		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind", "F:\\game_media\\Oblivion",
-				"F:\\game_media\\Fallout3", "F:\\game_media\\Skyrim", "F:\\game_media\\Fallout4", }, true);
+		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind", //
+				"F:\\game_media\\Oblivion",//
+				"F:\\game_media\\Fallout3", //
+				"F:\\game_media\\Skyrim",//
+			//	"F:\\game_media\\Fallout4", //
+				}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 
+		NiGeometryAppearanceShader.OUTPUT_BINDINGS = true;
+
 		//win.setVisible(true);
-		//win.setLocation(400, 0);
+
 		//win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		Canvas3D canvas3D = new Canvas3D();
-
-		//win.getContentPane().add(canvas3D);
+		canvas3D.getGLWindow().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+				{
+					System.exit(0);
+				}
+			}
+		});
 
 		simpleUniverse = new SimpleUniverse(canvas3D);
 		/*		GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
@@ -150,24 +160,26 @@ public class NifDisplayTester
 			*/
 		//TODO: these must come form a new one of those ^
 		canvas3D.getGLWindow().setSize(800, 600);
+		canvas3D.getGLWindow().setPosition(400, 30);
 		DDSTextureLoader.setAnisotropicFilterDegree(8);
 
 		//win.setVisible(true);
 		canvas3D.addNotify();
-		JFrame dataF = new JFrame();
-		dataF.getContentPane().setLayout(new GridLayout(1, 1));
 
-		splitterH.setTopComponent(nifFileDisplayTree);
-		splitterH.setBottomComponent(nifFileDisplayTable);
-
-		splitterV.setTopComponent(splitterH);
-		splitterV.setBottomComponent(niObjectDisplayTable);
-
-		dataF.getContentPane().add(splitterV);
-
-		dataF.setSize(900, 900);
-		dataF.setLocation(400, 0);
-		//dataF.setVisible(true);
+		/*	JFrame dataF = new JFrame();
+			dataF.getContentPane().setLayout(new GridLayout(1, 1));
+		
+			splitterH.setTopComponent(nifFileDisplayTree);
+			splitterH.setBottomComponent(nifFileDisplayTable);
+		
+			splitterV.setTopComponent(splitterH);
+			splitterV.setBottomComponent(niObjectDisplayTable);
+		
+			dataF.getContentPane().add(splitterV);
+		
+			dataF.setSize(900, 900);
+			dataF.setLocation(400, 0);
+			dataF.setVisible(true);*/
 
 		spinTransformGroup.addChild(rotateTransformGroup);
 		rotateTransformGroup.addChild(modelGroup);
@@ -441,14 +453,14 @@ public class NifDisplayTester
 
 			if (showVisual && nif != null)
 			{
-				vbg.setCapability(Node.ALLOW_BOUNDS_READ);				
+				vbg.setCapability(Node.ALLOW_BOUNDS_READ);
 				vbg.addChild(nif.getVisualRoot());
-				
+
 				//vbg.outputTraversal();
 				vbg.compile();// oddly this does NOT get called automatically
 				modelGroup.addChild(vbg);
 			}
-
+			System.out.println("vbg.getBounds() " + vbg.getBounds());
 			simpleCameraHandler.viewBounds(vbg.getBounds());
 
 			spinTransform.setEnable(spin);
