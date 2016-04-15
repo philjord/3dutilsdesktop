@@ -39,7 +39,6 @@ import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.gui.util.ControllerInvokerThread;
-import nif.gui.util.SpinTransform;
 import nif.j3d.J3dNiAVObject;
 import nif.shaders.NiGeometryAppearanceShader;
 import tools.compressedtexture.dds.DDSTextureLoader;
@@ -47,6 +46,7 @@ import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.Utils3D;
 import tools3d.utils.leafnode.Cube;
+import tools3d.utils.scenegraph.SpinTransform;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
@@ -91,11 +91,11 @@ public class NifDisplayTester
 
 	private JSplitPane splitterH = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
-//	private NiObjectDisplayTable niObjectDisplayTable = new NiObjectDisplayTable();
+	//	private NiObjectDisplayTable niObjectDisplayTable = new NiObjectDisplayTable();
 
-//	private NifFileDisplayTable nifFileDisplayTable = new NifFileDisplayTable(niObjectDisplayTable);
+	//	private NifFileDisplayTable nifFileDisplayTable = new NifFileDisplayTable(niObjectDisplayTable);
 
-//	private NifFileDisplayTree nifFileDisplayTree = new NifFileDisplayTree(niObjectDisplayTable);
+	//	private NifFileDisplayTree nifFileDisplayTree = new NifFileDisplayTree(niObjectDisplayTable);
 
 	private SimpleUniverse simpleUniverse;
 
@@ -126,11 +126,11 @@ public class NifDisplayTester
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
 		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind", //
-				"F:\\game_media\\Oblivion",//
+				"F:\\game_media\\Oblivion", //
 				"F:\\game_media\\Fallout3", //
 				"F:\\game_media\\Skyrim",//
-			//	"F:\\game_media\\Fallout4", //
-				}, true);
+				//	"F:\\game_media\\Fallout4", //
+		}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 
 		NiGeometryAppearanceShader.OUTPUT_BINDINGS = true;
@@ -231,7 +231,7 @@ public class NifDisplayTester
 		bg.addChild(fileManageBehavior);
 
 		bg.addChild(spinTransformGroup);
-		spinTransform = new SpinTransform(spinTransformGroup);
+		spinTransform = new SpinTransform(spinTransformGroup, 0.5);
 		spinTransform.setEnable(false);
 		bg.addChild(spinTransform);
 

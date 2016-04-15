@@ -39,7 +39,6 @@ import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.character.NifCharacter;
 import nif.character.NifCharacterTes3;
 import nif.character.NifJ3dSkeletonRoot;
-import nif.gui.util.SpinTransform;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.tes3.J3dNiSequenceStreamHelper;
 import tools.compressedtexture.dds.DDSTextureLoader;
@@ -47,6 +46,7 @@ import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.leafnode.Cube;
+import tools3d.utils.scenegraph.SpinTransform;
 import utils.source.MediaSources;
 import utils.source.file.FileMeshSource;
 import utils.source.file.FileSoundSource;
@@ -92,7 +92,6 @@ public class KfDisplayTester
 	public KfDisplayTester()
 	{
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
- 
 
 		//DDS requires no installed java3D
 		if (QueryProperties.checkForInstalledJ3d())
@@ -101,7 +100,7 @@ public class KfDisplayTester
 		}
 
 		NiGeometryAppearanceFactoryShader.setAsDefault();
-		
+
 		//win.setVisible(true);
 		//win.setLocation(400, 0);
 		//win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -109,19 +108,19 @@ public class KfDisplayTester
 		Canvas3D canvas3D = new Canvas3D();
 
 		//win.getContentPane().add(canvas3D);
-		 
+
 		simpleUniverse = new SimpleUniverse(canvas3D);
-	//	GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
+		//	GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
 		//		true);
 
 		//canvas3D.getView().setSceneAntialiasingEnable(gs.isAaRequired());
-	//	DDSTextureLoader.setAnisotropicFilterDegree(gs.getAnisotropicFilterDegree());
+		//	DDSTextureLoader.setAnisotropicFilterDegree(gs.getAnisotropicFilterDegree());
 
 		//win.setVisible(true);
 		canvas3D.getGLWindow().setSize(800, 600);
 		DDSTextureLoader.setAnisotropicFilterDegree(8);
 		canvas3D.addNotify();
-		
+
 		spinTransformGroup.addChild(rotateTransformGroup);
 		rotateTransformGroup.addChild(modelGroup);
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(), modelGroup,
@@ -159,7 +158,7 @@ public class KfDisplayTester
 		//bg.addChild(fileManageBehavior);
 
 		bg.addChild(spinTransformGroup);
-		spinTransform = new SpinTransform(spinTransformGroup);
+		spinTransform = new SpinTransform(spinTransformGroup, 0.5);
 		spinTransform.setEnable(false);
 		bg.addChild(spinTransform);
 
@@ -177,28 +176,28 @@ public class KfDisplayTester
 
 		simpleUniverse.getCanvas().getGLWindow().addKeyListener(new KeyHandler());
 
-	/*	JMenuBar menuBar = new JMenuBar();
-		menuBar.setOpaque(true);
-		JMenu menu = new JMenu("File");
-		menu.setMnemonic(70);
-		menuBar.add(menu);
-
-		menu.add(setGraphics);
-		setGraphics.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				GraphicsSettings gs2 = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win,
-						false, true, true);
-
-				simpleUniverse.getCanvas().getView().setSceneAntialiasingEnable(gs2.isAaRequired());
-				DDSTextureLoader.setAnisotropicFilterDegree(gs2.getAnisotropicFilterDegree());
-				System.out.println("filtering will require newly loaded textures remember");
-			}
-		});
-
-		win.setJMenuBar(menuBar);
-		win.setVisible(true);*/
+		/*	JMenuBar menuBar = new JMenuBar();
+			menuBar.setOpaque(true);
+			JMenu menu = new JMenu("File");
+			menu.setMnemonic(70);
+			menuBar.add(menu);
+		
+			menu.add(setGraphics);
+			setGraphics.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{
+					GraphicsSettings gs2 = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win,
+							false, true, true);
+		
+					simpleUniverse.getCanvas().getView().setSceneAntialiasingEnable(gs2.isAaRequired());
+					DDSTextureLoader.setAnisotropicFilterDegree(gs2.getAnisotropicFilterDegree());
+					System.out.println("filtering will require newly loaded textures remember");
+				}
+			});
+		
+			win.setJMenuBar(menuBar);
+			win.setVisible(true);*/
 
 		try
 		{
