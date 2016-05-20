@@ -248,7 +248,7 @@ public class NifDisplayTester
 		simpleUniverse.getViewer().getView().setBackClipDistance(5000);
 
 		simpleUniverse.getCanvas().getGLWindow().addKeyListener(new KeyHandler());
-		simpleUniverse.getCanvas().getGLWindow().setPosition(500, 20);
+		//simpleUniverse.getCanvas().getGLWindow().setPosition(500, 20);
 
 		/*	JMenuBar menuBar = new JMenuBar();
 			menuBar.setOpaque(true);
