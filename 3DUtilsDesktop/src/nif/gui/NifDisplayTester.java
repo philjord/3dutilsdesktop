@@ -1,6 +1,7 @@
 package nif.gui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.prefs.Preferences;
 
@@ -40,6 +41,7 @@ import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.gui.util.ControllerInvokerThread;
 import nif.j3d.J3dNiAVObject;
+import nif.j3d.particles.tes3.J3dNiParticles;
 import nif.shaders.NiGeometryAppearanceShader;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
@@ -429,6 +431,8 @@ public class NifDisplayTester
 		{
 
 			J3dNiAVObject havok = nif.getHavokRoot();
+
+			// set up an animation thread
 			if (nif.getVisualRoot().getJ3dNiControllerManager() != null && animateModel)
 			{
 				//note self cleaning uping
@@ -468,6 +472,26 @@ public class NifDisplayTester
 			bgc.setCapability(BranchGroup.ALLOW_DETACH);
 			bgc.addChild(new Cube(0.01f));
 			modelGroup.addChild(bgc);
+
+			// if a j3dparticlesystem exists fire it off
+			ArrayList<J3dNiParticles> j3dNiParticless = new ArrayList<J3dNiParticles>();
+			for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues())
+			{
+				if (j3dNiAVObject instanceof J3dNiParticles)
+				{
+					j3dNiParticless.add((J3dNiParticles) j3dNiAVObject);
+
+				}
+			}
+
+			if (j3dNiParticless.size() > 0)
+			{
+				System.out.println("Adding controller thread");
+				//note self cleaning uping
+				ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nif.getVisualRoot().getName(),
+						j3dNiParticless);
+				controllerInvokerThread.start();
+			}
 
 		}
 		else
@@ -520,12 +544,13 @@ public class NifDisplayTester
 			setEnable(true);
 		}
 
+		@Override
 		public void initialize()
 		{
 			wakeupOn(FPSCriterion);
 		}
 
-		@SuppressWarnings("rawtypes")
+		@Override
 		public void processStimulus(Enumeration criteria)
 		{
 			process();
@@ -552,6 +577,7 @@ public class NifDisplayTester
 			System.out.println("Space toggle cycle through files");
 		}
 
+		@Override
 		public void keyPressed(KeyEvent e)
 		{
 
