@@ -53,8 +53,12 @@ public class ControllerInvokerThread extends Thread
 					for (J3dNiParticles j3dNiParticles : j3dNiParticless)
 					{
 						anyLive = anyLive || j3dNiParticles.isLive();
-						System.out.println("firing " + j3dNiParticles);
-						j3dNiParticles.fireSequence();
+						if (j3dNiParticles.isNotRunning())
+						{
+							System.out.println("firing " + j3dNiParticles);
+							//j3dNiParticles.fireSequence();
+							j3dNiParticles.fireSequenceLooping();
+						}
 
 						maxSleep = j3dNiParticles.getLengthMS() > maxSleep ? j3dNiParticles.getLengthMS() : maxSleep;
 					}
