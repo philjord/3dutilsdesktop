@@ -473,8 +473,10 @@ public class NifDisplayTester
 			bgc.addChild(new Cube(0.01f));
 			modelGroup.addChild(bgc);
 
+			
+			//Particles are aut looping for now
 			// if a j3dparticlesystem exists fire it off
-			ArrayList<J3dNiParticles> j3dNiParticless = new ArrayList<J3dNiParticles>();
+	/*		ArrayList<J3dNiParticles> j3dNiParticless = new ArrayList<J3dNiParticles>();
 			for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues())
 			{
 				if (j3dNiAVObject instanceof J3dNiParticles)
@@ -491,7 +493,7 @@ public class NifDisplayTester
 				ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nif.getVisualRoot().getName(),
 						j3dNiParticless);
 				controllerInvokerThread.start();
-			}
+			}*/
 
 		}
 		else
