@@ -338,7 +338,7 @@ public class KfDisplayTester
 		J3dNiSkinInstance.showSkinBoneMarkers = false;//TODO: this doesn't show anything?
 		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
 
-		final NifCharacterTes3 nifCharacter = new NifCharacterTes3(skeletonNifFile, skinNifFiles2, mediaSources);
+		final NifCharacterTes3 nifCharacter = new NifCharacterTes3(skeletonNifFile, skinNifFiles2, null, mediaSources);
 		nifCharacter.setCapability(Node.ALLOW_BOUNDS_READ);
 		bg.addChild(nifCharacter);
 
