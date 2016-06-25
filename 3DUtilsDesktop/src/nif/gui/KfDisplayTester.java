@@ -36,6 +36,7 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
 import awt.tools3d.resolution.QueryProperties;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
+import nif.character.AttachedParts;
 import nif.character.NifCharacter;
 import nif.character.NifCharacterTes3;
 import nif.character.NifJ3dSkeletonRoot;
@@ -338,7 +339,11 @@ public class KfDisplayTester
 		J3dNiSkinInstance.showSkinBoneMarkers = false;//TODO: this doesn't show anything?
 		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
 
-		final NifCharacterTes3 nifCharacter = new NifCharacterTes3(skeletonNifFile, null, mediaSources);
+		
+		AttachedParts attachFileNames = new AttachedParts();
+		attachFileNames.addPart(AttachedParts.Part.Root, skinNifFiles2.get(0));
+		
+		final NifCharacterTes3 nifCharacter = new NifCharacterTes3(skeletonNifFile, attachFileNames, mediaSources);
 		nifCharacter.setCapability(Node.ALLOW_BOUNDS_READ);
 		bg.addChild(nifCharacter);
 
