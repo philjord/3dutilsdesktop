@@ -39,8 +39,10 @@ import nif.BgsmSource;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
+import nif.character.NifJ3dSkeletonRoot;
 import nif.gui.util.ControllerInvokerThread;
 import nif.j3d.J3dNiAVObject;
+import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.particles.tes3.J3dNiParticles;
 import nif.shaders.NiGeometryAppearanceShader;
 import tools.compressedtexture.dds.DDSTextureLoader;
@@ -49,6 +51,8 @@ import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.Utils3D;
 import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.SpinTransform;
+import utils.PerFrameUpdateBehavior;
+import utils.PerFrameUpdateBehavior.CallBack;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
@@ -424,6 +428,9 @@ public class NifDisplayTester
 		}
 	}
 
+	private ArrayList<J3dNiSkinInstance> allSkins;
+	private NifJ3dSkeletonRoot inputSkeleton;
+
 	private void display(NifJ3dVisPhysRoot nif)
 	{
 
@@ -454,15 +461,48 @@ public class NifDisplayTester
 
 			vbg = new BranchGroup();
 			vbg.setCapability(BranchGroup.ALLOW_DETACH);
+			vbg.setCapability(Node.ALLOW_BOUNDS_READ);
 
 			if (showVisual && nif != null)
 			{
-				vbg.setCapability(Node.ALLOW_BOUNDS_READ);
-				vbg.addChild(nif.getVisualRoot());
+				// check for skins!
+				inputSkeleton = new NifJ3dSkeletonRoot(nif.getVisualRoot(), nif.getNiToJ3dData());
+				// create skins from the skeleton and skin nif
+				allSkins = J3dNiSkinInstance.createSkins(nif.getNiToJ3dData(), inputSkeleton);
 
-				//vbg.outputTraversal();
-				vbg.compile();// oddly this does NOT get called automatically
-				modelGroup.addChild(vbg);
+				if (allSkins.size() > 0)
+				{
+					// add the skins to the scene
+					for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
+					{
+						vbg.addChild(j3dNiSkinInstance);
+					}
+
+					PerFrameUpdateBehavior pub = new PerFrameUpdateBehavior(new CallBack() {
+						@Override
+						public void update()
+						{
+							// must be called to update the accum transform
+							inputSkeleton.updateBones();
+							for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
+							{
+								j3dNiSkinInstance.processSkinInstance();
+							}
+						}
+
+					});
+					vbg.addChild(inputSkeleton);
+					vbg.addChild(pub);
+					modelGroup.addChild(vbg);
+				}
+				else
+				{
+					vbg.addChild(nif.getVisualRoot());
+
+					//vbg.outputTraversal();
+					vbg.compile();// oddly this does NOT get called automatically
+					modelGroup.addChild(vbg);
+				}
 			}
 			System.out.println("vbg.getBounds() " + vbg.getBounds());
 			simpleCameraHandler.viewBounds(vbg.getBounds());
@@ -473,27 +513,26 @@ public class NifDisplayTester
 			bgc.addChild(new Cube(0.01f));
 			modelGroup.addChild(bgc);
 
-			
 			//Particles are aut looping for now
 			// if a j3dparticlesystem exists fire it off
-	/*		ArrayList<J3dNiParticles> j3dNiParticless = new ArrayList<J3dNiParticles>();
-			for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues())
-			{
-				if (j3dNiAVObject instanceof J3dNiParticles)
-				{
-					j3dNiParticless.add((J3dNiParticles) j3dNiAVObject);
-
-				}
-			}
-
-			if (j3dNiParticless.size() > 0)
-			{
-				System.out.println("Adding controller thread");
-				//note self cleaning uping
-				ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nif.getVisualRoot().getName(),
-						j3dNiParticless);
-				controllerInvokerThread.start();
-			}*/
+			/*		ArrayList<J3dNiParticles> j3dNiParticless = new ArrayList<J3dNiParticles>();
+					for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues())
+					{
+						if (j3dNiAVObject instanceof J3dNiParticles)
+						{
+							j3dNiParticless.add((J3dNiParticles) j3dNiAVObject);
+			
+						}
+					}
+			
+					if (j3dNiParticless.size() > 0)
+					{
+						System.out.println("Adding controller thread");
+						//note self cleaning uping
+						ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nif.getVisualRoot().getName(),
+								j3dNiParticless);
+						controllerInvokerThread.start();
+					}*/
 
 		}
 		else
