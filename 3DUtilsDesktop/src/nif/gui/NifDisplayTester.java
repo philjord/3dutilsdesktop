@@ -30,6 +30,8 @@ import javax.vecmath.Vector3f;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
 import archive.BSArchiveSet;
@@ -156,6 +158,15 @@ public class NifDisplayTester
 				}
 			}
 		});
+
+		canvas3D.getGLWindow().addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowResized(final WindowEvent e)
+			{
+				J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
+			}
+		});
+		J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
 
 		simpleUniverse = new SimpleUniverse(canvas3D);
 		/*		GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
@@ -466,34 +477,37 @@ public class NifDisplayTester
 			if (showVisual && nif != null)
 			{
 				// check for skins!
-				inputSkeleton = new NifJ3dSkeletonRoot(nif.getVisualRoot(), nif.getNiToJ3dData());
-				// create skins from the skeleton and skin nif
-				allSkins = J3dNiSkinInstance.createSkins(nif.getNiToJ3dData(), inputSkeleton);
-
-				if (allSkins.size() > 0)
+				if (NifJ3dSkeletonRoot.hasSkeletonRoot(nif.getNiToJ3dData()))
 				{
-					// add the skins to the scene
-					for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
-					{
-						vbg.addChild(j3dNiSkinInstance);
-					}
+					inputSkeleton = new NifJ3dSkeletonRoot(nif.getVisualRoot(), nif.getNiToJ3dData());
+					// create skins from the skeleton and skin nif
+					allSkins = J3dNiSkinInstance.createSkins(nif.getNiToJ3dData(), inputSkeleton);
 
-					PerFrameUpdateBehavior pub = new PerFrameUpdateBehavior(new CallBack() {
-						@Override
-						public void update()
+					if (allSkins.size() > 0)
+					{
+						// add the skins to the scene
+						for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
 						{
-							// must be called to update the accum transform
-							inputSkeleton.updateBones();
-							for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
-							{
-								j3dNiSkinInstance.processSkinInstance();
-							}
+							vbg.addChild(j3dNiSkinInstance);
 						}
 
-					});
-					vbg.addChild(inputSkeleton);
-					vbg.addChild(pub);
-					modelGroup.addChild(vbg);
+						PerFrameUpdateBehavior pub = new PerFrameUpdateBehavior(new CallBack() {
+							@Override
+							public void update()
+							{
+								// must be called to update the accum transform
+								inputSkeleton.updateBones();
+								for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
+								{
+									j3dNiSkinInstance.processSkinInstance();
+								}
+							}
+
+						});
+						vbg.addChild(inputSkeleton);
+						vbg.addChild(pub);
+						modelGroup.addChild(vbg);
+					}
 				}
 				else
 				{

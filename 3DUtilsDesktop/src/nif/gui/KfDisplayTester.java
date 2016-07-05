@@ -31,6 +31,8 @@ import javax.vecmath.Vector3f;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
 import awt.tools3d.resolution.QueryProperties;
@@ -42,6 +44,7 @@ import nif.character.NifCharacterTes3;
 import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.tes3.J3dNiSequenceStreamHelper;
+import nif.j3d.particles.tes3.J3dNiParticles;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
@@ -108,7 +111,25 @@ public class KfDisplayTester
 
 		Canvas3D canvas3D = new Canvas3D();
 
-		//win.getContentPane().add(canvas3D);
+		canvas3D.getGLWindow().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+				{
+					System.exit(0);
+				}
+			}
+		});
+
+		canvas3D.getGLWindow().addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowResized(final WindowEvent e)
+			{
+				J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
+			}
+		});
+		J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
 
 		simpleUniverse = new SimpleUniverse(canvas3D);
 		//	GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
@@ -339,10 +360,9 @@ public class KfDisplayTester
 		J3dNiSkinInstance.showSkinBoneMarkers = false;//TODO: this doesn't show anything?
 		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
 
-		
 		AttachedParts attachFileNames = new AttachedParts();
 		attachFileNames.addPart(AttachedParts.Part.Root, skinNifFiles2.get(0));
-		
+
 		final NifCharacterTes3 nifCharacter = new NifCharacterTes3(skeletonNifFile, attachFileNames, mediaSources);
 		nifCharacter.setCapability(Node.ALLOW_BOUNDS_READ);
 		bg.addChild(nifCharacter);
