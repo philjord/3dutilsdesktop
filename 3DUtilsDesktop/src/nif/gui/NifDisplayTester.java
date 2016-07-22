@@ -474,10 +474,10 @@ public class NifDisplayTester
 			vbg.setCapability(BranchGroup.ALLOW_DETACH);
 			vbg.setCapability(Node.ALLOW_BOUNDS_READ);
 
-			if (showVisual && nif != null)
+			if (showVisual)
 			{
 				// check for skins!
-				if (NifJ3dSkeletonRoot.hasSkeletonRoot(nif.getNiToJ3dData()))
+				if (NifJ3dSkeletonRoot.isSkeleton(nif.getNiToJ3dData()))
 				{
 					inputSkeleton = new NifJ3dSkeletonRoot(nif.getVisualRoot(), nif.getNiToJ3dData());
 					// create skins from the skeleton and skin nif
