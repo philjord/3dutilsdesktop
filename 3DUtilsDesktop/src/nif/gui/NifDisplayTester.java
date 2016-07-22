@@ -137,7 +137,7 @@ public class NifDisplayTester
 				"F:\\game_media\\Oblivion", //
 				"F:\\game_media\\Fallout3", //
 				"F:\\game_media\\Skyrim",//
-				//	"F:\\game_media\\Fallout4", //
+					"F:\\game_media\\Fallout4", //
 		}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 
