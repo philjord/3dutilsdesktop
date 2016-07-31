@@ -45,6 +45,7 @@ import nif.character.NifJ3dSkeletonRoot;
 import nif.gui.util.ControllerInvokerThread;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiSkinInstance;
+import nif.j3d.animation.J3dNiGeomMorpherController;
 import nif.j3d.particles.tes3.J3dNiParticles;
 import nif.shaders.NiGeometryAppearanceShader;
 import tools.compressedtexture.dds.DDSTextureLoader;
@@ -136,8 +137,8 @@ public class NifDisplayTester
 		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind", //
 				"F:\\game_media\\Oblivion", //
 				"F:\\game_media\\Fallout3", //
-				"F:\\game_media\\Skyrim",//
-					"F:\\game_media\\Fallout4", //
+				"F:\\game_media\\Skyrim", //
+				"F:\\game_media\\Fallout4", //
 		}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 
@@ -529,25 +530,15 @@ public class NifDisplayTester
 
 			//Particles are aut looping for now
 			// if a j3dparticlesystem exists fire it off
-			/*		ArrayList<J3dNiParticles> j3dNiParticless = new ArrayList<J3dNiParticles>();
-					for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues())
-					{
-						if (j3dNiAVObject instanceof J3dNiParticles)
-						{
-							j3dNiParticless.add((J3dNiParticles) j3dNiAVObject);
-			
-						}
-					}
-			
-					if (j3dNiParticless.size() > 0)
-					{
-						System.out.println("Adding controller thread");
-						//note self cleaning uping
-						ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nif.getVisualRoot().getName(),
-								j3dNiParticless);
-						controllerInvokerThread.start();
-					}*/
 
+			for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues())
+			{
+				if (j3dNiAVObject.getJ3dNiTimeController() != null
+						&& j3dNiAVObject.getJ3dNiTimeController() instanceof J3dNiGeomMorpherController)
+				{
+					((J3dNiGeomMorpherController)j3dNiAVObject.getJ3dNiTimeController()) .fireFrameName("Frame_1");
+				}
+			}
 		}
 		else
 		{
