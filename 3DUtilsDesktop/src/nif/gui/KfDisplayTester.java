@@ -403,7 +403,7 @@ public class KfDisplayTester
 			{
 				String newAnimation = (String) tableModel.getValueAt(table.convertRowIndexToModel(table.getSelectedRow()), 0);
 				System.out.println("newAnimation " + newAnimation);
-				nifCharacter.startAnimation(newAnimation, false);
+				nifCharacter.addToQueue(newAnimation, false);
 			}
 
 		});
