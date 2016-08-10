@@ -536,7 +536,7 @@ public class NifDisplayTester
 				if (j3dNiAVObject.getJ3dNiTimeController() != null
 						&& j3dNiAVObject.getJ3dNiTimeController() instanceof J3dNiGeomMorpherController)
 				{
-					((J3dNiGeomMorpherController)j3dNiAVObject.getJ3dNiTimeController()) .fireFrameName("Frame_1");
+					((J3dNiGeomMorpherController)j3dNiAVObject.getJ3dNiTimeController()) .fireFrameName("Frame_1", true);
 				}
 			}
 		}
