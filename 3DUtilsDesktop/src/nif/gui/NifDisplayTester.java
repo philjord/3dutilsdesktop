@@ -520,7 +520,7 @@ public class NifDisplayTester
 				}
 			}
 			System.out.println("vbg.getBounds() " + vbg.getBounds());
-			simpleCameraHandler.viewBounds(vbg.getBounds());
+			//simpleCameraHandler.viewBounds(vbg.getBounds());
 
 			spinTransform.setEnable(spin);
 			BranchGroup bgc = new BranchGroup();
