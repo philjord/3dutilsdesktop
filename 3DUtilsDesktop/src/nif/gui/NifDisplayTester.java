@@ -23,6 +23,7 @@ import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.WakeupCondition;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
+import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
@@ -33,7 +34,6 @@ import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
-import com.sun.j3d.utils.universe.SimpleUniverse;
 
 import archive.BSArchiveSet;
 import awt.tools3d.resolution.QueryProperties;

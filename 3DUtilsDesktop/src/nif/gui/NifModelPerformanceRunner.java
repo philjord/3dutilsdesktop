@@ -19,6 +19,7 @@ import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.WakeupCondition;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
 import org.jogamp.java3d.WakeupOnElapsedTime;
+import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.AxisAngle4d;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
@@ -28,8 +29,6 @@ import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;
 import utils.source.file.FileMeshSource;
 import utils.source.file.FileTextureSource;
-
-import com.sun.j3d.utils.universe.SimpleUniverse;
 
 /**
  * @author Administrator
