@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.vecmath.Vector3f;
 
 import org.jogamp.java3d.BranchGroup;
+import org.jogamp.vecmath.Vector3f;
 
 import com.bulletphysics.collision.broadphase.BroadphaseInterface;
 import com.bulletphysics.collision.broadphase.DbvtBroadphase;

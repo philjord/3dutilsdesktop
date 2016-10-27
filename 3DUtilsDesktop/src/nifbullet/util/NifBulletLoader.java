@@ -5,7 +5,8 @@ import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.vecmath.Vector3f;
+
+import org.jogamp.vecmath.Vector3f;
 
 import nif.NifToJ3d;
 import nifbullet.BulletNifModel;
