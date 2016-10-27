@@ -6,16 +6,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
-import javax.media.j3d.AmbientLight;
-import javax.media.j3d.Background;
-import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Canvas3D;
-import javax.media.j3d.DirectionalLight;
-import javax.media.j3d.Group;
-import javax.media.j3d.Light;
-import javax.media.j3d.Node;
-import javax.media.j3d.TransformGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -28,6 +18,17 @@ import javax.swing.table.TableRowSorter;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3f;
+
+import org.jogamp.java3d.AmbientLight;
+import org.jogamp.java3d.Background;
+import org.jogamp.java3d.BoundingSphere;
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Canvas3D;
+import org.jogamp.java3d.DirectionalLight;
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.Light;
+import org.jogamp.java3d.Node;
+import org.jogamp.java3d.TransformGroup;
 
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;

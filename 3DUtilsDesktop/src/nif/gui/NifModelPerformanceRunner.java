@@ -4,17 +4,6 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.prefs.Preferences;
 
-import javax.media.j3d.AmbientLight;
-import javax.media.j3d.Behavior;
-import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Group;
-import javax.media.j3d.Light;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
-import javax.media.j3d.WakeupCondition;
-import javax.media.j3d.WakeupOnElapsedFrames;
-import javax.media.j3d.WakeupOnElapsedTime;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -22,6 +11,18 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
+import org.jogamp.java3d.AmbientLight;
+import org.jogamp.java3d.Behavior;
+import org.jogamp.java3d.BoundingSphere;
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Group;
+import org.jogamp.java3d.Light;
+import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.WakeupCondition;
+import org.jogamp.java3d.WakeupOnElapsedFrames;
+import org.jogamp.java3d.WakeupOnElapsedTime;
 
 import nif.NifToJ3d;
 import nif.j3d.J3dNiAVObject;

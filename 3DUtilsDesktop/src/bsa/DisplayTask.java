@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.media.j3d.Texture;
 import javax.swing.SwingUtilities;
+
+import org.jogamp.java3d.Texture;
 
 import archive.ArchiveEntry;
 import archive.displayables.DisplayableArchiveEntry;
