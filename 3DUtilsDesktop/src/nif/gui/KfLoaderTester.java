@@ -28,6 +28,12 @@ public class KfLoaderTester
 
 	public static void main(String[] args)
 	{
+		System.setProperty("sun.awt.noerasebackground", "true");
+		System.setProperty("j3d.cacheAutoComputeBounds", "true");
+		System.setProperty("j3d.defaultReadCapability", "false");
+		System.setProperty("j3d.defaultNodePickable", "false");
+		System.setProperty("j3d.defaultNodeCollidable", "false");
+		
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
 		prefs = Preferences.userNodeForPackage(KfLoaderTester.class);
 		String baseDir = prefs.get("KfLoaderTester.baseDir", System.getProperty("user.dir"));

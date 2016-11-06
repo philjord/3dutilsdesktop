@@ -6,7 +6,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 import org.jogamp.java3d.AmbientLight;
 import org.jogamp.java3d.Behavior;
@@ -41,7 +40,12 @@ public class NifModelPerformanceRunner
 
 	public static void main(String[] args)
 	{
-
+		System.setProperty("sun.awt.noerasebackground", "true");
+		System.setProperty("j3d.cacheAutoComputeBounds", "true");
+		System.setProperty("j3d.defaultReadCapability", "false");
+		System.setProperty("j3d.defaultNodePickable", "false");
+		System.setProperty("j3d.defaultNodeCollidable", "false");
+		
 		setUpUniverseAndCanvas();
 
 		prefs = Preferences.userNodeForPackage(NifModelPerformanceRunner.class);
@@ -185,13 +189,13 @@ public class NifModelPerformanceRunner
 			setEnable(true);
 		}
 
+		@Override
 		public void initialize()
 		{
 			wakeupOn(FPSCriterion);
 		}
 
-		@SuppressWarnings(
-		{ "unchecked", "rawtypes" })
+		@Override
 		public void processStimulus(Enumeration criteria)
 		{
 			process();
@@ -236,13 +240,13 @@ public class NifModelPerformanceRunner
 			setEnable(true);
 		}
 
+		@Override
 		public void initialize()
 		{
 			wakeupOn(wakeUp);
 		}
 
-		@SuppressWarnings(
-		{ "unchecked", "rawtypes" })
+		@Override
 		public void processStimulus(Enumeration critera)
 		{
 			currtime = System.currentTimeMillis();
@@ -267,13 +271,14 @@ public class NifModelPerformanceRunner
 			setEnable(true);
 		}
 
+		@Override
 		public void initialize()
 		{
 			wakeupOn(wakeUp);
 		}
 
-		@SuppressWarnings(
-		{ "unchecked", "rawtypes" })
+		 
+		@Override
 		public void processStimulus(Enumeration critera)
 		{
 			// time is in millisec, so multiply by 1000 to get frames/sec

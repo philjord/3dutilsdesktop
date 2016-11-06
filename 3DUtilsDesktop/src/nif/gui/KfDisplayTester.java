@@ -70,7 +70,7 @@ public class KfDisplayTester
 
 	private static String skeletonNifModelFile;
 
-	private static ArrayList<String> skinNifFiles = new ArrayList<String>();
+	private static ArrayList<String> skinNifFiles = new ArrayList<>();
 
 	public static KfDisplayTester nifDisplay;
 
@@ -331,7 +331,7 @@ public class KfDisplayTester
 		J3dNiSkinInstance.showSkinBoneMarkers = false;//TODO: this doesn't show anything?
 		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
 
-		ArrayList<String> idleAnimations = new ArrayList<String>();
+		ArrayList<String> idleAnimations = new ArrayList<>();
 
 		if (kff != null)
 		{
@@ -409,7 +409,7 @@ public class KfDisplayTester
 
 		});
 
-		table.setRowSorter(new TableRowSorter<DefaultTableModel>(tableModel));
+		table.setRowSorter(new TableRowSorter<>(tableModel));
 
 		seqFrame.getContentPane().add(new JScrollPane(table));
 		seqFrame.setVisible(true);
@@ -417,6 +417,12 @@ public class KfDisplayTester
 
 	public static void main(String[] args)
 	{
+		System.setProperty("sun.awt.noerasebackground", "true");
+		System.setProperty("j3d.cacheAutoComputeBounds", "true");
+		System.setProperty("j3d.defaultReadCapability", "false");
+		System.setProperty("j3d.defaultNodePickable", "false");
+		System.setProperty("j3d.defaultNodeCollidable", "false");
+		
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
 		prefs = Preferences.userNodeForPackage(KfDisplayTester.class);
 		nifDisplay = new KfDisplayTester();
@@ -435,6 +441,7 @@ public class KfDisplayTester
 				System.out.println("Space toggle cycle through files");
 			}*/
 
+		@Override
 		public void keyPressed(KeyEvent e)
 		{
 

@@ -24,6 +24,13 @@ public class NifLoaderTester
 
 	public static void main(String[] args)
 	{
+		
+		System.setProperty("sun.awt.noerasebackground", "true");
+		System.setProperty("j3d.cacheAutoComputeBounds", "true");
+		System.setProperty("j3d.defaultReadCapability", "false");
+		System.setProperty("j3d.defaultNodePickable", "false");
+		System.setProperty("j3d.defaultNodeCollidable", "false");
+		
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 
@@ -36,6 +43,7 @@ public class NifLoaderTester
 			{
 				prefs.put("NifToJ3dTester.baseDir", dir.getPath());
 				Thread t = new Thread() {
+					@Override
 					public void run()
 					{
 						processDir(dir);

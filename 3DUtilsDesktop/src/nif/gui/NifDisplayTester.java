@@ -520,8 +520,8 @@ public class NifDisplayTester
 					modelGroup.addChild(vbg);
 				}
 			}
-			System.out.println("vbg.getBounds() " + vbg.getBounds());
-			//simpleCameraHandler.viewBounds(vbg.getBounds());
+			
+			simpleCameraHandler.viewBounds(vbg.getBounds());
 
 			spinTransform.setEnable(spin);
 			BranchGroup bgc = new BranchGroup();
@@ -554,6 +554,12 @@ public class NifDisplayTester
 
 	public static void main(String[] args)
 	{
+		System.setProperty("sun.awt.noerasebackground", "true");
+		System.setProperty("j3d.cacheAutoComputeBounds", "true");
+		System.setProperty("j3d.defaultReadCapability", "false");
+		System.setProperty("j3d.defaultNodePickable", "false");
+		System.setProperty("j3d.defaultNodeCollidable", "false");
+		
 		prefs = Preferences.userNodeForPackage(NifDisplayTester.class);
 		String baseDir = prefs.get("NifDisplayTester.baseDir", System.getProperty("user.dir"));
 
