@@ -9,20 +9,26 @@ import javax.swing.JMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.jogamp.java3d.Alpha;
 import org.jogamp.java3d.AmbientLight;
+import org.jogamp.java3d.Appearance;
 import org.jogamp.java3d.Background;
 import org.jogamp.java3d.Behavior;
 import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Canvas3D;
+import org.jogamp.java3d.ColoringAttributes;
+import org.jogamp.java3d.DirectionalLight;
 import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.Node;
 import org.jogamp.java3d.PointLight;
+import org.jogamp.java3d.RotationInterpolator;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.WakeupCondition;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
+import org.jogamp.java3d.utils.geometry.Sphere;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
@@ -52,6 +58,7 @@ import nif.shaders.NiGeometryAppearanceShader;
 import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
+import tools3d.utils.SimpleShaderAppearance;
 import tools3d.utils.Utils3D;
 import tools3d.utils.leafnode.Cube;
 import tools3d.utils.scenegraph.SpinTransform;
@@ -221,21 +228,22 @@ public class NifDisplayTester
 		ambLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
 		ambLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 
-		//Color3f dlColor = new Color3f(0.1f, 0.1f, 0.6f);
-		//DirectionalLight dirLight = new DirectionalLight(true, dlColor, new Vector3f(0f, -1f, 0f));
-		//dirLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
-		//dirLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
-
-		Color3f plColor = new Color3f(1.0f, 0.95f, 0.95f);
-		//Color3f plColor = new Color3f(0.4f, 0.4f, 0.7f);
-		PointLight pLight = new PointLight(true, plColor, new Point3f(0f, 0f, 0f), new Point3f(1f, 1f, 0f));
-		pLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
-		pLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
+		Color3f dlColor = new Color3f(0.9f, 0.9f, 0.85f);//slightly yellow
+		DirectionalLight dirLight = new DirectionalLight(true, dlColor, new Vector3f(0f, -1f, 0f));
+		dirLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		dirLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 
 		BranchGroup bg = new BranchGroup();
 
 		bg.addChild(ambLight);
-		//bg.addChild(dirLight);
+		bg.addChild(dirLight);
+
+		//static point light
+		/*Color3f plColor = new Color3f(1.0f, 0.95f, 0.95f);
+		//Color3f plColor = new Color3f(0.4f, 0.4f, 0.7f);
+		PointLight pLight = new PointLight(true, plColor, new Point3f(0f, 0f, 0f), new Point3f(1f, 1f, 0f));
+		pLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		pLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 
 		TransformGroup tg = new TransformGroup();
 		// light is above like nifskope
@@ -243,8 +251,38 @@ public class NifDisplayTester
 		tg.setTransform(t);
 		tg.addChild(new Cube(0.1f));
 		tg.addChild(pLight);
-		bg.addChild(tg);
+		bg.addChild(tg);*/
 
+		// Create a spinning point light		
+		TransformGroup l1RotTrans = new TransformGroup();
+		l1RotTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);		
+		Transform3D t2 = new Transform3D();
+		Vector3f lPos1 = new Vector3f(0.0f, 0.0f, 2.0f);
+		t2.set(lPos1);
+		TransformGroup l1Trans = new TransformGroup(t2);
+		l1RotTrans.addChild(l1Trans);
+		
+		Color3f lColor1 = new Color3f(0.6f, 0.6f, 0.9f);
+		PointLight pLight = new PointLight(true, lColor1, new Point3f(0f, 0f, 0f), new Point3f(1f, 0f, 0f));
+		pLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		pLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
+		l1Trans.addChild(pLight);
+		
+		/*Appearance appL1 = new SimpleShaderAppearance(false, false);
+		ColoringAttributes caL1 = new ColoringAttributes();
+		caL1.setColor(lColor1);
+		appL1.setColoringAttributes(caL1);
+		l1Trans.addChild(new Sphere(0.02f, appL1));//oddly refuse to show anything?*/
+		l1Trans.addChild(new Cube(0.01f));
+		
+		bg.addChild(l1RotTrans);
+		
+		Transform3D yAxis = new Transform3D();
+		Alpha rotor1Alpha = new Alpha(-1, Alpha.INCREASING_ENABLE, 0, 0, 4000, 0, 0, 0, 0, 0);
+		RotationInterpolator rotator1 = new RotationInterpolator(rotor1Alpha, l1RotTrans, yAxis, 0.0f, (float) Math.PI * 2.0f);
+		rotator1.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
+		l1RotTrans.addChild(rotator1);
+		
 		bg.addChild(simpleCameraHandler);
 
 		bg.addChild(fileManageBehavior);
@@ -520,7 +558,7 @@ public class NifDisplayTester
 					modelGroup.addChild(vbg);
 				}
 			}
-			
+
 			simpleCameraHandler.viewBounds(vbg.getBounds());
 
 			spinTransform.setEnable(spin);
@@ -537,7 +575,7 @@ public class NifDisplayTester
 				if (j3dNiAVObject.getJ3dNiTimeController() != null
 						&& j3dNiAVObject.getJ3dNiTimeController() instanceof J3dNiGeomMorpherController)
 				{
-					((J3dNiGeomMorpherController)j3dNiAVObject.getJ3dNiTimeController()) .fireFrameName("Frame_1", true);
+					((J3dNiGeomMorpherController) j3dNiAVObject.getJ3dNiTimeController()).fireFrameName("Frame_1", true);
 				}
 			}
 		}
@@ -559,6 +597,8 @@ public class NifDisplayTester
 		System.setProperty("j3d.defaultReadCapability", "false");
 		System.setProperty("j3d.defaultNodePickable", "false");
 		System.setProperty("j3d.defaultNodeCollidable", "false");
+		
+		System.setProperty("j3d.displaylist", "false");
 		
 		prefs = Preferences.userNodeForPackage(NifDisplayTester.class);
 		String baseDir = prefs.get("NifDisplayTester.baseDir", System.getProperty("user.dir"));
