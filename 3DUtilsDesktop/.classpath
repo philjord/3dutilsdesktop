@@ -24,5 +24,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/ESEAndroid"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/awtshim"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java3d-compressedtexture"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/awtgeom"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
