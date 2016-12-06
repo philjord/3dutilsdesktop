@@ -1,7 +1,7 @@
 package nif.gui;
 
 import java.io.File;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
@@ -16,6 +16,7 @@ import org.jogamp.java3d.Light;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.WakeupCondition;
+import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
 import org.jogamp.java3d.WakeupOnElapsedTime;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
@@ -196,7 +197,7 @@ public class NifModelPerformanceRunner
 		}
 
 		@Override
-		public void processStimulus(Enumeration criteria)
+		public void processStimulus(Iterator<WakeupCriterion> criteria)
 		{
 			process();
 			wakeupOn(FPSCriterion);
@@ -247,7 +248,7 @@ public class NifModelPerformanceRunner
 		}
 
 		@Override
-		public void processStimulus(Enumeration critera)
+		public void processStimulus(Iterator<WakeupCriterion> critera)
 		{
 			currtime = System.currentTimeMillis();
 			deltatime = currtime - lasttime;
@@ -279,7 +280,7 @@ public class NifModelPerformanceRunner
 
 		 
 		@Override
-		public void processStimulus(Enumeration critera)
+		public void processStimulus(Iterator<WakeupCriterion> critera)
 		{
 			// time is in millisec, so multiply by 1000 to get frames/sec
 			double fps = numOfFrames / (timeOfFrames / 1000.0);

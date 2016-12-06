@@ -2,7 +2,7 @@ package nif.gui;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.prefs.Preferences;
 
 import javax.swing.JMenuItem;
@@ -26,6 +26,7 @@ import org.jogamp.java3d.SpotLight;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.WakeupCondition;
+import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
 import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
@@ -668,7 +669,7 @@ public class NifDisplayTester
 		}
 
 		@Override
-		public void processStimulus(Enumeration criteria)
+		public void processStimulus(Iterator<WakeupCriterion> criteria)
 		{
 			process();
 			wakeupOn(FPSCriterion);
