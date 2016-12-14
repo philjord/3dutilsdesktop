@@ -70,7 +70,7 @@ public class KfDisplayTester
 
 	private static String skeletonNifModelFile;
 
-	private static ArrayList<String> skinNifFiles = new ArrayList<>();
+	private static ArrayList<String> skinNifFiles = new ArrayList<String>();
 
 	public static KfDisplayTester nifDisplay;
 
@@ -110,7 +110,7 @@ public class KfDisplayTester
 		//win.setLocation(400, 0);
 		//win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		Canvas3D canvas3D = new Canvas3D();
+		final Canvas3D canvas3D = new Canvas3D();
 
 		canvas3D.getGLWindow().addKeyListener(new KeyAdapter() {
 			@Override
@@ -331,7 +331,7 @@ public class KfDisplayTester
 		J3dNiSkinInstance.showSkinBoneMarkers = false;//TODO: this doesn't show anything?
 		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
 
-		ArrayList<String> idleAnimations = new ArrayList<>();
+		ArrayList<String> idleAnimations = new ArrayList<String>();
 
 		if (kff != null)
 		{
@@ -409,7 +409,7 @@ public class KfDisplayTester
 
 		});
 
-		table.setRowSorter(new TableRowSorter<>(tableModel));
+		table.setRowSorter(new TableRowSorter<DefaultTableModel>(tableModel));
 
 		seqFrame.getContentPane().add(new JScrollPane(table));
 		seqFrame.setVisible(true);

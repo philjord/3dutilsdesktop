@@ -153,7 +153,7 @@ public class NifDisplayTester
 
 		//win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		Canvas3D canvas3D = new Canvas3D();
+		final Canvas3D canvas3D = new Canvas3D();
 		canvas3D.getGLWindow().addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e)
