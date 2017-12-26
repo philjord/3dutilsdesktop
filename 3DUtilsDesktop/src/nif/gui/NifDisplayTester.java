@@ -64,6 +64,7 @@ import utils.PerFrameUpdateBehavior.CallBack;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
+import utils.source.file.FileTextureSource;
 
 public class NifDisplayTester
 {
@@ -139,13 +140,23 @@ public class NifDisplayTester
 
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
-		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Morrowind", //
+		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { //
+				"F:\\game_media\\Morrowind GOTYE\\Morrowind\\Data Files", //use the newer one with a few bits extra in it
 				"F:\\game_media\\Oblivion", //
 				"F:\\game_media\\Fallout3", //
 				"F:\\game_media\\Skyrim", //
 				"F:\\game_media\\Fallout4", //
 		}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
+		
+		//TODO: this entire nif display system needs to simply allow browsing a bsa and use the 
+		// sibling bsa and folders for textures, like the game does, basically one data file location that's searched properly
+		// In fact! I need a new texture source and mesh source called a DataFilesSource
+		
+		
+		// for gotye where the texture only appear in the textures folder not in a bsa use this one
+		//textureSource = new FileTextureSource();
+		
 
 		NiGeometryAppearanceShader.OUTPUT_BINDINGS = true;
 
