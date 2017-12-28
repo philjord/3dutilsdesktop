@@ -15,6 +15,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/vecmath"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/esmj3d"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/3DToolsDesktop"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ESEAndroid"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsExplorerBase"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
