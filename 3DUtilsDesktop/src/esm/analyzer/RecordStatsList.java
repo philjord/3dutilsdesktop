@@ -2,7 +2,7 @@ package esm.analyzer;
 
 import java.util.LinkedHashMap;
 
-import esmmanager.common.data.record.Record;
+import esmio.common.data.record.Record;
 
 public class RecordStatsList extends LinkedHashMap<String, RecordStats>
 {	

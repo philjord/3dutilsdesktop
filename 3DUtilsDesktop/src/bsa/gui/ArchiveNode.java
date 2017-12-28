@@ -2,7 +2,7 @@ package bsa.gui;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import archive.ArchiveFile;
+import bsaio.ArchiveFile;
 
 public class ArchiveNode extends DefaultMutableTreeNode
 {

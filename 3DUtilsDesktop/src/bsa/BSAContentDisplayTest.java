@@ -30,7 +30,6 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import archive.ArchiveEntry;
 import bsa.gui.ArchiveNode;
 import bsa.gui.BSAFileSetWithStatus;
 import bsa.gui.FileNode;
@@ -38,6 +37,7 @@ import bsa.gui.FolderNode;
 import bsa.gui.StatusDialog;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.Main;
+import bsaio.ArchiveEntry;
 
 public class BSAContentDisplayTest extends JFrame implements ActionListener
 {

@@ -17,14 +17,14 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import esm.EsmFileLocations;
-import esmmanager.common.PluginException;
-import esmmanager.common.data.plugin.PluginGroup;
-import esmmanager.common.data.plugin.PluginRecord;
-import esmmanager.common.data.record.Record;
-import esmmanager.loader.CELLDIALPointer;
-import esmmanager.loader.ESMManager;
-import esmmanager.loader.IESMManager;
-import esmmanager.loader.InteriorCELLTopGroup;
+import esmio.common.PluginException;
+import esmio.common.data.plugin.PluginGroup;
+import esmio.common.data.plugin.PluginRecord;
+import esmio.common.data.record.Record;
+import esmio.loader.CELLDIALPointer;
+import esmio.loader.ESMManager;
+import esmio.loader.IESMManager;
+import esmio.loader.InteriorCELLTopGroup;
 
 public class EsmFormatAnalyzer
 {

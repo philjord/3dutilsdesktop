@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import archive.ArchiveEntry;
-import archive.ArchiveFile;
-import archive.DBException;
 import bsa.tasks.LoadTask;
+import bsaio.ArchiveEntry;
+import bsaio.ArchiveFile;
+import bsaio.DBException;
 
 public class BSAFileSetWithStatus extends ArrayList<ArchiveFile>
 {

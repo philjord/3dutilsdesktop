@@ -25,14 +25,14 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import archive.ArchiveEntry;
-import archive.ArchiveFile;
-import archive.DBException;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.CreateTask;
 import bsa.tasks.ExtractTask;
 import bsa.tasks.LoadTask;
 import bsa.tasks.Main;
+import bsaio.ArchiveEntry;
+import bsaio.ArchiveFile;
+import bsaio.DBException;
 
 public class MainWindow extends JFrame implements ActionListener
 {

@@ -27,13 +27,13 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import esm.EsmFileLocations;
-import esmmanager.common.PluginException;
-import esmmanager.common.data.plugin.Plugin;
-import esmmanager.common.data.plugin.PluginGroup;
-import esmmanager.common.data.plugin.PluginRecord;
-import esmmanager.common.data.plugin.PluginSubrecord;
-import esmmanager.common.data.record.Record;
-import esmmanager.common.data.record.Subrecord;
+import esmio.common.PluginException;
+import esmio.common.data.plugin.Plugin;
+import esmio.common.data.plugin.PluginGroup;
+import esmio.common.data.plugin.PluginRecord;
+import esmio.common.data.plugin.PluginSubrecord;
+import esmio.common.data.record.Record;
+import esmio.common.data.record.Subrecord;
 
 public class PluginDisplayDialog extends JFrame implements ActionListener, TreeExpansionListener
 {

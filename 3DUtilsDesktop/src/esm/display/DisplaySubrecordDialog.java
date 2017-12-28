@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import esmmanager.common.data.plugin.PluginSubrecord;
+import esmio.common.data.plugin.PluginSubrecord;
 
 public class DisplaySubrecordDialog extends JDialog implements ActionListener
 {

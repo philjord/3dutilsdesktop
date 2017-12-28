@@ -2,8 +2,8 @@ package bsa.gui;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import archive.ArchiveEntry;
-import archive.displayables.DisplayableArchiveEntry;
+import bsaio.ArchiveEntry;
+import bsaio.displayables.DisplayableArchiveEntry;
 
 public class FileNode extends DefaultMutableTreeNode implements Comparable<FileNode>
 {

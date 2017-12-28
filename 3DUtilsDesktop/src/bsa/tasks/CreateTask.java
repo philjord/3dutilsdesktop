@@ -12,11 +12,11 @@ import java.util.zip.Deflater;
 
 import javax.swing.SwingUtilities;
 
-import archive.ArchiveEntry;
-import archive.DBException;
-import archive.HashCode;
-import archive.displayables.DisplayableArchiveEntry;
 import bsa.gui.StatusDialog;
+import bsaio.ArchiveEntry;
+import bsaio.DBException;
+import bsaio.HashCode;
+import bsaio.displayables.DisplayableArchiveEntry;
 import tools.io.MappedByteBufferRAF;
 
 public class CreateTask extends Thread

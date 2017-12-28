@@ -26,6 +26,8 @@ import org.jogamp.java3d.Group;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.Node;
 import org.jogamp.java3d.TransformGroup;
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader.DDS;
 import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
@@ -47,7 +49,6 @@ import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.tes3.J3dNiSequenceStreamHelper;
 import nif.j3d.particles.tes3.J3dNiParticles;
-import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
@@ -141,7 +142,7 @@ public class KfDisplayTester
 
 		//win.setVisible(true);
 		canvas3D.getGLWindow().setSize(800, 600);
-		DDSTextureLoader.setAnisotropicFilterDegree(8);
+		CompressedTextureLoader.setAnisotropicFilterDegree(8);
 		canvas3D.addNotify();
 
 		spinTransformGroup.addChild(rotateTransformGroup);

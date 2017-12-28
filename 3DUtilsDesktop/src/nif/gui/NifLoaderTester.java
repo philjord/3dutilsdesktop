@@ -6,11 +6,12 @@ import java.util.prefs.Preferences;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
+
 import nif.BgsmSource;
 import nif.NifFile;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
-import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import utils.source.DummyTextureSource;
 import utils.source.file.FileMeshSource;
@@ -189,8 +190,8 @@ public class NifLoaderTester
 			}
 			else if (f.getName().endsWith(".dds"))
 			{
-				DDSTextureLoader.getTexture(f);
-				DDSTextureLoader.clearCache();
+				CompressedTextureLoader.DDS.getTexture(f);
+				CompressedTextureLoader.clearCache();
 			}
 			else
 			{

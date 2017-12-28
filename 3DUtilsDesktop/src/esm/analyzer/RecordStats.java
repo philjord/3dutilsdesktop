@@ -2,8 +2,8 @@ package esm.analyzer;
 
 import java.util.List;
 
-import esmmanager.common.data.record.Record;
-import esmmanager.common.data.record.Subrecord;
+import esmio.common.data.record.Record;
+import esmio.common.data.record.Subrecord;
 
 public class RecordStats
 {

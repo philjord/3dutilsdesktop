@@ -7,19 +7,19 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import org.jogamp.java3d.Texture;
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
-import archive.ArchiveEntry;
-import archive.displayables.DisplayableArchiveEntry;
 import bsa.gui.BSAFileSetWithStatus;
 import bsa.gui.StatusDialog;
 import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
 import bsa.tasks.Main;
+import bsaio.ArchiveEntry;
+import bsaio.displayables.DisplayableArchiveEntry;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
-import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.ddstexture.utils.DDSTextureLoaderTester;
 import utils.source.DummyTextureSource;
 
@@ -46,6 +46,7 @@ public class DisplayTask extends Thread
 		this.sopErrOnly = sopErrOnly;
 	}
 
+	@Override
 	public void run()
 	{
 
@@ -107,7 +108,7 @@ public class DisplayTask extends Thread
 								System.out.println("issue: " + fileName);
 							}
 
-							DDSTextureLoader.clearCache();
+							CompressedTextureLoader.clearCache();
 						}
 						else
 						{
@@ -243,6 +244,7 @@ public class DisplayTask extends Thread
 		}
 		completed = true;
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run()
 			{
 				statusDialog.closeDialog(completed);

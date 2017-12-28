@@ -8,10 +8,10 @@ import java.util.List;
 
 import javax.swing.SwingUtilities;
 
-import archive.ArchiveEntry;
-import archive.ArchiveFile;
-import archive.displayables.DisplayableArchiveEntry;
 import bsa.gui.StatusDialog;
+import bsaio.ArchiveEntry;
+import bsaio.ArchiveFile;
+import bsaio.displayables.DisplayableArchiveEntry;
 
 public class ExtractTask extends Thread
 {

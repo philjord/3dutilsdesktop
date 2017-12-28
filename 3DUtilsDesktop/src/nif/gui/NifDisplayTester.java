@@ -28,6 +28,7 @@ import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.WakeupCondition;
 import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
@@ -40,9 +41,9 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
-import archive.BSArchiveSet;
 import awt.tools3d.resolution.QueryProperties;
 import bsa.source.BsaTextureSource;
+import bsaio.BSArchiveSet;
 import nif.BgsmSource;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
@@ -54,7 +55,6 @@ import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiGeomMorpherController;
 import nif.j3d.particles.tes3.J3dNiParticles;
 import nif.shaders.NiGeometryAppearanceShader;
-import tools.compressedtexture.dds.DDSTextureLoader;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.Utils3D;
@@ -64,7 +64,6 @@ import utils.PerFrameUpdateBehavior.CallBack;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
-import utils.source.file.FileTextureSource;
 
 public class NifDisplayTester
 {
@@ -195,7 +194,7 @@ public class NifDisplayTester
 		//TODO: these must come form a new one of those ^
 		canvas3D.getGLWindow().setSize(800, 600);
 		canvas3D.getGLWindow().setPosition(400, 30);
-		DDSTextureLoader.setAnisotropicFilterDegree(8);
+		CompressedTextureLoader.setAnisotropicFilterDegree(8);
 
 		//win.setVisible(true);
 		canvas3D.addNotify();

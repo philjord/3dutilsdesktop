@@ -9,10 +9,10 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import esm.EsmFileLocations;
-import esmmanager.common.data.record.Record;
-import esmmanager.common.data.record.Subrecord;
-import esmmanager.loader.ESMManager;
-import esmmanager.loader.IESMManager;
+import esmio.common.data.record.Record;
+import esmio.common.data.record.Subrecord;
+import esmio.loader.ESMManager;
+import esmio.loader.IESMManager;
 
 public class SoundExporter
 {
