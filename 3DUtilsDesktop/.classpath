@@ -16,5 +16,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/esmj3d"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/3DToolsDesktop"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsExplorerBase"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsExplorer"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
