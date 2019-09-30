@@ -5,7 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/3DTools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/BSAManager"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ESMManager"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core-and"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/java3d-utils-and"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jbullet1.1"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jnif"/>
@@ -17,5 +16,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/3DToolsDesktop"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsExplorerBase"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsExplorer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core-and"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java3d-core"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
