@@ -29,6 +29,7 @@ import javax.swing.tree.TreePath;
 import esm.EsmFileLocations;
 import esmio.common.PluginException;
 import esmio.common.data.plugin.Plugin;
+import esmio.common.data.plugin.PluginFile;
 import esmio.common.data.plugin.PluginGroup;
 import esmio.common.data.plugin.PluginRecord;
 import esmio.common.data.plugin.PluginSubrecord;
@@ -48,7 +49,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 			System.out.println("loading file " + generalEsmFile);
 
 			File pluginFile = new File(generalEsmFile);
-			Plugin plugin = new Plugin(pluginFile);
+			Plugin plugin = new PluginFile(pluginFile);
 			try
 			{
 				plugin.load(!SHOW_ALL);

@@ -3,26 +3,24 @@ package esm.TES4Gecko;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-public class EditTask extends WorkerTask
-{
-	private File inFile;
+import tools.io.FileChannelRAF;
 
-	private PluginInfo pluginInfo;
+public class EditTask extends WorkerTask {
+	private File		inFile;
 
-	public EditTask(StatusDialog statusDialog, File inFile, PluginInfo pluginInfo)
-	{
+	private PluginInfo	pluginInfo;
+
+	public EditTask(StatusDialog statusDialog, File inFile, PluginInfo pluginInfo) {
 		super(statusDialog);
 		this.inFile = inFile;
 		this.pluginInfo = pluginInfo;
 	}
 
-	public static void editFile(JFrame parent, File inFile, PluginInfo pluginInfo)
-	{
+	public static void editFile(JFrame parent, File inFile, PluginInfo pluginInfo) {
 		StatusDialog statusDialog = new StatusDialog(parent, "Updating " + inFile.getName(), "Update Plugin");
 
 		EditTask worker = new EditTask(statusDialog, inFile, pluginInfo);
@@ -37,24 +35,21 @@ public class EditTask extends WorkerTask
 			JOptionPane.showMessageDialog(parent, "Unable to update " + inFile.getName(), "Update Plugin", 1);
 	}
 
-	public void run()
-	{
+	@Override
+	public void run() {
 		File outFile = new File(this.inFile.getParent() + Main.fileSeparator + "Gecko.tmp");
-		RandomAccessFile in = null;
+		FileChannelRAF in = null;
 		FileOutputStream out = null;
 		byte[] buffer = new byte[4096];
 		boolean completed = false;
-		try
-		{
-			if ((!this.inFile.exists()) || (!this.inFile.isFile()))
-			{
+		try {
+			if ((!this.inFile.exists()) || (!this.inFile.isFile())) {
 				throw new IOException("'" + this.inFile.getName() + "' does not exist");
 			}
-			if (outFile.exists())
-			{
+			if (outFile.exists()) {
 				outFile.delete();
 			}
-			in = new RandomAccessFile(this.inFile, "r");
+			in = new FileChannelRAF(this.inFile, "r");
 			out = new FileOutputStream(outFile);
 			long fileSize = this.inFile.length();
 			long processedCount = 0L;
@@ -71,25 +66,20 @@ public class EditTask extends WorkerTask
 			outHeader.setCreator(this.pluginInfo.getCreator());
 			outHeader.setSummary(this.pluginInfo.getSummary());
 			outHeader.write(out);
-			while (true)
-			{
+			while (true) {
 				int count = in.read(buffer, 0, 4096);
-				if (count < 0)
-				{
+				if (count < 0) {
 					break;
 				}
-				if (count > 0)
-				{
+				if (count > 0) {
 					out.write(buffer, 0, count);
 				}
-				if (interrupted())
-				{
+				if (interrupted()) {
 					throw new InterruptedException("Request canceled");
 				}
 				processedCount += count;
-				int newProgress = (int) (processedCount * 100L / fileSize);
-				if (newProgress >= currentProgress + 5)
-				{
+				int newProgress = (int)(processedCount * 100L / fileSize);
+				if (newProgress >= currentProgress + 5) {
 					currentProgress = newProgress;
 					getStatusDialog().updateProgress(currentProgress);
 				}
@@ -106,41 +96,27 @@ public class EditTask extends WorkerTask
 			outFile.renameTo(this.inFile);
 
 			completed = true;
-		}
-		catch (PluginException exc)
-		{
+		} catch (PluginException exc) {
 			Main.logException("Plugin Error", exc);
-		}
-		catch (IOException exc)
-		{
+		} catch (IOException exc) {
 			Main.logException("I/O Error", exc);
-		}
-		catch (InterruptedException exc)
-		{
+		} catch (InterruptedException exc) {
 			WorkerDialog.showMessageDialog(getStatusDialog(), "Request canceled", "Interrupted", 0);
-		}
-		catch (Throwable exc)
-		{
+		} catch (Throwable exc) {
 			Main.logException("Exception while updating plugin", exc);
 		}
 
-		if (!completed)
-		{
-			try
-			{
-				if (out != null)
-				{
+		if (!completed) {
+			try {
+				if (out != null) {
 					out.close();
 				}
-				if (in != null)
-				{
+				if (in != null) {
 					in.close();
 				}
 				if (outFile.exists())
 					outFile.delete();
-			}
-			catch (IOException exc)
-			{
+			} catch (IOException exc) {
 				Main.logException("I/O Error", exc);
 			}
 

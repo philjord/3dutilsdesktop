@@ -35,7 +35,7 @@ import bsaio.ArchiveFile;
 import esmio.common.PluginException;
 import esmio.common.data.plugin.PluginRecord;
 import esmio.loader.CELLDIALPointer;
-import esmio.loader.ESMManager;
+import esmio.loader.ESMManagerFile;
 import esmio.loader.IESMManager;
 import esmio.utils.source.EsmSoundKeyToName;
 import esmj3d.j3d.cell.J3dICellFactory;
@@ -259,7 +259,7 @@ public class ESMBSAExporter extends JFrame
 				synchronized (selectedGameConfig)
 				{
 
-					esmManager = ESMManager.getESMManager(selectedGameConfig.getESMPath());
+					esmManager = ESMManagerFile.getESMManager(selectedGameConfig.getESMPath());
 					bsaFileSet = null;
 
 					new EsmSoundKeyToName(esmManager);

@@ -23,6 +23,7 @@ import esmio.common.data.plugin.PluginRecord;
 import esmio.common.data.record.Record;
 import esmio.loader.CELLDIALPointer;
 import esmio.loader.ESMManager;
+import esmio.loader.ESMManagerFile;
 import esmio.loader.IESMManager;
 import esmio.loader.InteriorCELLTopGroup;
 
@@ -65,7 +66,7 @@ public class EsmFormatAnalyzer
 		try
 		{
 			Thread.currentThread().setPriority(4);
-			ESMManager esmManager = (ESMManager) ESMManager.getESMManager(generalEsmFile);
+			ESMManager esmManager = (ESMManager) ESMManagerFile.getESMManager(generalEsmFile);
 			Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
 			System.out.println("Done in " + (System.currentTimeMillis() - start) + " analyzing...");
 

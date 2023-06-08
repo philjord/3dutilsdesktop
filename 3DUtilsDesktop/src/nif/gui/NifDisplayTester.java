@@ -43,7 +43,7 @@ import com.jogamp.newt.event.WindowEvent;
 
 import awt.tools3d.resolution.QueryProperties;
 import bsa.source.BsaTextureSource;
-import bsaio.BSArchiveSet;
+import bsaio.BSArchiveSetFile;
 import nif.BgsmSource;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
@@ -139,7 +139,7 @@ public class NifDisplayTester
 
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
-		BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { //
+		BSArchiveSetFile bsaFileSet = new BSArchiveSetFile(new String[] { //
 				"F:\\game_media\\Morrowind GOTYE\\Morrowind\\Data Files", //use the newer one with a few bits extra in it
 				"F:\\game_media\\Oblivion", //
 				"F:\\game_media\\Fallout3", //

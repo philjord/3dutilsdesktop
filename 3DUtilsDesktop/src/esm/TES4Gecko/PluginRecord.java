@@ -2,7 +2,6 @@ package esm.TES4Gecko;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -13,45 +12,42 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-public class PluginRecord extends SerializedElement implements Cloneable
-{
-	private static final String dummyEditorID = new String();
+import tools.io.FileChannelRAF;
 
-	private String recordType;
+public class PluginRecord extends SerializedElement implements Cloneable {
+	private static final String	dummyEditorID	= new String();
 
-	private int recordFlags1;
+	private String				recordType;
 
-	private int recordFlags2;
+	private int					recordFlags1;
 
-	private int formID;
+	private int					recordFlags2;
 
-	private String editorID;
+	private int					formID;
 
-	private long recordPosition = -1L;
+	private String				editorID;
 
-	private int recordLength;
+	private long				recordPosition	= -1L;
 
-	private byte[] digest;
+	private int					recordLength;
 
-	private PluginRecord parentRecord;
+	private byte[]				digest;
 
-	public PluginRecord(String recordType)
-	{
+	private PluginRecord		parentRecord;
+
+	public PluginRecord(String recordType) {
 		this.recordType = recordType;
 		this.editorID = dummyEditorID;
 	}
 
-	public PluginRecord(String recordType, int formID)
-	{
+	public PluginRecord(String recordType, int formID) {
 		this.recordType = recordType;
 		this.formID = formID;
 		this.editorID = dummyEditorID;
 	}
 
-	public PluginRecord(byte[] prefix)
-	{
-		if (prefix.length != 20)
-		{
+	public PluginRecord(byte[] prefix) {
+		if (prefix.length != 20) {
 			throw new IllegalArgumentException("The record prefix is not 20 bytes");
 		}
 
@@ -62,83 +58,68 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		this.recordFlags2 = getInteger(prefix, 16);
 	}
 
-	public PluginRecord getParent()
-	{
+	public PluginRecord getParent() {
 		return this.parentRecord;
 	}
 
-	public void setParent(PluginRecord parent)
-	{
+	public void setParent(PluginRecord parent) {
 		this.parentRecord = parent;
 	}
 
-	public boolean isDeleted()
-	{
+	public boolean isDeleted() {
 		return (this.recordFlags1 & 0x20) != 0;
 	}
 
-	public void setDelete(boolean deleted)
-	{
+	public void setDelete(boolean deleted) {
 		if (deleted)
 			this.recordFlags1 |= 32;
 		else if ((this.recordFlags1 & 0x20) != 0)
 			this.recordFlags1 ^= 32;
 	}
 
-	public boolean isIgnored()
-	{
+	public boolean isIgnored() {
 		return (this.recordFlags1 & 0x1000) != 0;
 	}
 
-	public void setIgnore(boolean ignored)
-	{
+	public void setIgnore(boolean ignored) {
 		if (ignored)
 			this.recordFlags1 |= 4096;
 		else if ((this.recordFlags1 & 0x1000) != 0)
 			this.recordFlags1 ^= 4096;
 	}
 
-	public boolean isCompressed()
-	{
+	public boolean isCompressed() {
 		return (this.recordFlags1 & 0x40000) != 0;
 	}
 
-	public String getRecordType()
-	{
+	public String getRecordType() {
 		return this.recordType;
 	}
 
-	public int getRecordFlags()
-	{
+	public int getRecordFlags() {
 		return this.recordFlags1;
 	}
 
-	public int getFormID()
-	{
+	public int getFormID() {
 		return this.formID;
 	}
 
-	public void setFormID(int formID)
-	{
+	public void setFormID(int formID) {
 		this.formID = formID;
 	}
 
-	public String getEditorID()
-	{
+	public String getEditorID() {
 		return this.editorID;
 	}
 
-	public void setEditorID(String editorID) throws DataFormatException, IOException, PluginException
-	{
+	public void setEditorID(String editorID) throws DataFormatException, IOException, PluginException {
 		this.editorID = editorID;
 
 		List<PluginSubrecord> subrecords = getSubrecords();
 		ListIterator<PluginSubrecord> lit = subrecords.listIterator();
-		while (lit.hasNext())
-		{
+		while (lit.hasNext()) {
 			PluginSubrecord subrecord = lit.next();
-			if (subrecord.getSubrecordType().equals("EDID"))
-			{
+			if (subrecord.getSubrecordType().equals("EDID")) {
 				lit.remove();
 				break;
 			}
@@ -148,38 +129,32 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		byte[] edidData = editorID.getBytes();
 		byte[] subrecordData = new byte[edidData.length + 1];
 		System.arraycopy(edidData, 0, subrecordData, 0, edidData.length);
-		subrecordData[edidData.length] = 0;
+		subrecordData [edidData.length] = 0;
 		PluginSubrecord edidSubrecord = new PluginSubrecord(this.recordType, "EDID", subrecordData);
 		subrecords.add(0, edidSubrecord);
 		setSubrecords(subrecords);
 	}
 
-	public int getRecordLength()
-	{
+	public int getRecordLength() {
 		return this.recordLength;
 	}
 
-	public byte[] getDigest()
-	{
+	public byte[] getDigest() {
 		return this.digest;
 	}
 
-	public byte[] getRecordData() throws DataFormatException, IOException, PluginException
-	{
-		if (this.recordLength == 0)
-		{
+	public byte[] getRecordData() throws DataFormatException, IOException, PluginException {
+		if (this.recordLength == 0) {
 			return new byte[0];
 		}
 
 		byte[] recordData = Main.pluginSpill.read(this.recordPosition, this.recordLength);
 
-		if (!isCompressed())
-		{
+		if (!isCompressed()) {
 			return recordData;
 		}
 
-		if ((recordData.length < 5) || (recordData[3] >= 32))
-		{
+		if ((recordData.length < 5) || (recordData [3] >= 32)) {
 			throw new PluginException("Compressed data prefix is not valid");
 		}
 
@@ -188,8 +163,7 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		Inflater expand = new Inflater();
 		expand.setInput(recordData, 4, recordData.length - 4);
 		int count = expand.inflate(buffer);
-		if (count != length)
-		{
+		if (count != length) {
 			throw new PluginException("Expanded data less than data length");
 		}
 		expand.end();
@@ -197,68 +171,53 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return buffer;
 	}
 
-	public void setRecordData(byte[] buffer) throws DataFormatException, IOException
-	{
+	public void setRecordData(byte[] buffer) throws DataFormatException, IOException {
 		byte[] recordData;
-		if (isCompressed())
-		{
+		if (isCompressed()) {
 			int length = buffer.length;
 			Deflater comp = new Deflater(6);
 			comp.setInput(buffer);
 			comp.finish();
 			byte[] compBuffer = new byte[length + 20];
 			int compLength = comp.deflate(compBuffer);
-			if (compLength == 0)
-			{
+			if (compLength == 0) {
 				throw new DataFormatException("Unable to compress " + this.recordType + " record " + this.editorID);
 			}
-			if (!comp.finished())
-			{
+			if (!comp.finished()) {
 				throw new DataFormatException("Compressed buffer is too small");
 			}
 			comp.end();
 			recordData = new byte[4 + compLength];
 			setInteger(length, recordData, 0);
 			System.arraycopy(compBuffer, 0, recordData, 4, compLength);
-		}
-		else
-		{
+		} else {
 			recordData = buffer;
 		}
 
 		this.recordPosition = Main.pluginSpill.write(recordData);
 		this.recordLength = recordData.length;
-		try
-		{
+		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(recordData);
 			this.digest = md.digest();
-		}
-		catch (NoSuchAlgorithmException exc)
-		{
+		} catch (NoSuchAlgorithmException exc) {
 			throw new UnsupportedOperationException("MD5 digest algorithm is not supported", exc);
 		}
 	}
 
-	public List<PluginSubrecord> getSubrecords() throws DataFormatException, IOException, PluginException
-	{
+	public List<PluginSubrecord> getSubrecords() throws DataFormatException, IOException, PluginException {
 		List<PluginSubrecord> subrecordList = new ArrayList<PluginSubrecord>();
 		byte[] recordData = getRecordData();
 		int offset = 0;
 		int overrideLength = 0;
 
-		while (offset < recordData.length)
-		{
+		while (offset < recordData.length) {
 			String subrecordType = new String(recordData, offset, 4);
 			int subrecordLength = getShort(recordData, offset + 4);
-			if (subrecordType.equals("XXXX"))
-			{
+			if (subrecordType.equals("XXXX")) {
 				overrideLength = getInteger(recordData, offset + 6);
-			}
-			else
-			{
-				if (subrecordLength == 0)
-				{
+			} else {
+				if (subrecordLength == 0) {
 					subrecordLength = overrideLength;
 					overrideLength = 0;
 				}
@@ -274,21 +233,18 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return subrecordList;
 	}
 
-	public boolean addAdditionalSubrecord(String subrecordType, Object subrecordData) throws DataFormatException, IOException,
-			PluginException
-	{
+	public boolean addAdditionalSubrecord(String subrecordType, Object subrecordData)
+			throws DataFormatException, IOException, PluginException {
 		byte[] dataBytes = convertToByteArray(subrecordData);
 		boolean typeFound = false;
 		List<PluginSubrecord> subrecordList = getSubrecords();
 		PluginSubrecord newSub = new PluginSubrecord(getRecordType(), subrecordType, dataBytes);
 		ListIterator<PluginSubrecord> lit = subrecordList.listIterator();
-		while (lit.hasNext())
-		{
+		while (lit.hasNext()) {
 			PluginSubrecord checkSubrecord = lit.next();
 			if (checkSubrecord.getSubrecordType().equals(subrecordType))
 				continue;
-			if (typeFound)
-			{
+			if (typeFound) {
 				lit.previous();
 				lit.add(newSub);
 				setSubrecords(subrecordList);
@@ -296,8 +252,7 @@ public class PluginRecord extends SerializedElement implements Cloneable
 			}
 
 			typeFound = true;
-			if (checkSubrecord.equals(newSub))
-			{
+			if (checkSubrecord.equals(newSub)) {
 				return false;
 			}
 		}
@@ -305,15 +260,13 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return false;
 	}
 
-	public boolean insertSubrecordAfter(String subrecordType, Object subrecordData, String subrecordAfterType) throws DataFormatException,
-			IOException, PluginException
-	{
+	public boolean insertSubrecordAfter(String subrecordType, Object subrecordData, String subrecordAfterType)
+			throws DataFormatException, IOException, PluginException {
 		byte[] dataBytes = convertToByteArray(subrecordData);
 		List<PluginSubrecord> subrecordList = getSubrecords();
 		PluginSubrecord newSub = new PluginSubrecord(getRecordType(), subrecordType, dataBytes);
 		ListIterator<PluginSubrecord> lit = subrecordList.listIterator(subrecordList.size());
-		while (lit.hasPrevious())
-		{
+		while (lit.hasPrevious()) {
 			PluginSubrecord checkSubrecord = lit.previous();
 			if (!checkSubrecord.getSubrecordType().equals(subrecordAfterType))
 				continue;
@@ -326,23 +279,21 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return false;
 	}
 
-	public void addSubrecord(String subrecordType, Object subrecordData) throws DataFormatException, IOException, PluginException
-	{
+	public void addSubrecord(String subrecordType, Object subrecordData)
+			throws DataFormatException, IOException, PluginException {
 		byte[] dataBytes = convertToByteArray(subrecordData);
-		boolean typeFound = false;
+		//boolean typeFound = false;
 		List<PluginSubrecord> subrecordList = getSubrecords();
 		PluginSubrecord newSub = new PluginSubrecord(getRecordType(), subrecordType, dataBytes);
 		subrecordList.add(newSub);
 		setSubrecords(subrecordList);
 	}
 
-	public boolean changeSubrecord(String subrecordType, Object oldSubData, Object newSubData) throws DataFormatException, IOException,
-			PluginException
-	{
-		if (!oldSubData.getClass().equals(newSubData.getClass()))
-		{
-			throw new DataFormatException("changeSubrecord: Argument 2 is of class " + oldSubData.getClass()
-					+ " while argument 3 is of class " + newSubData.getClass());
+	public boolean changeSubrecord(String subrecordType, Object oldSubData, Object newSubData)
+			throws DataFormatException, IOException, PluginException {
+		if (!oldSubData.getClass().equals(newSubData.getClass())) {
+			throw new DataFormatException("changeSubrecord: Argument 2 is of class "	+ oldSubData.getClass()
+											+ " while argument 3 is of class " + newSubData.getClass());
 		}
 
 		byte[] oldDataBytes = convertToByteArray(oldSubData);
@@ -351,8 +302,7 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		PluginSubrecord oldSub = new PluginSubrecord(getRecordType(), subrecordType, oldDataBytes);
 		PluginSubrecord newSub = new PluginSubrecord(getRecordType(), subrecordType, newDataBytes);
 		ListIterator<PluginSubrecord> lit = subrecordList.listIterator();
-		while (lit.hasNext())
-		{
+		while (lit.hasNext()) {
 			PluginSubrecord checkSubrecord = lit.next();
 			if (!checkSubrecord.equals(oldSub))
 				continue;
@@ -364,17 +314,15 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return false;
 	}
 
-	public boolean hasSubrecordWithData(String subrecordType, Object subrecData) throws DataFormatException, IOException, PluginException
-	{
+	public boolean hasSubrecordWithData(String subrecordType, Object subrecData)
+			throws DataFormatException, IOException, PluginException {
 		byte[] dataBytes = convertToByteArray(subrecData);
 		List<?> subrecordList = getSubrecords();
 		PluginSubrecord checkRec = new PluginSubrecord(getRecordType(), subrecordType, dataBytes);
 		ListIterator<?> lit = subrecordList.listIterator();
-		while (lit.hasNext())
-		{
-			PluginSubrecord checkSubrecord = (PluginSubrecord) lit.next();
-			if (checkSubrecord.equals(checkRec))
-			{
+		while (lit.hasNext()) {
+			PluginSubrecord checkSubrecord = (PluginSubrecord)lit.next();
+			if (checkSubrecord.equals(checkRec)) {
 				return true;
 			}
 		}
@@ -382,14 +330,12 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return false;
 	}
 
-	public boolean removeSubrecords(HashSet<String> subrecordTypes, boolean notInSet) throws DataFormatException, IOException,
-			PluginException
-	{
+	public boolean removeSubrecords(HashSet<String> subrecordTypes, boolean notInSet)
+			throws DataFormatException, IOException, PluginException {
 		boolean atLeastOne = false;
 		List<PluginSubrecord> subrecordList = getSubrecords();
 		ListIterator<PluginSubrecord> lit = subrecordList.listIterator();
-		while (lit.hasNext())
-		{
+		while (lit.hasNext()) {
 			PluginSubrecord subrec = lit.next();
 			if (!(notInSet ^ subrecordTypes.contains(subrec.getSubrecordType())))
 				continue;
@@ -398,24 +344,20 @@ public class PluginRecord extends SerializedElement implements Cloneable
 			atLeastOne = true;
 		}
 
-		if (atLeastOne)
-		{
+		if (atLeastOne) {
 			setSubrecords(subrecordList);
 		}
 		return atLeastOne;
 	}
 
-	public boolean removeCTDASubrecords(HashSet<Integer> functionCodes, boolean notInSet) throws DataFormatException, IOException,
-			PluginException
-	{
+	public boolean removeCTDASubrecords(HashSet<Integer> functionCodes, boolean notInSet)
+			throws DataFormatException, IOException, PluginException {
 		boolean atLeastOne = false;
 		List<PluginSubrecord> subrecordList = getSubrecords();
 		ListIterator<PluginSubrecord> lit = subrecordList.listIterator();
-		while (lit.hasNext())
-		{
+		while (lit.hasNext()) {
 			PluginSubrecord subrec = lit.next();
-			if (subrec.getSubrecordType().equals("CTDA"))
-			{
+			if (subrec.getSubrecordType().equals("CTDA")) {
 				byte[] subrecordData = subrec.getSubrecordData();
 				int functionCode = getInteger(subrecordData, 8);
 
@@ -428,126 +370,93 @@ public class PluginRecord extends SerializedElement implements Cloneable
 
 		}
 
-		if (atLeastOne)
-		{
+		if (atLeastOne) {
 			setSubrecords(subrecordList);
 		}
 		return atLeastOne;
 	}
 
-	public boolean removeSubrecords(String subrecordType) throws DataFormatException, IOException, PluginException
-	{
+	public boolean removeSubrecords(String subrecordType) throws DataFormatException, IOException, PluginException {
 		HashSet<String> onlyOne = new HashSet<String>(1);
 		onlyOne.add(subrecordType);
 		return removeSubrecords(onlyOne, false);
 	}
 
-	public List<PluginSubrecord> getAllSubrecords(String subrecordType) throws DataFormatException, IOException, PluginException
-	{
+	public List<PluginSubrecord> getAllSubrecords(String subrecordType)
+			throws DataFormatException, IOException, PluginException {
 		List<PluginSubrecord> subrecordList = getSubrecords();
 		List<PluginSubrecord> returnList = new ArrayList<PluginSubrecord>();
-		for (PluginSubrecord sub : subrecordList)
-		{
+		for (PluginSubrecord sub : subrecordList) {
 			if (sub.getSubrecordType().equals(subrecordType))
 				returnList.add(sub);
 		}
 		return returnList;
 	}
 
-	public PluginSubrecord getSubrecord(String subrecordType) throws DataFormatException, IOException, PluginException
-	{
+	public PluginSubrecord getSubrecord(String subrecordType) throws DataFormatException, IOException, PluginException {
 		List<PluginSubrecord> subrecordList = getSubrecords();
-		for (PluginSubrecord sub : subrecordList)
-		{
+		for (PluginSubrecord sub : subrecordList) {
 			if (sub.getSubrecordType().equals(subrecordType))
 				return sub;
 		}
 		return null;
 	}
 
-	public boolean hasSubrecordOfType(String subrecordType)
-	{
-		try
-		{
+	public boolean hasSubrecordOfType(String subrecordType) {
+		try {
 			List<PluginSubrecord> subrecordList = getSubrecords();
-			for (PluginSubrecord sub : subrecordList)
-			{
+			for (PluginSubrecord sub : subrecordList) {
 				if (sub.getSubrecordType().equals(subrecordType))
 					return true;
 			}
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			return false;
 		}
 		return false;
 	}
 
-	public static byte[] convertToByteArray(Object data) throws DataFormatException
-	{
+	public static byte[] convertToByteArray(Object data) throws DataFormatException {
 		byte[] dataBytes = null;
-		if ((data instanceof Byte))
-		{
+		if ((data instanceof Byte)) {
 			dataBytes = new byte[1];
-			dataBytes[0] = ((Byte) data).byteValue();
-		}
-		else if ((data instanceof Short))
-		{
+			dataBytes [0] = ((Byte)data).byteValue();
+		} else if ((data instanceof Short)) {
 			dataBytes = new byte[2];
-			SerializedElement.setShort(((Short) data).shortValue(), dataBytes, 0);
-		}
-		else if ((data instanceof Integer))
-		{
+			SerializedElement.setShort(((Short)data).shortValue(), dataBytes, 0);
+		} else if ((data instanceof Integer)) {
 			dataBytes = new byte[4];
-			SerializedElement.setInteger(((Integer) data).intValue(), dataBytes, 0);
-		}
-		else if ((data instanceof Long))
-		{
+			SerializedElement.setInteger(((Integer)data).intValue(), dataBytes, 0);
+		} else if ((data instanceof Long)) {
 			dataBytes = new byte[8];
-			SerializedElement.setLong(((Long) data).longValue(), dataBytes, 0);
-		}
-		else if ((data instanceof Float))
-		{
+			SerializedElement.setLong(((Long)data).longValue(), dataBytes, 0);
+		} else if ((data instanceof Float)) {
 			dataBytes = new byte[8];
-			int tmp = Float.floatToIntBits(((Float) data).floatValue());
+			int tmp = Float.floatToIntBits(((Float)data).floatValue());
 			SerializedElement.setInteger(tmp, dataBytes, 0);
-		}
-		else if ((data instanceof Double))
-		{
+		} else if ((data instanceof Double)) {
 			dataBytes = new byte[8];
-			long tmp = Double.doubleToLongBits(((Double) data).doubleValue());
+			long tmp = Double.doubleToLongBits(((Double)data).doubleValue());
 			SerializedElement.setLong(tmp, dataBytes, 0);
-		}
-		else if ((data instanceof String))
-		{
-			dataBytes = new byte[((String) data).length()];
-			System.arraycopy(((String) data).getBytes(), 0, dataBytes, 0, ((String) data).length());
-		}
-		else if ((data instanceof int[]))
-		{
-			dataBytes = new byte[((int[]) data).length * 4];
-			SerializedElement.setIntegerArray((int[]) data, dataBytes, 0);
-		}
-		else if ((data instanceof byte[]))
-		{
-			dataBytes = (byte[]) data;
-		}
-		else
-		{
+		} else if ((data instanceof String)) {
+			dataBytes = new byte[((String)data).length()];
+			System.arraycopy(((String)data).getBytes(), 0, dataBytes, 0, ((String)data).length());
+		} else if ((data instanceof int[])) {
+			dataBytes = new byte[((int[])data).length * 4];
+			SerializedElement.setIntegerArray((int[])data, dataBytes, 0);
+		} else if ((data instanceof byte[])) {
+			dataBytes = (byte[])data;
+		} else {
 			throw new DataFormatException("convertToByteArray: Argument is of unrecognized class " + data.getClass());
 		}
 		return dataBytes;
 	}
 
-	public void setSubrecords(List<PluginSubrecord> subrecordList) throws DataFormatException, IOException
-	{
+	public void setSubrecords(List<PluginSubrecord> subrecordList) throws DataFormatException, IOException {
 		int length = 0;
-		for (PluginSubrecord subrecord : subrecordList)
-		{
+		for (PluginSubrecord subrecord : subrecordList) {
 			int subrecordLength = subrecord.getSubrecordData().length;
 			length += 6 + subrecordLength;
-			if (subrecordLength > 65535)
-			{
+			if (subrecordLength > 65535) {
 				length += 10;
 			}
 
@@ -555,12 +464,10 @@ public class PluginRecord extends SerializedElement implements Cloneable
 
 		byte[] recordData = new byte[length];
 		int offset = 0;
-		for (PluginSubrecord subrecord : subrecordList)
-		{
+		for (PluginSubrecord subrecord : subrecordList) {
 			byte[] subrecordData = subrecord.getSubrecordData();
 			int subrecordLength = subrecordData.length;
-			if (subrecordLength > 65535)
-			{
+			if (subrecordLength > 65535) {
 				System.arraycopy("XXXX".getBytes(), 0, recordData, offset, 4);
 				setShort(4, recordData, offset + 4);
 				setInteger(subrecordLength, recordData, offset + 6);
@@ -571,8 +478,7 @@ public class PluginRecord extends SerializedElement implements Cloneable
 
 			if (subrecordLength > 65535)
 				setShort(0, recordData, offset + 4);
-			else
-			{
+			else {
 				setShort(subrecordLength, recordData, offset + 4);
 			}
 			System.arraycopy(subrecordData, 0, recordData, offset + 6, subrecordLength);
@@ -582,31 +488,23 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		setRecordData(recordData);
 	}
 
-	public void changeFormID(int newFormID)
-	{
-		if ((this.parentRecord != null) && ((this.parentRecord instanceof PluginGroup)))
-		{
-			PluginGroup parentGroup = (PluginGroup) this.parentRecord;
+	public void changeFormID(int newFormID) {
+		if ((this.parentRecord != null) && ((this.parentRecord instanceof PluginGroup))) {
+			PluginGroup parentGroup = (PluginGroup)this.parentRecord;
 			List<?> parentList = parentGroup.getRecordList();
 			int index = parentList.indexOf(this);
-			if ((index >= 0) && (index < parentList.size() - 1))
-			{
-				PluginRecord checkRecord = (PluginRecord) parentList.get(index + 1);
-				if ((checkRecord instanceof PluginGroup))
-				{
-					PluginGroup checkGroup = (PluginGroup) checkRecord;
-					if (checkGroup.getGroupParentID() == this.formID)
-					{
+			if ((index >= 0) && (index < parentList.size() - 1)) {
+				PluginRecord checkRecord = (PluginRecord)parentList.get(index + 1);
+				if ((checkRecord instanceof PluginGroup)) {
+					PluginGroup checkGroup = (PluginGroup)checkRecord;
+					if (checkGroup.getGroupParentID() == this.formID) {
 						checkGroup.setGroupParentID(newFormID);
 
 						List<PluginRecord> subgroupList = checkGroup.getRecordList();
-						for (PluginRecord subgroupRecord : subgroupList)
-						{
-							if ((subgroupRecord instanceof PluginGroup))
-							{
-								checkGroup = (PluginGroup) subgroupRecord;
-								if (checkGroup.getGroupParentID() == this.formID)
-								{
+						for (PluginRecord subgroupRecord : subgroupList) {
+							if ((subgroupRecord instanceof PluginGroup)) {
+								checkGroup = (PluginGroup)subgroupRecord;
+								if (checkGroup.getGroupParentID() == this.formID) {
 									checkGroup.setGroupParentID(newFormID);
 								}
 							}
@@ -621,87 +519,72 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		this.formID = newFormID;
 	}
 
-	public boolean updateReferences(FormAdjust formAdjust) throws DataFormatException, IOException, PluginException
-	{
+	public boolean updateReferences(FormAdjust formAdjust) throws DataFormatException, IOException, PluginException {
 		boolean recordModified = false;
 		List<PluginSubrecord> subrecords = getSubrecords();
-		for (PluginSubrecord subrecord : subrecords)
-		{
+		for (PluginSubrecord subrecord : subrecords) {
 			boolean subrecordModified = false;
 			byte[] subrecordData = subrecord.getSubrecordData();
 			int[][] references = subrecord.getReferences();
-			if ((references == null) || (references.length == 0))
-			{
+			if ((references == null) || (references.length == 0)) {
 				continue;
 			}
 
-			for (int i = 0; i < references.length; i++)
-			{
-				int offset = references[i][0];
-				int oldFormID = references[i][1];
-				if (oldFormID == 0)
-				{
+			for (int i = 0; i < references.length; i++) {
+				int offset = references [i] [0];
+				int oldFormID = references [i] [1];
+				if (oldFormID == 0) {
 					continue;
 				}
 				int newFormID = formAdjust.adjustFormID(oldFormID);
-				if (newFormID != oldFormID)
-				{
+				if (newFormID != oldFormID) {
 					setInteger(newFormID, subrecordData, offset);
 					subrecordModified = true;
 				}
 
 			}
 
-			if (subrecordModified)
-			{
+			if (subrecordModified) {
 				subrecord.setSubrecordData(subrecordData);
 				recordModified = true;
 			}
 
 		}
 
-		if (recordModified)
-		{
+		if (recordModified) {
 			setSubrecords(subrecords);
 		}
 		return recordModified;
 	}
 
-	List<PluginRecord> getAllPluginRecords()
-	{
+	List<PluginRecord> getAllPluginRecords() {
 		ArrayList<PluginRecord> recList = new ArrayList<PluginRecord>();
 		recList.add(this);
 		return recList;
 	}
 
-	List<PluginRecord> getDeletedPluginRecords()
-	{
+	List<PluginRecord> getDeletedPluginRecords() {
 		ArrayList<PluginRecord> recList = new ArrayList<PluginRecord>();
 		if (isDeleted())
 			recList.add(this);
 		return recList;
 	}
 
-	public int hashCode()
-	{
+	@Override
+	public int hashCode() {
 		return this.formID;
 	}
 
-	public boolean equals(Object object)
-	{
+	@Override
+	public boolean equals(Object object) {
 		boolean areEqual = false;
-		if ((object instanceof PluginRecord))
-		{
-			PluginRecord objRecord = (PluginRecord) object;
-			if (objRecord.getRecordType().equals(this.recordType))
-			{
-				if (this.recordType.equals("GMST"))
-				{
+		if ((object instanceof PluginRecord)) {
+			PluginRecord objRecord = (PluginRecord)object;
+			if (objRecord.getRecordType().equals(this.recordType)) {
+				if (this.recordType.equals("GMST")) {
 					if (objRecord.getEditorID().equals(this.editorID))
 						areEqual = true;
-				}
-				else if (objRecord.getFormID() == this.formID)
-				{
+				} else if (objRecord.getFormID() == this.formID) {
 					areEqual = true;
 				}
 			}
@@ -710,38 +593,29 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return areEqual;
 	}
 
-	public boolean isIdentical(PluginRecord record)
-	{
+	public boolean isIdentical(PluginRecord record) {
 		boolean areIdentical = false;
 
 		boolean areEqual = equals(record);
-		if (areEqual)
-		{
+		if (areEqual) {
 			int cmpFlags1 = record.getRecordFlags();
-			if ((this.recordFlags1 & 0xFFFBFFFE) != (cmpFlags1 & 0xFFFBFFFE))
-			{
+			if ((this.recordFlags1 & 0xFFFBFFFE) != (cmpFlags1 & 0xFFFBFFFE)) {
 				areEqual = false;
 			}
 
 		}
 
-		if (areEqual)
-		{
+		if (areEqual) {
 			areIdentical = true;
 			byte[] cmpDigest = record.getDigest();
-			if (this.digest == null)
-			{
+			if (this.digest == null) {
 				if (cmpDigest != null)
 					areIdentical = false;
-			}
-			else if (cmpDigest == null)
+			} else if (cmpDigest == null)
 				areIdentical = false;
-			else
-			{
-				for (int i = 0; i < this.digest.length; i++)
-				{
-					if (this.digest[i] != cmpDigest[i])
-					{
+			else {
+				for (int i = 0; i < this.digest.length; i++) {
+					if (this.digest [i] != cmpDigest [i]) {
 						areIdentical = false;
 						break;
 					}
@@ -752,45 +626,37 @@ public class PluginRecord extends SerializedElement implements Cloneable
 
 		}
 
-		if ((areEqual) && (!areIdentical))
-		{
-			try
-			{
+		if ((areEqual) && (!areIdentical)) {
+			try {
 				areIdentical = true;
 				List<PluginSubrecord> subrecords = getSubrecords();
 				List<?> cmpSubrecords = record.getSubrecords();
 				String cmpDisplayValue = "";
-				for (PluginSubrecord subrecord : subrecords)
-				{
+				for (PluginSubrecord subrecord : subrecords) {
 					ListIterator<?> lit = cmpSubrecords.listIterator();
 					areIdentical = false;
-					while (lit.hasNext())
-					{
-						PluginSubrecord cmpSubrecord = (PluginSubrecord) lit.next();
-						try
-						{
+					while (lit.hasNext()) {
+						PluginSubrecord cmpSubrecord = (PluginSubrecord)lit.next();
+						try {
 							cmpDisplayValue = cmpSubrecord.getDisplayData();
+						} catch (Throwable exc) {
+							cmpDisplayValue = "Cannot make display value for subrecord type "
+												+ cmpSubrecord.getSubrecordType() + " of record type "
+												+ record.getRecordType();
 						}
-						catch (Throwable exc)
-						{
-							cmpDisplayValue = "Cannot make display value for subrecord type " + cmpSubrecord.getSubrecordType()
-									+ " of record type " + record.getRecordType();
-						}
-						if (cmpSubrecord.equals(subrecord))
-						{
+						if (cmpSubrecord.equals(subrecord)) {
 							areIdentical = true;
 							lit.remove();
 							break;
 						}
 					}
 
-					if (!areIdentical)
-					{
+					if (!areIdentical) {
 						if (!Main.debugMode)
 							break;
-						System.out.printf("Miscompare on %s subrecord [%s vs %s] of %s record %s (%08X)\n", new Object[]
-						{ subrecord.getSubrecordType(), subrecord.getDisplayData(), cmpDisplayValue, this.recordType, this.editorID,
-								Integer.valueOf(this.formID) });
+						System.out.printf("Miscompare on %s subrecord [%s vs %s] of %s record %s (%08X)\n",
+								new Object[] {subrecord.getSubrecordType(), subrecord.getDisplayData(), cmpDisplayValue,
+									this.recordType, this.editorID, Integer.valueOf(this.formID)});
 
 						break;
 					}
@@ -798,9 +664,7 @@ public class PluginRecord extends SerializedElement implements Cloneable
 
 				if ((areIdentical) && (cmpSubrecords.size() != 0))
 					areIdentical = false;
-			}
-			catch (Throwable exc)
-			{
+			} catch (Throwable exc) {
 				areIdentical = false;
 				Main.logException("Unable to compare record data", exc);
 			}
@@ -809,101 +673,82 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		return areIdentical;
 	}
 
-	public String toString()
-	{
+	@Override
+	public String toString() {
 		String text = null;
 
-		if ((this.recordType.equals("CELL")) && (this.recordLength > 0) && (this.parentRecord != null)
-				&& ((this.parentRecord instanceof PluginGroup)))
-		{
-			PluginGroup parentGroup = (PluginGroup) this.parentRecord;
-			if (parentGroup.getGroupType() == 5)
-			{
-				try
-				{
+		if ((this.recordType.equals("CELL"))	&& (this.recordLength > 0) && (this.parentRecord != null)
+			&& ((this.parentRecord instanceof PluginGroup))) {
+			PluginGroup parentGroup = (PluginGroup)this.parentRecord;
+			if (parentGroup.getGroupType() == 5) {
+				try {
 					List<PluginSubrecord> subrecords = getSubrecords();
 					for (PluginSubrecord subrecord : subrecords)
-						if (subrecord.getSubrecordType().equals("XCLC"))
-						{
+						if (subrecord.getSubrecordType().equals("XCLC")) {
 							byte[] subrecordData = subrecord.getSubrecordData();
-							text = String.format("CELL (%d,%d) record: %s (%08X)", new Object[]
-							{ Integer.valueOf(getInteger(subrecordData, 0)), Integer.valueOf(getInteger(subrecordData, 4)), this.editorID,
-									Integer.valueOf(this.formID) });
+							text = String.format("CELL (%d,%d) record: %s (%08X)",
+									new Object[] {Integer.valueOf(getInteger(subrecordData, 0)),
+										Integer.valueOf(getInteger(subrecordData, 4)), this.editorID,
+										Integer.valueOf(this.formID)});
 							break;
 						}
-				}
-				catch (Exception localException)
-				{
+				} catch (Exception localException) {
 				}
 			}
 		}
-		if (text == null)
-		{
-			text = String.format("%s record: %s (%08X)", new Object[]
-			{ this.recordType, this.editorID, Integer.valueOf(this.formID) });
+		if (text == null) {
+			text = String.format("%s record: %s (%08X)",
+					new Object[] {this.recordType, this.editorID, Integer.valueOf(this.formID)});
 		}
 		if (isIgnored())
 			text = "(Ignore) " + text;
-		else if (isDeleted())
-		{
+		else if (isDeleted()) {
 			text = "(Deleted) " + text;
 		}
 		return text;
 	}
 
-	public void load(File file, RandomAccessFile in, int recordLength) throws PluginException, IOException, DataFormatException
-	{
+	public void load(File file, FileChannelRAF in, int recordLength)
+			throws PluginException, IOException, DataFormatException {
 		int offset = 0;
 		int overrideLength = 0;
 
 		byte[] recordData = new byte[recordLength];
 		int count = in.read(recordData);
-		if (count != recordLength)
-		{
+		if (count != recordLength) {
 			throw new PluginException(file.getName() + ": " + this.recordType + " record is incomplete");
 		}
 		this.recordPosition = Main.pluginSpill.write(recordData);
 		this.recordLength = recordData.length;
-		try
-		{
+		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(recordData);
 			this.digest = md.digest();
-		}
-		catch (NoSuchAlgorithmException exc)
-		{
+		} catch (NoSuchAlgorithmException exc) {
 			throw new UnsupportedOperationException("MD5 digest algorithm is not supported", exc);
 		}
 
 		byte[] buffer = getRecordData();
 		int dataLength = buffer.length;
 
-		while (dataLength >= 6)
-		{
+		while (dataLength >= 6) {
 			String subrecordType = new String(buffer, offset, 4);
 			int length = getShort(buffer, offset + 4);
-			if (length == 0)
-			{
+			if (length == 0) {
 				length = overrideLength;
 				overrideLength = 0;
 			}
 
-			if (length > dataLength)
-			{
+			if (length > dataLength) {
 				throw new PluginException(file.getName() + ": " + subrecordType + " subrecord is incomplete");
 			}
-			if (length > 0)
-			{
-				if (subrecordType.equals("XXXX"))
-				{
-					if (length != 4)
-					{
+			if (length > 0) {
+				if (subrecordType.equals("XXXX")) {
+					if (length != 4) {
 						throw new PluginException(file.getName() + ": XXXX subrecord data length is not 4");
 					}
 					overrideLength = getInteger(buffer, offset + 6);
-				}
-				else if ((subrecordType.equals("EDID")) && (length > 1))
-				{
+				} else if ((subrecordType.equals("EDID")) && (length > 1)) {
 					this.editorID = new String(buffer, offset + 6, length - 1);
 				}
 			}
@@ -916,8 +761,7 @@ public class PluginRecord extends SerializedElement implements Cloneable
 			throw new PluginException(file.getName() + ": " + this.recordType + " record is incomplete");
 	}
 
-	public void store(RandomAccessFile out) throws IOException
-	{
+	public void store(FileChannelRAF out) throws IOException {
 		byte[] prefix = new byte[20];
 		System.arraycopy(this.recordType.getBytes(), 0, prefix, 0, 4);
 		setInteger(this.recordLength, prefix, 4);
@@ -926,22 +770,18 @@ public class PluginRecord extends SerializedElement implements Cloneable
 		setInteger(this.recordFlags2, prefix, 16);
 		out.write(prefix);
 
-		if (this.recordLength != 0)
-		{
+		if (this.recordLength != 0) {
 			byte[] recordData = Main.pluginSpill.read(this.recordPosition, this.recordLength);
 			out.write(recordData);
 		}
 	}
 
-	public Object clone()
-	{
+	@Override
+	public Object clone() {
 		Object clonedObject;
-		try
-		{
+		try {
 			clonedObject = super.clone();
-		}
-		catch (CloneNotSupportedException exc)
-		{
+		} catch (CloneNotSupportedException exc) {
 
 			throw new UnsupportedOperationException("Unable to clone record", exc);
 		}

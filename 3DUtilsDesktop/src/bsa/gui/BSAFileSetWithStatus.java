@@ -1,6 +1,7 @@
 package bsa.gui;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +105,7 @@ public class BSAFileSetWithStatus extends ArrayList<ArchiveFile>
 
 		try
 		{
-			ArchiveFile archiveFile = ArchiveFile.createArchiveFile(file);
+			ArchiveFile archiveFile = ArchiveFile.createArchiveFile(new FileInputStream(file).getChannel(), file.getName());
 
 			try
 			{

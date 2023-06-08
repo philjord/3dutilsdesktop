@@ -11,7 +11,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import esm.EsmFileLocations;
 import esmio.common.data.record.Record;
 import esmio.common.data.record.Subrecord;
-import esmio.loader.ESMManager;
+import esmio.loader.ESMManagerFile;
 import esmio.loader.IESMManager;
 
 public class SoundExporter
@@ -34,7 +34,7 @@ public class SoundExporter
 		try
 		{
 			Thread.currentThread().setPriority(4);
-			IESMManager esmManager = ESMManager.getESMManager(esmFile);
+			IESMManager esmManager = ESMManagerFile.getESMManager(esmFile);
 			Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
 			System.out.println("Done in " + (System.currentTimeMillis() - start) + " analyzing...");
 

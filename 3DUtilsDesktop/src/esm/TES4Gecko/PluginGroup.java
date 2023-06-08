@@ -2,7 +2,6 @@ package esm.TES4Gecko;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,118 +10,72 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
-public class PluginGroup extends PluginRecord
-{
-	public static final int TOP = 0;
+import tools.io.FileChannelRAF;
 
-	public static final int WORLDSPACE = 1;
+public class PluginGroup extends PluginRecord {
+	public static final int				TOP					= 0;
 
-	public static final int INTERIOR_BLOCK = 2;
+	public static final int				WORLDSPACE			= 1;
 
-	public static final int INTERIOR_SUBBLOCK = 3;
+	public static final int				INTERIOR_BLOCK		= 2;
 
-	public static final int EXTERIOR_BLOCK = 4;
+	public static final int				INTERIOR_SUBBLOCK	= 3;
 
-	public static final int EXTERIOR_SUBBLOCK = 5;
+	public static final int				EXTERIOR_BLOCK		= 4;
 
-	public static final int CELL = 6;
+	public static final int				EXTERIOR_SUBBLOCK	= 5;
 
-	public static final int TOPIC = 7;
+	public static final int				CELL				= 6;
 
-	public static final int CELL_PERSISTENT = 8;
+	public static final int				TOPIC				= 7;
 
-	public static final int CELL_TEMPORARY = 9;
+	public static final int				CELL_PERSISTENT		= 8;
 
-	public static final int CELL_DISTANT = 10;
+	public static final int				CELL_TEMPORARY		= 9;
 
-	private byte[] groupLabel;
+	public static final int				CELL_DISTANT		= 10;
 
-	private String groupRecordType;
+	private byte[]						groupLabel;
 
-	private int groupParentID;
+	private String						groupRecordType;
 
-	private int groupType;
+	private int							groupParentID;
 
-	private List<PluginRecord> recordList;
+	private int							groupType;
 
-	private static Map<String, String> typeMap;
+	private List<PluginRecord>			recordList;
 
-	private static String[][] groupDescriptions =
-	{
-	{ "ACTI", "Activators" },
-	{ "ALCH", "Potions" },
-	{ "AMMO", "Ammunition" },
-	{ "ANIO", "Animated Object" },
-	{ "APPA", "Apparatus" },
-	{ "ARMO", "Armor" },
-	{ "BOOK", "Books" },
-	{ "BSGN", "Birthsigns" },
-	{ "CELL", "Cells" },
-	{ "CLAS", "Classes" },
-	{ "CLOT", "Clothing" },
-	{ "CLMT", "Climate" },
-	{ "CONT", "Containers" },
-	{ "CREA", "Creatures" },
-	{ "CSTY", "Combat Styles" },
-	{ "DIAL", "Dialog" },
-	{ "DOOR", "Doors" },
-	{ "EFSH", "Effect Shaders" },
-	{ "ENCH", "Enchantments" },
-	{ "EYES", "Eyes" },
-	{ "FACT", "Factions" },
-	{ "FLOR", "Flora" },
-	{ "FURN", "Furniture" },
-	{ "GLOB", "Global Variables" },
-	{ "GMST", "Game Settings" },
-	{ "GRAS", "Grass" },
-	{ "HAIR", "Hair" },
-	{ "IDLE", "Idle Animations" },
-	{ "INGR", "Ingredients" },
-	{ "KEYM", "Keys" },
-	{ "LIGH", "Lights" },
-	{ "LSCR", "Load Screens" },
-	{ "LTEX", "Land Textures" },
-	{ "LVLC", "Leveled Creatures" },
-	{ "LVLI", "Leveled Items" },
-	{ "LVSP", "Leveled Spells" },
-	{ "MGEF", "Magic Effects" },
-	{ "MISC", "Miscellaneous Items" },
-	{ "NPC_", "NPCs" },
-	{ "PACK", "Packages" },
-	{ "QUST", "Quests" },
-	{ "RACE", "Races" },
-	{ "REGN", "Regions" },
-	{ "SBSP", "Subspaces" },
-	{ "SCPT", "Scripts" },
-	{ "SGST", "Sigil Stones" },
-	{ "SKIL", "Skills" },
-	{ "SLGM", "Soul Gems" },
-	{ "SOUN", "Sounds" },
-	{ "SPEL", "Spells" },
-	{ "STAT", "Statics" },
-	{ "TREE", "Trees" },
-	{ "WATR", "Water" },
-	{ "WEAP", "Weapons" },
-	{ "WTHR", "Weather" },
-	{ "WRLD", "World Spaces" } };
+	private static Map<String, String>	typeMap;
 
-	public Map<String, String> getTypeMap()
-	{
+	private static String[][]			groupDescriptions	= {{"ACTI", "Activators"}, {"ALCH", "Potions"},
+		{"AMMO", "Ammunition"}, {"ANIO", "Animated Object"}, {"APPA", "Apparatus"}, {"ARMO", "Armor"},
+		{"BOOK", "Books"}, {"BSGN", "Birthsigns"}, {"CELL", "Cells"}, {"CLAS", "Classes"}, {"CLOT", "Clothing"},
+		{"CLMT", "Climate"}, {"CONT", "Containers"}, {"CREA", "Creatures"}, {"CSTY", "Combat Styles"},
+		{"DIAL", "Dialog"}, {"DOOR", "Doors"}, {"EFSH", "Effect Shaders"}, {"ENCH", "Enchantments"}, {"EYES", "Eyes"},
+		{"FACT", "Factions"}, {"FLOR", "Flora"}, {"FURN", "Furniture"}, {"GLOB", "Global Variables"},
+		{"GMST", "Game Settings"}, {"GRAS", "Grass"}, {"HAIR", "Hair"}, {"IDLE", "Idle Animations"},
+		{"INGR", "Ingredients"}, {"KEYM", "Keys"}, {"LIGH", "Lights"}, {"LSCR", "Load Screens"},
+		{"LTEX", "Land Textures"}, {"LVLC", "Leveled Creatures"}, {"LVLI", "Leveled Items"}, {"LVSP", "Leveled Spells"},
+		{"MGEF", "Magic Effects"}, {"MISC", "Miscellaneous Items"}, {"NPC_", "NPCs"}, {"PACK", "Packages"},
+		{"QUST", "Quests"}, {"RACE", "Races"}, {"REGN", "Regions"}, {"SBSP", "Subspaces"}, {"SCPT", "Scripts"},
+		{"SGST", "Sigil Stones"}, {"SKIL", "Skills"}, {"SLGM", "Soul Gems"}, {"SOUN", "Sounds"}, {"SPEL", "Spells"},
+		{"STAT", "Statics"}, {"TREE", "Trees"}, {"WATR", "Water"}, {"WEAP", "Weapons"}, {"WTHR", "Weather"},
+		{"WRLD", "World Spaces"}};
+
+	public Map<String, String> getTypeMap() {
 		return typeMap;
 	}
 
-	public PluginGroup(byte[] prefix)
-	{
+	public PluginGroup(byte[] prefix) {
 		super("GRUP");
 
 		this.groupLabel = new byte[4];
 		System.arraycopy(prefix, 8, this.groupLabel, 0, 4);
-		this.groupType = (prefix[12] & 0xFF);
+		this.groupType = (prefix [12] & 0xFF);
 
-		switch (this.groupType)
-		{
+		switch (this.groupType) {
 			case 0:
-				if (this.groupLabel[0] >= 32)
+				if (this.groupLabel [0] >= 32)
 					this.groupRecordType = new String(this.groupLabel);
 				else
 					this.groupRecordType = new String();
@@ -144,8 +97,7 @@ public class PluginGroup extends PluginRecord
 			buildTypeMap();
 	}
 
-	public PluginGroup(String recordType)
-	{
+	public PluginGroup(String recordType) {
 		super("GRUP");
 		this.groupType = 0;
 		this.groupLabel = recordType.getBytes();
@@ -156,16 +108,14 @@ public class PluginGroup extends PluginRecord
 			buildTypeMap();
 	}
 
-	public PluginGroup(int groupType, byte[] groupLabel)
-	{
+	public PluginGroup(int groupType, byte[] groupLabel) {
 		super("GRUP");
 		this.groupType = groupType;
 		this.groupLabel = groupLabel;
 
-		switch (groupType)
-		{
+		switch (groupType) {
 			case 0:
-				if (groupLabel[0] >= 32)
+				if (groupLabel [0] >= 32)
 					this.groupRecordType = new String(groupLabel);
 				else
 					this.groupRecordType = new String();
@@ -187,15 +137,13 @@ public class PluginGroup extends PluginRecord
 			buildTypeMap();
 	}
 
-	public PluginGroup(int groupType, int groupParentID)
-	{
+	public PluginGroup(int groupType, int groupParentID) {
 		super("GRUP");
 		this.groupType = groupType;
 		this.groupLabel = new byte[4];
 		setInteger(groupParentID, this.groupLabel, 0);
 
-		switch (groupType)
-		{
+		switch (groupType) {
 			case 1:
 			case 6:
 			case 7:
@@ -213,50 +161,41 @@ public class PluginGroup extends PluginRecord
 			buildTypeMap();
 	}
 
-	private void buildTypeMap()
-	{
+	private static void buildTypeMap() {
 		typeMap = new HashMap<String, String>(groupDescriptions.length);
 		for (int i = 0; i < groupDescriptions.length; i++)
-			typeMap.put(groupDescriptions[i][0], groupDescriptions[i][1]);
+			typeMap.put(groupDescriptions [i] [0], groupDescriptions [i] [1]);
 	}
 
-	public int getRecordCount()
-	{
+	public int getRecordCount() {
 		int recordCount = 0;
-		for (PluginRecord record : this.recordList)
-		{
+		for (PluginRecord record : this.recordList) {
 			recordCount++;
-			if ((record instanceof PluginGroup))
-			{
-				recordCount += ((PluginGroup) record).getRecordCount();
+			if ((record instanceof PluginGroup)) {
+				recordCount += ((PluginGroup)record).getRecordCount();
 			}
 		}
 		return recordCount;
 	}
 
-	public boolean isEmpty()
-	{
+	public boolean isEmpty() {
 		return this.recordList.size() == 0;
 	}
 
-	public int getGroupType()
-	{
+	public int getGroupType() {
 		return this.groupType;
 	}
 
-	public byte[] getGroupLabel()
-	{
+	public byte[] getGroupLabel() {
 		return this.groupLabel;
 	}
 
-	public void setGroupLabel(byte[] label)
-	{
+	public void setGroupLabel(byte[] label) {
 		this.groupLabel = label;
 
-		switch (this.groupType)
-		{
+		switch (this.groupType) {
 			case 0:
-				if (this.groupLabel[0] >= 32)
+				if (this.groupLabel [0] >= 32)
 					this.groupRecordType = new String(this.groupLabel);
 				else
 					this.groupRecordType = new String();
@@ -275,138 +214,106 @@ public class PluginGroup extends PluginRecord
 		}
 	}
 
-	public String getGroupRecordType()
-	{
+	public String getGroupRecordType() {
 		return this.groupRecordType;
 	}
 
-	public int getGroupParentID()
-	{
+	public int getGroupParentID() {
 		return this.groupParentID;
 	}
 
-	public void setGroupParentID(int parentID)
-	{
+	public void setGroupParentID(int parentID) {
 		this.groupParentID = parentID;
 		setInteger(parentID, this.groupLabel, 0);
 	}
 
-	public List<PluginRecord> getRecordList()
-	{
+	public List<PluginRecord> getRecordList() {
 		return this.recordList;
 	}
 
-	public void updateFormList(List<FormInfo> formList)
-	{
-		for (PluginRecord record : this.recordList)
-		{
+	public void updateFormList(List<FormInfo> formList) {
+		for (PluginRecord record : this.recordList) {
 			record.setParent(this);
-			if ((record instanceof PluginGroup))
-			{
-				PluginGroup subGroup = (PluginGroup) record;
+			if ((record instanceof PluginGroup)) {
+				PluginGroup subGroup = (PluginGroup)record;
 				subGroup.updateFormList(formList);
-			}
-			else if (!record.isIgnored())
-			{
-				FormInfo formInfo = new FormInfo(record, record.getRecordType(), record.getFormID(), record.getEditorID());
+			} else if (!record.isIgnored()) {
+				FormInfo formInfo = new FormInfo(record, record.getRecordType(), record.getFormID(),
+						record.getEditorID());
 				formInfo.setParentFormID(this.groupParentID);
 				formList.add(formInfo);
 			}
 		}
 	}
 
-	public void setIgnore(boolean ignored)
-	{
+	@Override
+	public void setIgnore(boolean ignored) {
 		ListIterator<PluginRecord> lit = this.recordList.listIterator();
-		while (lit.hasNext())
-		{
+		while (lit.hasNext()) {
 			PluginRecord record = lit.next();
 			record.setIgnore(ignored);
 		}
 	}
 
-	public void removeIgnoredRecords()
-	{
+	public void removeIgnoredRecords() {
 		ListIterator<PluginRecord> lit = this.recordList.listIterator();
 		PluginRecord prevRecord = null;
-		while (lit.hasNext())
-		{
+		while (lit.hasNext()) {
 			PluginRecord record = lit.next();
-			if ((record instanceof PluginGroup))
-			{
-				PluginGroup group = (PluginGroup) record;
+			if ((record instanceof PluginGroup)) {
+				PluginGroup group = (PluginGroup)record;
 				group.removeIgnoredRecords();
-				if (group.isEmpty())
-				{
+				if (group.isEmpty()) {
 					int groupType = group.getGroupType();
-					if ((groupType == 1) || (groupType == 6) || (groupType == 7))
-					{
+					if ((groupType == 1) || (groupType == 6) || (groupType == 7)) {
 						if ((prevRecord == null) || (prevRecord.getRecordType().equals("GRUP")))
 							lit.remove();
 						else
 							prevRecord = record;
-					}
-					else
+					} else
 						lit.remove();
-				}
-				else
-				{
+				} else {
 					prevRecord = record;
 				}
-			}
-			else if (record.isIgnored())
-			{
+			} else if (record.isIgnored()) {
 				lit.remove();
-			}
-			else
-			{
+			} else {
 				prevRecord = record;
 			}
 		}
 	}
 
-	public void suturePNAMs(Map<Integer, List<PluginRecord>> deletedMap)
-	{
+	public void suturePNAMs(Map<Integer, List<PluginRecord>> deletedMap) {
 		if ((this.groupType != 0) || (!this.groupRecordType.equals("DIAL")))
 			return;
 		if (deletedMap.isEmpty())
 			return;
 		List<PluginRecord> groupList = getRecordList();
-		for (PluginRecord dialOrInfo : groupList)
-		{
+		for (PluginRecord dialOrInfo : groupList) {
 			if (!(dialOrInfo instanceof PluginGroup))
 				continue;
-			int topicID = ((PluginGroup) dialOrInfo).getGroupParentID();
-			if (deletedMap.containsKey(Integer.valueOf(topicID)))
-			{
-				List<PluginRecord> infoList = ((PluginGroup) dialOrInfo).getRecordList();
+			int topicID = ((PluginGroup)dialOrInfo).getGroupParentID();
+			if (deletedMap.containsKey(Integer.valueOf(topicID))) {
+				List<PluginRecord> infoList = ((PluginGroup)dialOrInfo).getRecordList();
 				List<PluginRecord> deletedList = deletedMap.get(Integer.valueOf(topicID));
 				Collections.reverse(deletedList);
 
-				for (PluginRecord delRec : deletedList)
-				{
+				for (PluginRecord delRec : deletedList) {
 					int delPNAMID = 0;
 					int delFormID = delRec.getFormID();
-					try
-					{
+					try {
 						PluginSubrecord plSubrec = delRec.getSubrecord("PNAM");
 						byte[] subrecordData = plSubrec.getSubrecordData();
 						delPNAMID = SerializedElement.getInteger(subrecordData, 0);
-					}
-					catch (Exception ex)
-					{
+					} catch (Exception ex) {
 						continue;
 					}
 					//byte[] subrecordData;
-					for (PluginRecord rec : infoList)
-					{
-						try
-						{
+					for (PluginRecord rec : infoList) {
+						try {
 							if (!rec.changeSubrecord("PNAM", Integer.valueOf(delFormID), Integer.valueOf(delPNAMID)))
 								continue;
-						}
-						catch (Exception localException1)
-						{
+						} catch (Exception localException1) {
 						}
 					}
 				}
@@ -415,23 +322,19 @@ public class PluginGroup extends PluginRecord
 		}
 	}
 
-	public Map<Integer, List<PluginRecord>> getDeletedINFOMap()
-	{
+	public Map<Integer, List<PluginRecord>> getDeletedINFOMap() {
 		Map<Integer, List<PluginRecord>> deletedINFOMap = new HashMap<Integer, List<PluginRecord>>();
 		if ((this.groupType != 0) || (!this.groupRecordType.equals("DIAL")))
 			return deletedINFOMap;
 		List<PluginRecord> groupList = getRecordList();
-		for (PluginRecord dialOrInfo : groupList)
-		{
+		for (PluginRecord dialOrInfo : groupList) {
 			if (!(dialOrInfo instanceof PluginGroup))
 				continue;
-			List<PluginRecord> infoGroup = ((PluginGroup) dialOrInfo).getDeletedPluginRecords();
-			if (infoGroup.size() != 0)
-			{
-				int topicID = ((PluginGroup) dialOrInfo).getGroupParentID();
+			List<PluginRecord> infoGroup = ((PluginGroup)dialOrInfo).getDeletedPluginRecords();
+			if (infoGroup.size() != 0) {
+				int topicID = ((PluginGroup)dialOrInfo).getGroupParentID();
 				List<PluginRecord> infoList = new ArrayList<PluginRecord>();
-				for (PluginRecord rec : infoGroup)
-				{
+				for (PluginRecord rec : infoGroup) {
 					infoList.add(rec);
 				}
 				deletedINFOMap.put(Integer.valueOf(topicID), infoList);
@@ -440,52 +343,44 @@ public class PluginGroup extends PluginRecord
 		return deletedINFOMap;
 	}
 
-	public List<PluginRecord> getAllPluginRecords()
-	{
+	@Override
+	public List<PluginRecord> getAllPluginRecords() {
 		ArrayList<PluginRecord> recList = new ArrayList<PluginRecord>();
 		List<PluginRecord> tmpList = getRecordList();
-		for (PluginRecord rec : tmpList)
-		{
+		for (PluginRecord rec : tmpList) {
 			recList.addAll(rec.getAllPluginRecords());
 		}
 		return recList;
 	}
 
-	public List<PluginRecord> getDeletedPluginRecords()
-	{
+	@Override
+	public List<PluginRecord> getDeletedPluginRecords() {
 		ArrayList<PluginRecord> recList = new ArrayList<PluginRecord>();
 		List<PluginRecord> tmpList = getRecordList();
-		for (PluginRecord rec : tmpList)
-		{
+		for (PluginRecord rec : tmpList) {
 			recList.addAll(rec.getDeletedPluginRecords());
 		}
 		return recList;
 	}
 
-	public int hashCode()
-	{
+	@Override
+	public int hashCode() {
 		return getInteger(this.groupLabel, 0) + this.groupType;
 	}
 
-	public boolean equals(Object object)
-	{
+	@Override
+	public boolean equals(Object object) {
 		boolean areEqual = false;
-		if ((object instanceof PluginGroup))
-		{
-			PluginGroup objGroup = (PluginGroup) object;
-			if (objGroup.getGroupType() == this.groupType)
-			{
+		if ((object instanceof PluginGroup)) {
+			PluginGroup objGroup = (PluginGroup)object;
+			if (objGroup.getGroupType() == this.groupType) {
 				byte[] objGroupLabel = objGroup.getGroupLabel();
-				if (compareArrays(this.groupLabel, 0, objGroupLabel, 0, 4) == 0)
-				{
+				if (compareArrays(this.groupLabel, 0, objGroupLabel, 0, 4) == 0) {
 					List<?> objRecordList = objGroup.getRecordList();
-					if (objRecordList.size() == this.recordList.size())
-					{
+					if (objRecordList.size() == this.recordList.size()) {
 						areEqual = true;
-						for (int i = 0; i < this.recordList.size(); i++)
-						{
-							if (!((PluginRecord) objRecordList.get(i)).equals(this.recordList.get(i)))
-							{
+						for (int i = 0; i < this.recordList.size(); i++) {
+							if (!((PluginRecord)objRecordList.get(i)).equals(this.recordList.get(i))) {
 								areEqual = false;
 								break;
 							}
@@ -498,27 +393,20 @@ public class PluginGroup extends PluginRecord
 		return areEqual;
 	}
 
-	public boolean isIdentical(PluginGroup group)
-	{
+	public boolean isIdentical(PluginGroup group) {
 		boolean areIdentical = false;
-		if (group.getGroupType() == this.groupType)
-		{
+		if (group.getGroupType() == this.groupType) {
 			byte[] cmpGroupLabel = group.getGroupLabel();
-			if (compareArrays(this.groupLabel, 0, cmpGroupLabel, 0, 4) == 0)
-			{
+			if (compareArrays(this.groupLabel, 0, cmpGroupLabel, 0, 4) == 0) {
 				//PJPJPJPJ short cut for giant copy
-				if(group.getFormID() == this.getFormID() )
+				if (group.getFormID() == this.getFormID())
 					return true;
-				
-				
+
 				List<PluginRecord> cmpRecordList = group.getRecordList();
-				if (cmpRecordList.size() == this.recordList.size())
-				{
+				if (cmpRecordList.size() == this.recordList.size()) {
 					areIdentical = true;
-					for (int i = 0; i < this.recordList.size(); i++)
-					{
-						if (!cmpRecordList.get(i).isIdentical(this.recordList.get(i)))
-						{
+					for (int i = 0; i < this.recordList.size(); i++) {
+						if (!cmpRecordList.get(i).isIdentical(this.recordList.get(i))) {
 							areIdentical = false;
 							break;
 						}
@@ -530,103 +418,89 @@ public class PluginGroup extends PluginRecord
 		return areIdentical;
 	}
 
-	public String toString()
-	{
+	@Override
+	public String toString() {
 		int intValue = getInteger(this.groupLabel, 0);
 		String text;
 
-		switch (this.groupType)
-		{
+		switch (this.groupType) {
 			case 0:
 				String type = new String(this.groupLabel);
 				String description = typeMap.get(type);
 
 				if (description != null)
-					text = String.format("Group: %s", new Object[]
-					{ description });
+					text = String.format("Group: %s", new Object[] {description});
 				else
-					text = String.format("Group: Type %s", new Object[]
-					{ new String(this.groupLabel) });
+					text = String.format("Group: Type %s", new Object[] {new String(this.groupLabel)});
 				break;
 			case 1:
-				text = String.format("Group: Worldspace (%08X) children", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Worldspace (%08X) children", new Object[] {Integer.valueOf(intValue)});
 				break;
 			case 2:
-				text = String.format("Group: Interior cell block %d", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Interior cell block %d", new Object[] {Integer.valueOf(intValue)});
 				break;
 			case 3:
-				text = String.format("Group: Interior cell subblock %d", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Interior cell subblock %d", new Object[] {Integer.valueOf(intValue)});
 				break;
 			case 4:
 				int x2 = intValue >>> 16;
-				if ((x2 & 0x8000) != 0)
-				{
+				if ((x2 & 0x8000) != 0) {
 					x2 |= -65536;
 				}
 				int y2 = intValue & 0xFFFF;
-				if ((y2 & 0x8000) != 0)
-				{
+				if ((y2 & 0x8000) != 0) {
 					y2 |= -65536;
 				}
-				text = String.format("Group: Exterior cell block %d,%d", new Object[]
-				{ Integer.valueOf(x2), Integer.valueOf(y2) });
+				text = String.format("Group: Exterior cell block %d,%d",
+						new Object[] {Integer.valueOf(x2), Integer.valueOf(y2)});
 				break;
 			case 5:
 				int x = intValue >>> 16;
-				if ((x & 0x8000) != 0)
-				{
+				if ((x & 0x8000) != 0) {
 					x |= -65536;
 				}
 				int y = intValue & 0xFFFF;
-				if ((y & 0x8000) != 0)
-				{
+				if ((y & 0x8000) != 0) {
 					y |= -65536;
 				}
-				text = String.format("Group: Exterior cell subblock %d,%d", new Object[]
-				{ Integer.valueOf(x), Integer.valueOf(y) });
+				text = String.format("Group: Exterior cell subblock %d,%d",
+						new Object[] {Integer.valueOf(x), Integer.valueOf(y)});
 				break;
 			case 6:
-				text = String.format("Group: Cell (%08X) children", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Cell (%08X) children", new Object[] {Integer.valueOf(intValue)});
 				break;
 			case 7:
-				text = String.format("Group: Topic (%08X) children", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Topic (%08X) children", new Object[] {Integer.valueOf(intValue)});
 				break;
 			case 8:
-				text = String.format("Group: Cell (%08X) persistent children", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Cell (%08X) persistent children",
+						new Object[] {Integer.valueOf(intValue)});
 				break;
 			case 9:
-				text = String.format("Group: Cell (%08X) temporary children", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Cell (%08X) temporary children", new Object[] {Integer.valueOf(intValue)});
 				break;
 			case 10:
-				text = String.format("Group: Cell (%08X) visible distant children", new Object[]
-				{ Integer.valueOf(intValue) });
+				text = String.format("Group: Cell (%08X) visible distant children",
+						new Object[] {Integer.valueOf(intValue)});
 				break;
 			default:
-				text = String.format("Group: Type %d, Parent %08X", new Object[]
-				{ Integer.valueOf(this.groupType), Integer.valueOf(intValue) });
+				text = String.format("Group: Type %d, Parent %08X",
+						new Object[] {Integer.valueOf(this.groupType), Integer.valueOf(intValue)});
 		}
 
 		return text;
 	}
 
-	public void load(File file, RandomAccessFile in, int groupLength) throws PluginException, IOException, DataFormatException
-	{
+	@Override
+	public void load(File file, FileChannelRAF in, int groupLength)
+			throws PluginException, IOException, DataFormatException {
 		int dataLength = groupLength;
 
 		byte[] prefix = new byte[20];
 
-		while (dataLength >= 20)
-		{
+		while (dataLength >= 20) {
 			int count = in.read(prefix);
-			if (count != 20)
-			{
+			if (count != 20) {
 				throw new PluginException(file.getName() + ": Record prefix is incomplete");
 			}
 			dataLength -= 20;
@@ -634,13 +508,10 @@ public class PluginGroup extends PluginRecord
 			int length = getInteger(prefix, 4);
 			PluginRecord record;
 
-			if (type.equals("GRUP"))
-			{
+			if (type.equals("GRUP")) {
 				length -= 20;
 				record = new PluginGroup(prefix);
-			}
-			else
-			{
+			} else {
 				record = new PluginRecord(prefix);
 			}
 
@@ -649,30 +520,27 @@ public class PluginGroup extends PluginRecord
 			dataLength -= length;
 		}
 
-		if (dataLength != 0)
-		{
-			if (this.groupType == 0)
-			{
+		if (dataLength != 0) {
+			if (this.groupType == 0) {
 				throw new PluginException(file.getName() + ": Group " + this.groupRecordType + " is incomplete");
 			}
 			throw new PluginException(file.getName() + ": Subgroup type " + this.groupType + " is incomplete");
 		}
 	}
 
-	public void store(RandomAccessFile out) throws IOException
-	{
+	@Override
+	public void store(FileChannelRAF out) throws IOException {
 		byte[] prefix = new byte[20];
 		long groupPosition = out.getFilePointer();
 		out.write(prefix);
 
-		for (PluginRecord record : this.recordList)
-		{
+		for (PluginRecord record : this.recordList) {
 			record.store(out);
 		}
 
 		long stopPosition = out.getFilePointer();
 		System.arraycopy("GRUP".getBytes(), 0, prefix, 0, 4);
-		setInteger((int) (stopPosition - groupPosition), prefix, 4);
+		setInteger((int)(stopPosition - groupPosition), prefix, 4);
 		System.arraycopy(this.groupLabel, 0, prefix, 8, 4);
 		setInteger(this.groupType, prefix, 12);
 		out.seek(groupPosition);
@@ -680,14 +548,13 @@ public class PluginGroup extends PluginRecord
 		out.seek(stopPosition);
 	}
 
-	public Object clone()
-	{
+	@Override
+	public Object clone() {
 		Object clonedObject = super.clone();
-		PluginGroup clonedGroup = (PluginGroup) clonedObject;
+		PluginGroup clonedGroup = (PluginGroup)clonedObject;
 		clonedGroup.recordList = new ArrayList<PluginRecord>(this.recordList.size());
-		for (PluginRecord record : this.recordList)
-		{
-			clonedGroup.recordList.add((PluginRecord) record.clone());
+		for (PluginRecord record : this.recordList) {
+			clonedGroup.recordList.add((PluginRecord)record.clone());
 		}
 		return clonedObject;
 	}

@@ -9,7 +9,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,18 +22,17 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class MainWindow extends JFrame implements ActionListener
-{
+import tools.io.FileChannelRAF;
+
+public class MainWindow extends JFrame implements ActionListener {
 	private boolean windowMinimized = false;
 
-	public MainWindow()
-	{
+	public MainWindow() {
 		super("TES4Gecko Plugin Utility");
 		setDefaultCloseOperation(2);
 
 		String propValue = Main.properties.getProperty("window.main.position");
-		if (propValue != null)
-		{
+		if (propValue != null) {
 			int frameX = 0;
 			int frameY = 0;
 			int sep = propValue.indexOf(',');
@@ -169,14 +167,13 @@ public class MainWindow extends JFrame implements ActionListener
 		addWindowListener(new MainWindowListener());
 	}
 
-	public void actionPerformed(ActionEvent ae)
-	{
-		try
-		{
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		try {
 			String action = ae.getActionCommand();
-			if (Main.debugMode)
-			{
-				System.out.printf("There are " + Runtime.getRuntime().freeMemory() + " bytes available\n", new Object[0]);
+			if (Main.debugMode) {
+				System.out.printf("There are " + Runtime.getRuntime().freeMemory() + " bytes available\n",
+						new Object[0]);
 			}
 
 			if (action.equals("merge plugins"))
@@ -211,26 +208,21 @@ public class MainWindow extends JFrame implements ActionListener
 				setDirectory();
 			else if (action.equals("exit"))
 				exitProgram();
-			else if (action.equals("about"))
-			{
+			else if (action.equals("about")) {
 				aboutTES4Plugin();
 			}
 
 			Main.pluginSpill.reset();
-		}
-		catch (Throwable exc)
-		{
+		} catch (Throwable exc) {
 			Main.logException("Exception while processing action event", exc);
 		}
 	}
 
-	private void applyPatch()
-	{
+	private void applyPatch() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -238,8 +230,7 @@ public class MainWindow extends JFrame implements ActionListener
 		chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Patch File");
 		chooser.setFileFilter(new PluginFileFilter(false, false, true));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File patchFile = chooser.getSelectedFile();
@@ -247,13 +238,11 @@ public class MainWindow extends JFrame implements ActionListener
 		ApplyPatchTask.applyPatch(this, pluginFile, patchFile);
 	}
 
-	private void cleanPlugin()
-	{
+	private void cleanPlugin() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -261,62 +250,53 @@ public class MainWindow extends JFrame implements ActionListener
 		CleanTask.cleanPlugin(this, pluginFile);
 	}
 
-	private void comparePlugins()
-	{
+	private void comparePlugins() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select First File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFileA = chooser.getSelectedFile();
 
 		chooser.setDialogTitle("Select Second File");
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFileB = chooser.getSelectedFile();
 
 		PluginNode pluginNodeA = CreateTreeTask.createTree(this, pluginFileA);
-		if (pluginNodeA != null)
-		{
+		if (pluginNodeA != null) {
 			PluginNode pluginNodeB = CreateTreeTask.createTree(this, pluginFileB);
 			if ((pluginNodeB != null) && (CompareTask.comparePlugins(this, pluginNodeA, pluginNodeB)))
 				CompareDialog.showDialog(this, pluginFileA, pluginFileB, pluginNodeA, pluginNodeB);
 		}
 	}
 
-	private void convertToMaster()
-	{
+	private void convertToMaster() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
 
 		String inputName = pluginFile.getName();
 		int sep = inputName.lastIndexOf('.');
-		if (sep <= 0)
-		{
+		if (sep <= 0) {
 			JOptionPane.showMessageDialog(this, "'" + inputName + "' is not a valid plugin file name", "Error", 0);
 			return;
 		}
 
-		String outputName = String.format("%s%s%s.esm", new Object[]
-		{ pluginFile.getParent(), Main.fileSeparator, inputName.substring(0, sep) });
+		String outputName = String.format("%s%s%s.esm",
+				new Object[] {pluginFile.getParent(), Main.fileSeparator, inputName.substring(0, sep)});
 		File masterFile = new File(outputName);
 
-		if (masterFile.exists())
-		{
-			int selection = JOptionPane.showConfirmDialog(this, "'" + masterFile.getName()
-					+ "' already exists.  Do you want to overwrite it?", "File exists", 0);
-			if (selection != 0)
-			{
+		if (masterFile.exists()) {
+			int selection = JOptionPane.showConfirmDialog(this,
+					"'" + masterFile.getName() + "' already exists.  Do you want to overwrite it?", "File exists", 0);
+			if (selection != 0) {
 				return;
 			}
 			masterFile.delete();
@@ -325,35 +305,30 @@ public class MainWindow extends JFrame implements ActionListener
 		ConvertTask.convertFile(this, pluginFile, masterFile);
 	}
 
-	private void convertToPlugin()
-	{
+	private void convertToPlugin() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Master File");
 		chooser.setFileFilter(new PluginFileFilter(true));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File masterFile = chooser.getSelectedFile();
 
 		String inputName = masterFile.getName();
 		int sep = inputName.lastIndexOf('.');
-		if (sep <= 0)
-		{
+		if (sep <= 0) {
 			JOptionPane.showMessageDialog(this, "'" + inputName + "' is not a valid master file name", "Error", 0);
 			return;
 		}
 
-		String outputName = String.format("%s%s%s.esp", new Object[]
-		{ masterFile.getParent(), Main.fileSeparator, inputName.substring(0, sep) });
+		String outputName = String.format("%s%s%s.esp",
+				new Object[] {masterFile.getParent(), Main.fileSeparator, inputName.substring(0, sep)});
 		File pluginFile = new File(outputName);
 
-		if (pluginFile.exists())
-		{
-			int selection = JOptionPane.showConfirmDialog(this, "'" + pluginFile.getName()
-					+ "' already exists.  Do you want to overwrite it?", "File exists", 0);
-			if (selection != 0)
-			{
+		if (pluginFile.exists()) {
+			int selection = JOptionPane.showConfirmDialog(this,
+					"'" + pluginFile.getName() + "' already exists.  Do you want to overwrite it?", "File exists", 0);
+			if (selection != 0) {
 				return;
 			}
 			pluginFile.delete();
@@ -362,13 +337,11 @@ public class MainWindow extends JFrame implements ActionListener
 		ConvertTask.convertFile(this, masterFile, pluginFile);
 	}
 
-	private void createPatch()
-	{
+	private void createPatch() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Original File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File baseFile = chooser.getSelectedFile();
@@ -376,30 +349,26 @@ public class MainWindow extends JFrame implements ActionListener
 		chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Modified File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File modifiedFile = chooser.getSelectedFile();
 
 		String patchName = baseFile.getName();
 		int sep = patchName.lastIndexOf('.');
-		if (sep <= 0)
-		{
+		if (sep <= 0) {
 			JOptionPane.showMessageDialog(this, "'" + patchName + "' is not a valid plugin file name", "Error", 0);
 			return;
 		}
 
-		patchName = String.format("%s%s%s.esu", new Object[]
-		{ baseFile.getParent(), Main.fileSeparator, patchName.substring(0, sep) });
+		patchName = String.format("%s%s%s.esu",
+				new Object[] {baseFile.getParent(), Main.fileSeparator, patchName.substring(0, sep)});
 		File patchFile = new File(patchName);
 
-		if (patchFile.exists())
-		{
-			int selection = JOptionPane.showConfirmDialog(this, "'" + patchFile.getName()
-					+ "' already exists.  Do you want to overwrite it?", "File exists", 0);
-			if (selection != 0)
-			{
+		if (patchFile.exists()) {
+			int selection = JOptionPane.showConfirmDialog(this,
+					"'" + patchFile.getName() + "' already exists.  Do you want to overwrite it?", "File exists", 0);
+			if (selection != 0) {
 				return;
 			}
 			patchFile.delete();
@@ -408,13 +377,11 @@ public class MainWindow extends JFrame implements ActionListener
 		CreatePatchTask.createPatch(this, baseFile, modifiedFile, patchFile);
 	}
 
-	private void displayRecords()
-	{
+	private void displayRecords() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter());
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -424,60 +391,46 @@ public class MainWindow extends JFrame implements ActionListener
 			DisplayDialog.showDialog(this, pluginFile, pluginNode);
 	}
 
-	private void editDescription()
-	{
+	private void editDescription() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
 
-		RandomAccessFile in = null;
+		FileChannelRAF in = null;
 		float version = 0.0F;
 		String creator = null;
 		String summary = null;
 		boolean descriptionSet = false;
-		try
-		{
-			if ((!pluginFile.exists()) || (!pluginFile.isFile()))
-			{
+		try {
+			if ((!pluginFile.exists()) || (!pluginFile.isFile())) {
 				throw new IOException("'" + pluginFile.getName() + "' does not exist");
 			}
-			in = new RandomAccessFile(pluginFile, "r");
+			in = new FileChannelRAF(pluginFile, "r");
 			PluginHeader header = new PluginHeader(pluginFile);
 			header.read(in);
 			version = header.getVersion();
 			creator = header.getCreator();
 			summary = header.getSummary();
 			descriptionSet = true;
-		}
-		catch (PluginException exc)
-		{
+		} catch (PluginException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "Format Error", 0);
-		}
-		catch (IOException exc)
-		{
+		} catch (IOException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "I/O Error", 0);
-		}
-		catch (Throwable exc)
-		{
+		} catch (Throwable exc) {
 			Main.logException("Unable to read plugin header", exc);
 		}
-		try
-		{
+		try {
 			if (in != null)
 				in.close();
-		}
-		catch (IOException exc)
-		{
+		} catch (IOException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "I/O Error", 0);
 		}
 
-		if (!descriptionSet)
-		{
+		if (!descriptionSet) {
 			return;
 		}
 
@@ -488,13 +441,11 @@ public class MainWindow extends JFrame implements ActionListener
 			EditTask.editFile(this, pluginFile, pluginInfo);
 	}
 
-	private void editMasterList()
-	{
+	private void editMasterList() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -504,13 +455,11 @@ public class MainWindow extends JFrame implements ActionListener
 			MasterDialog.showDialog(this, pluginFile, plugin);
 	}
 
-	private void generateResponses()
-	{
+	private void generateResponses() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -518,75 +467,57 @@ public class MainWindow extends JFrame implements ActionListener
 		GenerateTask.generateResponses(this, pluginFile);
 	}
 
-	private void mergePlugins()
-	{
+	private void mergePlugins() {
 		String[] pluginNames = PluginDialog.showDialog(this);
-		if (pluginNames == null)
-		{
+		if (pluginNames == null) {
 			return;
 		}
 
-		RandomAccessFile in = null;
+		FileChannelRAF in = null;
 		boolean descriptionSet = false;
 		String creator = null;
 		String summary = null;
-		try
-		{
-			File pluginFile = new File(Main.pluginDirectory + Main.fileSeparator + pluginNames[0]);
-			if ((!pluginFile.exists()) || (!pluginFile.isFile()))
-			{
+		try {
+			File pluginFile = new File(Main.pluginDirectory + Main.fileSeparator + pluginNames [0]);
+			if ((!pluginFile.exists()) || (!pluginFile.isFile())) {
 				throw new IOException("'" + pluginFile.getName() + "' does not exist");
 			}
-			in = new RandomAccessFile(pluginFile, "r");
+			in = new FileChannelRAF(pluginFile, "r");
 			PluginHeader header = new PluginHeader(pluginFile);
 			header.read(in);
 			creator = header.getCreator();
 			summary = header.getSummary();
 			descriptionSet = true;
-		}
-		catch (PluginException exc)
-		{
+		} catch (PluginException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "Format Error", 0);
-		}
-		catch (IOException exc)
-		{
+		} catch (IOException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "I/O Error", 0);
-		}
-		catch (Throwable exc)
-		{
+		} catch (Throwable exc) {
 			Main.logException("Unable to read plugin header", exc);
 		}
-		try
-		{
-			if (in != null)
-			{
+		try {
+			if (in != null) {
 				in.close();
 				in = null;
 			}
-		}
-		catch (IOException exc)
-		{
+		} catch (IOException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "I/O Error", 0);
 		}
 
-		if (!descriptionSet)
-		{
+		if (!descriptionSet) {
 			return;
 		}
 
 		PluginInfo pluginInfo = MergeDialog.showDialog(this, creator, summary);
-		if (pluginInfo == null)
-		{
+		if (pluginInfo == null) {
 			return;
 		}
 
 		File mergedFile = new File(Main.pluginDirectory + Main.fileSeparator + pluginInfo.getName());
-		if (mergedFile.exists())
-		{
-			int selection = JOptionPane.showConfirmDialog(this, "'" + mergedFile.getName()
-					+ "' already exists.  Do you want to overwrite it?", "File exists", 0);
-			if (selection != 0)
-			{
+		if (mergedFile.exists()) {
+			int selection = JOptionPane.showConfirmDialog(this,
+					"'" + mergedFile.getName() + "' already exists.  Do you want to overwrite it?", "File exists", 0);
+			if (selection != 0) {
 				return;
 			}
 			mergedFile.delete();
@@ -595,15 +526,11 @@ public class MainWindow extends JFrame implements ActionListener
 		MergeTask.mergePlugins(this, pluginNames, pluginInfo);
 	}
 
-	private void mergeToMaster()
-	{
+	private void mergeToMaster() {
 		List<String[]> testVec = new ArrayList<String[]>();
-		String[] reg1 =
-		{ "0008DFD0", "Oblivion.ESM", "Tamriel", "NibenayBasinValleySubRegion06" };
-		String[] reg2 =
-		{ "0007B864", "Oblivion.ESM", "Tamriel", "CyrodiilWeatherRegion" };
-		String[] reg3 =
-		{ "0007B8CE", "Oblivion.ESM", "Tamriel", "TowerofFathisArenRegion" };
+		String[] reg1 = {"0008DFD0", "Oblivion.ESM", "Tamriel", "NibenayBasinValleySubRegion06"};
+		String[] reg2 = {"0007B864", "Oblivion.ESM", "Tamriel", "CyrodiilWeatherRegion"};
+		String[] reg3 = {"0007B8CE", "Oblivion.ESM", "Tamriel", "TowerofFathisArenRegion"};
 		testVec.add(reg1);
 		testVec.add(reg2);
 		testVec.add(reg3);
@@ -611,8 +538,7 @@ public class MainWindow extends JFrame implements ActionListener
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Master File");
 		chooser.setFileFilter(new PluginFileFilter(true));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File masterFile = chooser.getSelectedFile();
@@ -620,8 +546,7 @@ public class MainWindow extends JFrame implements ActionListener
 		chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -629,13 +554,11 @@ public class MainWindow extends JFrame implements ActionListener
 		MergeTask.mergeToMaster(this, masterFile, pluginFile);
 	}
 
-	private void moveWorldspaces()
-	{
+	private void moveWorldspaces() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -645,26 +568,22 @@ public class MainWindow extends JFrame implements ActionListener
 			WorldspaceTask.moveWorldspaces(this, pluginFile, option);
 	}
 
-	private void setDirectory()
-	{
+	private void setDirectory() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin Directory");
 		chooser.setFileFilter(new PluginDirectoryFilter());
 		chooser.setFileSelectionMode(1);
-		if (chooser.showDialog(this, "Select") == 0)
-		{
+		if (chooser.showDialog(this, "Select") == 0) {
 			Main.pluginDirectory = chooser.getSelectedFile().getPath();
 			Main.properties.setProperty("plugin.directory", Main.pluginDirectory);
 		}
 	}
 
-	private void splitRecords()
-	{
+	private void splitRecords() {
 		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File to Split");
 		chooser.setFileFilter(new PluginFileFilter(false));
-		if (chooser.showOpenDialog(this) != 0)
-		{
+		if (chooser.showOpenDialog(this) != 0) {
 			return;
 		}
 		File pluginFile = chooser.getSelectedFile();
@@ -674,24 +593,18 @@ public class MainWindow extends JFrame implements ActionListener
 			SplitDialog.showDialog(this, pluginFile, pluginNode);
 	}
 
-	private void exitProgram()
-	{
-		if (!this.windowMinimized)
-		{
+	private void exitProgram() {
+		if (!this.windowMinimized) {
 			Point p = Main.mainWindow.getLocation();
 			Main.properties.setProperty("window.main.position", p.x + "," + p.y);
 		}
 
 		Main.saveProperties();
 
-		if (Main.pluginSpill != null)
-		{
-			try
-			{
+		if (Main.pluginSpill != null) {
+			try {
 				Main.pluginSpill.close();
-			}
-			catch (IOException exc)
-			{
+			} catch (IOException exc) {
 				Main.logException("Unable to close spill file", exc);
 			}
 
@@ -700,11 +613,11 @@ public class MainWindow extends JFrame implements ActionListener
 		System.exit(0);
 	}
 
-	private void aboutTES4Plugin()
-	{
+	private void aboutTES4Plugin() {
 		StringBuilder info = new StringBuilder(256);
 		info.append("<html>TES4Gecko Version 15.2<br>");
-		info.append("<br>Created by TeamGecko<ul><li>ScripterRon (Ron Hoffman)<li>KomodoDave (N David Brown)<li>SACarrow (Steven A Carrow)<li>dev_akm (Aubrey K McAuley)</ul><br>");
+		info.append(
+				"<br>Created by TeamGecko<ul><li>ScripterRon (Ron Hoffman)<li>KomodoDave (N David Brown)<li>SACarrow (Steven A Carrow)<li>dev_akm (Aubrey K McAuley)</ul><br>");
 
 		info.append("See the included ReadMe file for usage details.<br>");
 
@@ -739,24 +652,22 @@ public class MainWindow extends JFrame implements ActionListener
 		JOptionPane.showMessageDialog(this, info.toString(), "About Gecko", 1);
 	}
 
-	private class MainWindowListener extends WindowAdapter
-	{
-		public MainWindowListener()
-		{
+	private class MainWindowListener extends WindowAdapter {
+		public MainWindowListener() {
 		}
 
-		public void windowIconified(WindowEvent we)
-		{
+		@Override
+		public void windowIconified(WindowEvent we) {
 			MainWindow.this.windowMinimized = true;
 		}
 
-		public void windowDeiconified(WindowEvent we)
-		{
+		@Override
+		public void windowDeiconified(WindowEvent we) {
 			MainWindow.this.windowMinimized = false;
 		}
 
-		public void windowClosing(WindowEvent we)
-		{
+		@Override
+		public void windowClosing(WindowEvent we) {
 			MainWindow.this.exitProgram();
 		}
 	}

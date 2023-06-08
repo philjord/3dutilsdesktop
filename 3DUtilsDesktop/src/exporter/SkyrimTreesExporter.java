@@ -8,7 +8,7 @@ import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
 import awt.tools3d.resolution.QueryProperties;
 import bsa.gui.BSAFileSetWithStatus;
-import esmio.loader.ESMManager;
+import esmio.loader.ESMManagerFile;
 import esmio.loader.IESMManager;
 import esmio.utils.source.EsmSoundKeyToName;
 import nif.NifToJ3d;
@@ -34,7 +34,7 @@ public class SkyrimTreesExporter
 		String scrollsFolder = PropertyLoader.properties.getProperty("SkyrimFolder");
 		String mainESMFile = scrollsFolder + PropertyLoader.fileSep + "Skyrim.esm";
 
-		IESMManager esmManager = ESMManager.getESMManager(mainESMFile);
+		IESMManager esmManager = ESMManagerFile.getESMManager(mainESMFile);
 		new EsmSoundKeyToName(esmManager);
 
 		BSAFileSetWithStatus bsaFileSet = null;
