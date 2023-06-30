@@ -54,7 +54,7 @@ import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiGeomMorpherController;
 import nif.j3d.particles.tes3.J3dNiParticles;
-import nif.shaders.NiGeometryAppearanceShader;
+import nif.shader.NiGeometryAppearanceShader;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.Utils3D;
@@ -140,11 +140,11 @@ public class NifDisplayTester
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
 		BSArchiveSetFile bsaFileSet = new BSArchiveSetFile(new String[] { //
-				"F:\\game_media\\Morrowind GOTYE\\Morrowind\\Data Files", //use the newer one with a few bits extra in it
-				"F:\\game_media\\Oblivion", //
-				"F:\\game_media\\Fallout3", //
-				"F:\\game_media\\Skyrim", //
-				"F:\\game_media\\Fallout4", //
+				"D:\\game_media\\Morrowind GOTYE\\Morrowind\\Data Files", //use the newer one with a few bits extra in it
+				"D:\\game_media\\Oblivion", //
+				"D:\\game_media\\Fallout3", //
+				"D:\\game_media\\Skyrim", //
+				"D:\\game_media\\Fallout4", //
 		}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 		
