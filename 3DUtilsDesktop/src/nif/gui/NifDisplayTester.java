@@ -172,6 +172,16 @@ public class NifDisplayTester
 				{
 					System.exit(0);
 				}
+				else if(e.getKeyCode() == KeyEvent.VK_SPACE)
+				{
+					//to quickly bring up a file to debug put it here!
+					// note you should comment out the light cubes to make it easier to debug the shaders etc
+					
+					//TODO so for now the remaining issue is the tbN matrix seems to be setting lighting and view to be buggered
+					// see ob_vcolors_ad.vert for details
+					
+					nifDisplay.nextFileToDisplay = new File("D:\\game_media\\Oblivion\\araltar01b.nif");
+				}
 			}
 		});
 
@@ -280,7 +290,7 @@ public class NifDisplayTester
 		caL1.setColor(lColor1);
 		appL1.setColoringAttributes(caL1);
 		l1Trans.addChild(new Sphere(0.02f, appL1));//oddly refuse to show anything?*/
-		l1Trans.addChild(new Cube(0.01f));
+//		l1Trans.addChild(new Cube(0.01f));
 
 		bg.addChild(l1RotTrans);
 
@@ -307,7 +317,7 @@ public class NifDisplayTester
 		pLight2.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l2Trans.addChild(pLight2);
 
-		l2Trans.addChild(new Cube(0.01f));
+//		l2Trans.addChild(new Cube(0.01f));
 
 		bg.addChild(l2RotTrans);
 
@@ -333,7 +343,7 @@ public class NifDisplayTester
 		background.setCapability(Background.ALLOW_APPLICATION_BOUNDS_READ);
 		bg.addChild(background);
 
-		bg.addChild(new Cube(0.01f));
+//		bg.addChild(new Cube(0.01f));
 
 		simpleUniverse.addBranchGraph(bg);
 
@@ -364,6 +374,9 @@ public class NifDisplayTester
 
 		//win.setJMenuBar(menuBar);
 		//win.setVisible(true);
+		
+		
+		
 	}
 
 	public void setNextFileTreeRoot(File nextFileTreeRoot)
@@ -380,6 +393,7 @@ public class NifDisplayTester
 
 	private void manage()
 	{
+		 	
 		if (nextFileTreeRoot != null)
 		{
 			if (!nextFileTreeRoot.equals(currentFileTreeRoot))
@@ -494,7 +508,12 @@ public class NifDisplayTester
 	public void showNif(String filename, MeshSource meshSource, TextureSource textureSource)
 	{
 		BgsmSource.setBgsmSource(meshSource);
-		display(NifToJ3d.loadNif(filename, meshSource, textureSource));
+		try {
+			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	private BranchGroup hbg;
@@ -599,7 +618,7 @@ public class NifDisplayTester
 			spinTransform.setEnable(spin);
 			BranchGroup bgc = new BranchGroup();
 			bgc.setCapability(BranchGroup.ALLOW_DETACH);
-			bgc.addChild(new Cube(0.01f));
+//			bgc.addChild(new Cube(0.01f));
 			modelGroup.addChild(bgc);
 
 			//Particles are aut looping for now
@@ -640,6 +659,9 @@ public class NifDisplayTester
 
 		nifDisplay = new NifDisplayTester();
 
+		
+		
+ 		
 		DetailsFileChooser dfc = new DetailsFileChooser(baseDir, new DetailsFileChooser.Listener() {
 			@Override
 			public void directorySelected(File dir)
@@ -657,7 +679,7 @@ public class NifDisplayTester
 		});
 
 		dfc.setFileFilter(new FileNameExtensionFilter("Nif", "nif", "btr"));
-
+ 
 	}
 
 	private class FileManageBehavior extends Behavior
