@@ -176,11 +176,10 @@ public class NifDisplayTester
 				{
 					//to quickly bring up a file to debug put it here!
 					// note you should comment out the light cubes to make it easier to debug the shaders etc
+
 					
-					//TODO so for now the remaining issue is the tbN matrix seems to be setting lighting and view to be buggered
-					// see ob_vcolors_ad.vert for details
-					
-					nifDisplay.nextFileToDisplay = new File("D:\\game_media\\Oblivion\\araltar01b.nif");
+					nifDisplay.nextFileToDisplay = new File("D:\\game_media\\Oblivion\\meshes\\effects\\se01gateway01.nif");
+					//nifDisplay.nextFileToDisplay = new File("D:\\game_media\\Morrowind\\Meshes\\e\\magic_area_alt.nif");
 				}
 			}
 		});
