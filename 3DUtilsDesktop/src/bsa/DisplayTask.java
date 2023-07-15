@@ -15,7 +15,7 @@ import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
 import bsa.tasks.Main;
 import bsaio.ArchiveEntry;
-import bsaio.displayables.DisplayableArchiveEntry;
+import bsaio.displayables.Displayable;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
@@ -60,9 +60,9 @@ public class DisplayTask extends Thread
 		{
 			try
 			{
-				InputStream in = ((DisplayableArchiveEntry) entry).getArchiveFile().getInputStream(entry);
+				InputStream in = ((Displayable) entry).getArchiveFile().getInputStream(entry);
 
-				String fileName = ((DisplayableArchiveEntry) entry).getName();
+				String fileName = ((Displayable) entry).getName();
 
 				int sep = fileName.lastIndexOf('.');
 				if (sep >= 0)
