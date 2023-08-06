@@ -34,7 +34,7 @@ import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import esmio.common.PluginException;
 import esmio.common.data.plugin.PluginRecord;
-import esmio.loader.CELLDIALPointer;
+import esmio.loader.FormToFilePointer;
 import esmio.loader.ESMManagerFile;
 import esmio.loader.IESMManager;
 import esmio.utils.source.EsmSoundKeyToName;
@@ -306,7 +306,7 @@ public class ESMBSAExporter extends JFrame
 							tableModel.addRow(new Object[] { false, "Ext", formId, pr });
 						}
 
-						for (CELLDIALPointer cp : esmManager.getAllInteriorCELLFormIds())
+						for (FormToFilePointer cp : esmManager.getAllInteriorCELLFormIds())
 						{
 							int formId = cp.formId;
 							PluginRecord pr = esmManager.getInteriorCELL(formId);

@@ -44,6 +44,17 @@ public class SerializedElement
 		return buffer[(offset + 0)] & 0xFF | (buffer[(offset + 1)] & 0xFF) << 8 | (buffer[(offset + 2)] & 0xFF) << 16
 				| (buffer[(offset + 3)] & 0xFF) << 24;
 	}
+	
+	/**
+	 * Used for fromId that reserve the top byte for a plugin/master idetifier
+	 * @param buffer
+	 * @param offset
+	 * @return
+	 */
+	public static int getInteger3(byte[] buffer, int offset)
+	{
+		return buffer[(offset + 0)] & 0xFF | (buffer[(offset + 1)] & 0xFF) << 8 | (buffer[(offset + 2)] & 0xFF) << 16;
+	}
 
 	public static void setInteger(int number, byte[] buffer, int offset)
 	{

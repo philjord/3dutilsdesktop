@@ -420,7 +420,7 @@ public class PluginGroup extends PluginRecord {
 
 	@Override
 	public String toString() {
-		int intValue = getInteger(this.groupLabel, 0);
+		int intValue = getInteger3(this.groupLabel, 0);
 		String text;
 
 		switch (this.groupType) {
