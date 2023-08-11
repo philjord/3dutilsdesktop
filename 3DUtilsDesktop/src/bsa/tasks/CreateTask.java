@@ -4,6 +4,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -73,8 +74,7 @@ public class CreateTask extends Thread {
 			if (fileCount != 0) {
 				if (archiveFile.exists() && !archiveFile.delete())
 					throw new IOException("Unable to delete '" + archiveFile.getPath() + "'");
-				//out = new RandomAccessFile(archiveFile, "rw");
-				out = new FileChannelRAF(archiveFile, "rw");
+				out = new FileChannelRAF(new RandomAccessFile(archiveFile, "rw"), "rw");
 				writeArchive(out);
 				out.close();
 				out = null;
