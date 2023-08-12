@@ -140,9 +140,10 @@ public class NifDisplayTester
 		//Test for android
 		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
 		BSArchiveSetFile bsaFileSet = new BSArchiveSetFile(new String[] { //
-				"D:\\game_media\\Morrowind GOTYE\\Morrowind\\Data Files", //use the newer one with a few bits extra in it
+				"D:\\game_media\\Morrowind", //use the newer one with a few bits extra in it
 				"D:\\game_media\\Oblivion", //
 				"D:\\game_media\\Fallout3", //
+				"D:\\game_media\\FalloutNV", //
 				"D:\\game_media\\Skyrim", //
 				"D:\\game_media\\Fallout4", //
 		}, true);
