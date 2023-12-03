@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -21,7 +20,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -40,8 +38,6 @@ import bsa.tasks.Main;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.DBException;
-import bsaio.displayables.Displayable;
-import nif.gui.KfDisplayTester;
 
 public class BSADDSToETC extends JFrame implements ActionListener
 {	
@@ -121,7 +117,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 
 			bsaFileSet = new BSAFileSetWithStatus(file.getAbsolutePath(), false, true);
 			
-			prefs.put("BSADDSToETCBase", file.getAbsolutePath());
+			prefs.put("BSADDSToETCBase", file.getParent());
 
 			//record the archive as the input file
 			this.archiveFile = bsaFileSet.get(0);
@@ -149,7 +145,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 		if (chooser.showOpenDialog(this) != 0)
 			return;
 		File file = chooser.getSelectedFile();
-		prefs.put("BSADDSToETCBaseOut", file.getAbsolutePath());
+		prefs.put("BSADDSToETCBaseOut", file.getParent());
 		
 		if (file.exists()) {
 			int option = JOptionPane.showConfirmDialog(this,
@@ -162,6 +158,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 			}
 		}
 	
+		long tstart = System.currentTimeMillis();
 		StatusDialog statusDialog = new StatusDialog(this, "Creating " + file.getPath());
 		CreateTaskFromBSA createTask = new CreateTaskFromBSA(file, archiveFile, statusDialog);
 		createTask.start();
@@ -173,6 +170,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 			JOptionPane.showMessageDialog(this, "No files were included in the archive", "Archive empty", 1);
 			return;
 		}
+		System.out.println(""	+ (System.currentTimeMillis() - tstart) + "ms to compress " + file.getPath() );
 
 		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(new FileInputStream(file).getChannel(),
 				file.getName());

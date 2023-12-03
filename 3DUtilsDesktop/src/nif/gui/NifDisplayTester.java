@@ -1,5 +1,7 @@
 package nif.gui;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -203,7 +205,9 @@ public class NifDisplayTester
 			*/
 		//TODO: these must come form a new one of those ^
 		canvas3D.getGLWindow().setSize(800, 600);
-		canvas3D.getGLWindow().setPosition(400, 30);
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); 
+		canvas3D.getGLWindow().setPosition((screenSize.width/2)-(canvas3D.getGLWindow().getWidth()/2), 
+				(screenSize.height/2)-(canvas3D.getGLWindow().getHeight()/2));
 		CompressedTextureLoader.setAnisotropicFilterDegree(8);
 
 		//win.setVisible(true);
