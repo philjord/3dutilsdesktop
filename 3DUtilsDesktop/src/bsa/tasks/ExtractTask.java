@@ -34,6 +34,7 @@ public class ExtractTask extends Thread
 		this.statusDialog = statusDialog;
 	}
 
+	@Override
 	public void run()
 	{
 		try
@@ -94,6 +95,7 @@ public class ExtractTask extends Thread
 			Main.logException("Exception while extracting files", exc);
 		}
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run()
 			{
 				statusDialog.closeDialog(completed);

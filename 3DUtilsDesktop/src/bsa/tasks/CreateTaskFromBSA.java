@@ -1,10 +1,10 @@
 package bsa.tasks;
 
 import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.InputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,18 +12,29 @@ import java.util.zip.Deflater;
 
 import javax.swing.SwingUtilities;
 
+import org.jogamp.java3d.NioImageBuffer;
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
+import org.jogamp.java3d.compressedtexture.dktxtools.dds.DDSDecompressor;
+
 import bsa.gui.StatusDialog;
 import bsaio.ArchiveEntry;
+import bsaio.ArchiveFile;
+import bsaio.ArchiveFile.SIG;
 import bsaio.DBException;
 import bsaio.HashCode;
 import bsaio.displayables.DisplayableArchiveEntry;
+import compressedtexture.DDSImage;
+import etcpack.ETCPack.FORMAT;
+import etcpack.QuickETC;
 import tools.io.FileChannelRAF;
 
-public class CreateTask extends Thread {
+public class CreateTaskFromBSA extends Thread {
 
-	private File					archiveFile;
+	private static final boolean CONVERT_DDS_to_KTX = true;
 
-	private File					dirFile;
+	private java.io.File			outputArchiveFile;
+
+	private ArchiveFile				inputArchive;
 
 	private StatusDialog			statusDialog;
 
@@ -43,12 +54,12 @@ public class CreateTask extends Thread {
 
 	private ArrayList<ArchiveEntry>	entries;
 
-	private List<Folder>			folders;
+	private ArrayList<Folder>		folders;
 
-	public CreateTask(File archiveFile, File dirFile, StatusDialog statusDialog) {
+	public CreateTaskFromBSA(java.io.File outputArchiveFile, ArchiveFile inputArchive, StatusDialog statusDialog) {
 		completed = false;
-		this.archiveFile = archiveFile;
-		this.dirFile = dirFile;
+		this.outputArchiveFile = outputArchiveFile;
+		this.inputArchive = inputArchive;
 		this.statusDialog = statusDialog;
 	}
 
@@ -58,23 +69,22 @@ public class CreateTask extends Thread {
 		try {
 			entries = new ArrayList<ArchiveEntry>(256);
 			folders = new ArrayList<Folder>(256);
-			archiveFlags = 7; // this is 4 and 2  and 1 :  4 is compressed, (0x100==256) is required for names to be written
+			archiveFlags = 3; // this is  2  and 1 being folders and filenames :  4 is compressed, (0x100==256) is required for names to be written
+			
+			if(inputArchive.getSig() != SIG.TES3)//tes3 no compression
+				archiveFlags |= 4;
 			fileFlags = 0;
-
-			File files[] = dirFile.listFiles();
-			if (files == null)
-				throw new IOException("Unable to access directory '" + dirFile.getPath() + "'");
-
-			for (int i = 0; i < files.length; i++) {
-				File file = files [i];
-				if (file.isDirectory())
-					addFolderFiles(file);
+			
+			List<ArchiveEntry> inEntries = inputArchive.getEntries(); 
+			// notice we require the loader to have keep the displayable version which holds the folder name per entry
+			for (ArchiveEntry entry : inEntries) {				
+				insertEntry(entry);				
 			}
 
 			if (fileCount != 0) {
-				if (archiveFile.exists() && !archiveFile.delete())
-					throw new IOException("Unable to delete '" + archiveFile.getPath() + "'");
-				out = new FileChannelRAF(new RandomAccessFile(archiveFile, "rw"), "rw");
+				if (outputArchiveFile.exists() && !outputArchiveFile.delete())
+					throw new IOException("Unable to delete '" + outputArchiveFile.getPath() + "'");
+				out = new FileChannelRAF(new java.io.RandomAccessFile(outputArchiveFile, "rw"), "rw");
 				writeArchive(out);
 				out.close();
 				out = null;
@@ -92,8 +102,8 @@ public class CreateTask extends Thread {
 			try {
 				out.close();
 				out = null;
-				if (archiveFile.exists())
-					archiveFile.delete();
+				if (outputArchiveFile.exists())
+					outputArchiveFile.delete();
 			} catch (IOException exc) {
 				Main.logException("I/O error while cleaning up", exc);
 			}
@@ -105,39 +115,27 @@ public class CreateTask extends Thread {
 			}
 		});
 	}
+  
 
-	private void addFolderFiles(File dirFile2) throws DBException, IOException {
-		File files[] = dirFile2.listFiles();
-		if (files == null)
-			throw new IOException("Unable to access directory '" + dirFile2.getPath() + "'");
-		if (files.length == 0)
-			return;
-		entries.ensureCapacity(files.length);
-		for (int i = 0; i < files.length; i++) {
-			File file = files [i];
-			if (file.isDirectory())
-				addFolderFiles(file);
-			else
-				insertFile(file);
-		}
+	private void insertEntry(ArchiveEntry entry) throws DBException {
+		String folderName = ((DisplayableArchiveEntry) entry).getFolderName();
+		//String baseName = "";// no base as we are coming from a BSA file
 
-	}
-
-	private void insertFile(File file) throws DBException {
-		String folderName = file.getParent().toLowerCase();
-		String baseName = dirFile.getPath();
-
-		folderName = folderName.substring(baseName.length() + 1);
+		//folderName = folderName.substring(baseName.length() + 1);
 		if (folderName.length() > 254) {
 			throw new DBException("Maximum folder path length is 254 characters");
 		}
 
-		String fileName = file.getName().toLowerCase();
+		
+		if(CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".dds")) {
+			entry.setFileName(entry.getFileName().replace(".dds",".ktx"));
+		}
+		
+		String fileName = ((DisplayableArchiveEntry) entry).getName();
 		if (fileName.length() > 254) {
 			throw new DBException("Maximum file name length is 254 characters");
 		}
 
-		DisplayableArchiveEntry entry = new DisplayableArchiveEntry(null, folderName, fileName);
 		boolean insert = true;
 
 		int count = entries.size();
@@ -146,8 +144,8 @@ public class CreateTask extends Thread {
 			ArchiveEntry listEntry = entries.get(i);
 			int diff = entry.compareTo(listEntry);
 			if (diff == 0) {
-				throw new DBException("Hash collision: '"	+ entry.getName() + "' and '"
-										+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
+				throw new DBException("Hash collision: '"	+ ((DisplayableArchiveEntry)entry).getName() + "' and '"
+						+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
 			}
 			if (diff < 0) {
 				insert = false;
@@ -180,16 +178,18 @@ public class CreateTask extends Thread {
 			} else if (ext.equals(".mp3")) {
 				fileFlags |= 0x10;
 				archiveFlags |= 0x10;
-				archiveFlags &= -5;
+				if(inputArchive.getSig() != SIG.TES3)//tes3 all sorts in the file
+					archiveFlags &= -5;
 			} else if (ext.equals(".ogg")) {
 				fileFlags |= 0x10;
-				archiveFlags &= -5;
+				if(inputArchive.getSig() != SIG.TES3)//tes3 all sorts in the file
+					archiveFlags &= -5;
 			} else if (ext.equals(".xml")) {
 				fileFlags |= 0x100;
 			}
 		}
 
-		if ((fileFlags & 2) != 0 && (fileFlags & -3) != 0) {
+		if ((inputArchive.getSig() != SIG.TES3) && ((fileFlags & 2) != 0 && (fileFlags & -3) != 0)) {
 			throw new DBException("Texture files must be packaged by themselves");
 		}
 		insert = true;
@@ -237,22 +237,36 @@ public class CreateTask extends Thread {
 		byte[] buffer = new byte[256];
 		byte[] dataBuffer = new byte[32000];
 		byte[] compressedBuffer = new byte[8000];
-		byte[] header = new byte[36];
+		
 
-		header [0] = 66;
-		header [1] = 83;
-		header [2] = 65;
-		setInteger(104, header, 4);
-		setInteger(36, header, 8);
-		setInteger(archiveFlags, header, 12);
-		setInteger(folderCount, header, 16);
-		setInteger(fileCount, header, 20);
-		setInteger(folderNamesLength, header, 24);
-		setInteger(fileNamesLength, header, 28);
-		setInteger(fileFlags, header, 32);
-
+		byte[] header;
+		//TES3 header is different
+		if(inputArchive.getSig() != SIG.TES3 || true) {		
+			header = new byte[36];
+			//this is the word "BSA\0" compare with BTDX
+			header [0] = 66;//(byte)"B".toCharArray()[0]; perhaps?
+			header [1] = 83;
+			header [2] = 65;
+			setInteger(104, header, 4);// 104 is FO3 and TES5, 103 is TES4
+			setInteger(36, header, 8);
+			setInteger(archiveFlags, header, 12);
+			setInteger(folderCount, header, 16);
+			setInteger(fileCount, header, 20);
+			setInteger(folderNamesLength, header, 24);
+			setInteger(fileNamesLength, header, 28);
+			setInteger(fileFlags, header, 32);
+			
+		} else {
+			//TES3 == 256
+			header = new byte[12];
+			setInteger(256, header, 0);
+			//tODO: need to write these 2 styles and the rest as well
+			//int hashtableOffset = getInteger(header, 4);
+			//fileCount = getInteger(header, 8);
+			
+		}
 		out.write(header);
-
+ 
 		long fileOffset = header.length + folderCount * 16 + fileNamesLength;
 		if (fileOffset > 0x7fffffffL) {
 			throw new DBException("File offset exceeds 2GB");
@@ -291,7 +305,7 @@ public class CreateTask extends Thread {
 		}
 
 		for (ArchiveEntry entry : entries) {
-			String fileName = ((DisplayableArchiveEntry)entry).getFileName();
+			String fileName = entry.getFileName();
 			byte[] nameBuffer = fileName.getBytes();
 			if (nameBuffer.length != fileName.length()) {
 				throw new DBException("Encoded file name is longer than character name");
@@ -305,18 +319,35 @@ public class CreateTask extends Thread {
 		fileIndex = 0;
 
 		for (ArchiveEntry entry : entries) {
-			FileInputStream in = null;
+			InputStream in = null;
 			Deflater deflater = null;
 
 			try {
-				File file = new File(dirFile.getPath() + "\\" + ((DisplayableArchiveEntry)entry).getName());
+				// notice we required the loader to have keep the displayable version which holds the folder name per entry
+				//((DisplayableArchiveEntry) entry).getFolderName();
+				/*File file = new File(inputArchive.getPath() + "\\" + entry.getFileName()); 
 				int residualLength = (int)file.length();
 				entry.setFileOffset(out.getFilePointer());
 				entry.setFileLength(residualLength);
-				in = new FileInputStream(file);
+				in = new FileInputStream(file);*/
+				
+				
+				in = inputArchive.getInputStream(entry);
+				
+				// convert to etc2 if needed
+				if(CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".ktx")) {
+					ByteBuffer bbKtx = convertDDStoKTX(in);
+					in = new ByteBufferBackedInputStream(bbKtx);					
+					entry.setFileLength(bbKtx.limit());
+				}
+				
+				int residualLength = entry.getFileLength();
+				
+				//NOTICE entry now configured for output only, input permanently broken
+				entry.setFileOffset(out.getFilePointer());
 
 				if ((archiveFlags & 0x100) != 0) {
-					byte nameBuffer2[] = ((DisplayableArchiveEntry)entry).getName().getBytes();
+					byte nameBuffer2[] = entry.getFileName().getBytes();
 					buffer [0] = (byte)nameBuffer2.length;
 					out.write(buffer, 0, 1);
 					out.write(nameBuffer2);
@@ -330,7 +361,7 @@ public class CreateTask extends Thread {
 						deflater = new Deflater(6);
 						while (!deflater.finished()) {
 							int count;
-							if (deflater.needsInput()) {
+							if (deflater.needsInput() && residualLength > 0) {
 								int length = Math.min(dataBuffer.length, residualLength);
 								count = in.read(dataBuffer, 0, length);
 								if (count == -1) {
@@ -394,7 +425,7 @@ public class CreateTask extends Thread {
 				ArchiveEntry entry = entries.get(entryIndex++);
 				int count;
 				if ((archiveFlags & 0x100) != 0) {
-					count = ((DisplayableArchiveEntry)entry).getName().getBytes().length + 1;
+					count = entry.getFileName().getBytes().length + 1;
 				} else {
 					count = 0;
 				}
@@ -469,5 +500,117 @@ public class CreateTask extends Thread {
 		}
 
 	}
+	
+	/**
+	 * Take an input stream in and returns a bytebuffer back out in ktx format
+	 * @param inputStream
+	 * @return
+	 */
+	public static ByteBuffer convertDDStoKTX(InputStream inputStream) throws IOException {
 
+		DDSImage ddsImage = DDSImage.read(CompressedTextureLoader.toByteBuffer(inputStream));
+
+		if (ddsImage != null) {
+			DDSDecompressor decomp = new DDSDecompressor(ddsImage, 0, null);
+			NioImageBuffer decompressedImage = decomp.convertImageNio();
+			Buffer b = decompressedImage.getDataBuffer();
+			if (b instanceof ByteBuffer) {
+				//ok so now find the RGB or RGBA byte buffers
+				ByteBuffer bb = (ByteBuffer)decompressedImage.getDataBuffer();
+				byte[] img = null;
+				byte[] imgalpha = null;
+				if (decompressedImage.getImageType() == NioImageBuffer.ImageType.TYPE_3BYTE_RGB) {
+					// just put the RGB data straight into the img byte array 
+					img = new byte[bb.capacity()];
+					bb.get(img, 0, bb.capacity());
+				} else if (decompressedImage.getImageType() == NioImageBuffer.ImageType.TYPE_4BYTE_RGBA) {
+					// copy RGB 3 sets out then 1 sets of alpha 
+					img = new byte[(bb.capacity() / 4) * 3];
+					imgalpha = new byte[(bb.capacity() / 4)];
+					for (int i = 0; i < img.length / 3; i++) {
+						img[i * 3 + 0] = bb.get();
+						img[i * 3 + 1] = bb.get();
+						img[i * 3 + 2] = bb.get();
+						imgalpha[i] = bb.get();
+					}
+				} else if (decompressedImage.getImageType() == NioImageBuffer.ImageType.TYPE_BYTE_GRAY) {
+					// copy RGB from the 1 byte of L8 data and use RGB (FORMAT.ETC2PACKAGE_R is odd 16 bit thing)
+					img = new byte[bb.capacity() * 3];
+					for (int i = 0; i < img.length / 3; i++) {
+						byte byt = bb.get();
+						img[i * 3 + 0] = byt;
+						img[i * 3 + 1] = byt;
+						img[i * 3 + 2] = byt;
+					}
+				} else {
+					System.err.println("Bad Image Type " + decompressedImage.getImageType());
+					return null;
+				}
+
+				int fmt = ddsImage.getPixelFormat();
+				FORMAT format = FORMAT.ETC2PACKAGE_RGBA;
+
+				if (fmt == DDSImage.D3DFMT_R8G8B8) {
+					format = FORMAT.ETC2PACKAGE_RGB;
+				} else if (fmt == DDSImage.D3DFMT_A8R8G8B8 || fmt == DDSImage.D3DFMT_X8R8G8B8) {
+					format = FORMAT.ETC2PACKAGE_RGBA;
+				} else if (fmt == DDSImage.D3DFMT_DXT1) {
+					if (!decomp.decompressedIsOpaque()) {
+						format = FORMAT.ETC2PACKAGE_RGBA1;
+					} else {
+						format = FORMAT.ETC2PACKAGE_RGB;
+					}
+				} else if (fmt == DDSImage.D3DFMT_DXT2	|| fmt == DDSImage.D3DFMT_DXT3 || fmt == DDSImage.D3DFMT_DXT4
+							|| fmt == DDSImage.D3DFMT_DXT5) {
+					if (!decomp.decompressedIsOpaque()) {
+						format = FORMAT.ETC2PACKAGE_RGBA;
+					} else {
+						format = FORMAT.ETC2PACKAGE_RGB;
+					}
+				} else if (fmt == DDSImage.D3DFMT_L8) {
+					format = FORMAT.ETC2PACKAGE_RGB;
+				}
+
+				// perhaps normal maps (_n) should be forcibly set to RGB ( not sRGBA)??
+				//if(filename.indexOf("_n.dds") > 0)
+				//	format = FORMAT.ETC2PACKAGE_RGB;
+
+				ByteBuffer ktxBB = null;
+				QuickETC ep = new QuickETC();
+				//Note mipmaps on to use on a GPU!
+				ktxBB = ep.compressImageToByteBuffer(img, imgalpha, ddsImage.getWidth(), ddsImage.getHeight(), format,
+						true);
+
+				return ktxBB;
+			}
+		}
+
+		return null;
+	}
+	public class ByteBufferBackedInputStream extends InputStream {
+
+	    ByteBuffer buf;
+
+	    public ByteBufferBackedInputStream(ByteBuffer buf) {
+	        this.buf = buf;
+	    }
+
+	    public int read() throws IOException {
+	        if (!buf.hasRemaining()) {
+	            return -1;
+	        }
+	        return buf.get() & 0xFF;
+	    }
+
+	    public int read(byte[] bytes, int off, int len)
+	            throws IOException {
+	        if (!buf.hasRemaining()) {
+	            return -1;
+	        }
+
+	        len = Math.min(len, buf.remaining());
+	        buf.get(bytes, off, len);
+	        return len;
+	    }
+	}
 }
