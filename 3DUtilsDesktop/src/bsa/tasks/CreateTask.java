@@ -98,12 +98,7 @@ public class CreateTask extends Thread {
 				Main.logException("I/O error while cleaning up", exc);
 			}
 		}
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				statusDialog.closeDialog(completed);
-			}
-		});
+		statusDialog.closeDialog(completed);
 	}
 
 	private void addFolderFiles(File dirFile2) throws DBException, IOException {

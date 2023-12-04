@@ -144,12 +144,7 @@ public class LoadTask extends Thread {
 		}
 
 		if (statusDialog != null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					statusDialog.closeDialog(completed);
-				}
-			});
+			statusDialog.closeDialog(completed);
 		}
 	}
 }

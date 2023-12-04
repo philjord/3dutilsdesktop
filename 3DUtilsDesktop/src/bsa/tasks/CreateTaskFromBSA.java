@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import javax.swing.SwingUtilities;
-
 import org.jogamp.java3d.NioImageBuffer;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 import org.jogamp.java3d.compressedtexture.dktxtools.dds.DDSDecompressor;
@@ -28,6 +26,9 @@ import etcpack.ETCPack.FORMAT;
 import etcpack.QuickETC;
 import tools.io.FileChannelRAF;
 
+/**
+ * This is prmarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
+ */
 public class CreateTaskFromBSA extends Thread {
 
 	private static final boolean CONVERT_DDS_to_KTX = true;
@@ -108,12 +109,8 @@ public class CreateTaskFromBSA extends Thread {
 				Main.logException("I/O error while cleaning up", exc);
 			}
 		}
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				statusDialog.closeDialog(completed);
-			}
-		});
+		if(statusDialog != null)
+			statusDialog.closeDialog(completed);			
 	}
   
 
@@ -260,7 +257,7 @@ public class CreateTaskFromBSA extends Thread {
 			//TES3 == 256
 			header = new byte[12];
 			setInteger(256, header, 0);
-			//tODO: need to write these 2 styles and the rest as well
+			//TODO: need to write these 2 styles and the rest as well
 			//int hashtableOffset = getInteger(header, 4);
 			//fileCount = getInteger(header, 8);
 			
@@ -414,7 +411,8 @@ public class CreateTaskFromBSA extends Thread {
 			int newProgress = (++fileIndex * 100) / fileCount;
 			if (newProgress >= currentProgress + 5) {
 				currentProgress = newProgress;
-				statusDialog.updateProgress(currentProgress);
+				if(statusDialog != null)
+					statusDialog.updateProgress(currentProgress);
 			}
 
 		}

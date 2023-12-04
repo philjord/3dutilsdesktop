@@ -214,7 +214,7 @@ public class BSAFileSetWithStatus extends ArrayList<ArchiveFile>
 		List<ArchiveFile> ret = new ArrayList<ArchiveFile>();
 		for (ArchiveFile af : this)
 		{
-			if (af.hasDDS())
+			if (af.hasTextureFiles())
 				ret.add(af);
 		}
 		return ret;

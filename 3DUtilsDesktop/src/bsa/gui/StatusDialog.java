@@ -53,9 +53,14 @@ public class StatusDialog extends JDialog
 
 	public void closeDialog(boolean completed)
 	{
-		status = completed ? 1 : 0;
-		setVisible(false);
-		dispose();
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				status = completed ? 1 : 0;
+				setVisible(false);
+				dispose();
+			}
+		});		
 	}
 
 	public void updateMessage(String text)
