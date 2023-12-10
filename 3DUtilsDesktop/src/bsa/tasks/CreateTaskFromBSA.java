@@ -314,10 +314,9 @@ public class CreateTaskFromBSA extends Thread {
 
 		int currentProgress = 0;
 		fileIndex = 0;
-
+		Deflater deflater = new Deflater(6);
 		for (ArchiveEntry entry : entries) {
 			InputStream in = null;
-			Deflater deflater = null;
 
 			try {
 				// notice we required the loader to have keep the displayable version which holds the folder name per entry
@@ -328,7 +327,7 @@ public class CreateTaskFromBSA extends Thread {
 				entry.setFileLength(residualLength);
 				in = new FileInputStream(file);*/
 				
-				
+//FIXME: can I have multiple inputstream from the archive for multithreading?	 yes.			
 				in = inputArchive.getInputStream(entry);
 				
 				// convert to etc2 if needed
@@ -346,6 +345,7 @@ public class CreateTaskFromBSA extends Thread {
 				
 				//NOTICE entry now configured for output only, input permanently broken
 				entry.setFileOffset(out.getFilePointer());
+//FIXME: If I write the data below to a fat buffer then use the pointer to find the location again and write it all at once I can get multi?
 
 				if ((archiveFlags & 0x100) != 0) {
 					byte nameBuffer2[] = entry.getFileName().getBytes();
@@ -359,7 +359,7 @@ public class CreateTaskFromBSA extends Thread {
 					out.write(buffer, 0, 4);
 					int compressedLength = 4;
 					if (residualLength > 0) {
-						deflater = new Deflater(6);
+
 						while (!deflater.finished()) {
 							int count;
 							if (deflater.needsInput() && residualLength > 0) {
@@ -398,16 +398,17 @@ public class CreateTaskFromBSA extends Thread {
 				if (in != null)
 					in.close();
 				if (deflater != null)
-					deflater.end();
+					deflater.reset();
 			} catch (IOException e) {
 				System.out.println("IOException "+ ((DisplayableArchiveEntry) entry).getName());
 				if (in != null)
 					in.close();
 				if (deflater != null)
-					deflater.end();			
+					deflater.reset();			
 				e.printStackTrace();
 			}
 
+//FIXME: this after each multi run, but fine			
 			int newProgress = (++fileIndex * 100) / fileCount;
 			if (newProgress >= currentProgress + 5) {
 				currentProgress = newProgress;
@@ -416,6 +417,11 @@ public class CreateTaskFromBSA extends Thread {
 			}
 
 		}
+		if (deflater != null)
+			deflater.end();
+		
+		// Note the files above don't need a pos reset as the nex section finds itself
+
 
 		long fileOffset2 = header.length + folderCount * 16;
 		out.seek(fileOffset2);
