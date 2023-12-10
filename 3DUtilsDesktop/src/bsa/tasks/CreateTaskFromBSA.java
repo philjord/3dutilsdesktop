@@ -23,6 +23,7 @@ import bsaio.HashCode;
 import bsaio.displayables.DisplayableArchiveEntry;
 import compressedtexture.DDSImage;
 import etcpack.ETCPack.FORMAT;
+import texture.DDSToKTXConverter;
 import etcpack.QuickETC;
 import tools.io.FileChannelRAF;
 
@@ -332,12 +333,12 @@ public class CreateTaskFromBSA extends Thread {
 				
 				// convert to etc2 if needed
 				if(CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".ktx")) {
-					ByteBuffer bbKtx = convertDDStoKTX(in);
+					ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in, ((DisplayableArchiveEntry) entry).getName());
 					if(bbKtx != null) {
 						in = new ByteBufferBackedInputStream(bbKtx);					
 						entry.setFileLength(bbKtx.limit());
 					} else {
-						System.out.println("Conversion failed for "+ ((DisplayableArchiveEntry) entry).getName());
+						System.out.println("Conversion failed for " + ((DisplayableArchiveEntry) entry).getName());
 					}
 				}
 				
