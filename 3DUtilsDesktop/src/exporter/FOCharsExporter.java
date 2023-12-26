@@ -6,9 +6,9 @@ import java.util.prefs.Preferences;
 
 import awt.tools3d.resolution.QueryProperties;
 import bsa.gui.BSAFileSetWithStatus;
-import esmio.loader.ESMManagerFile;
-import esmio.loader.IESMManager;
-import esmio.utils.source.EsmSoundKeyToName;
+import esfilemanager.loader.ESMManagerFile;
+import esfilemanager.loader.IESMManager;
+import esfilemanager.utils.source.EsmSoundKeyToName;
 import nif.NifToJ3d;
 import scrollsexplorer.PropertyLoader;
 import tools.io.ConfigLoader;

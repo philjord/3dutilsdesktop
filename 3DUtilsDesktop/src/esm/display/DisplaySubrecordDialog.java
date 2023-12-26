@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import esmio.common.data.plugin.PluginSubrecord;
+import esfilemanager.common.data.plugin.PluginSubrecord;
 
 public class DisplaySubrecordDialog extends JDialog implements ActionListener
 {
@@ -50,7 +50,7 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		    subrecord.getSubrecordType(), Integer.valueOf(subrecordData.length)
 		}));*/
 		dumpData.append("" + subrecord.getSubrecordType() + " subrecord: Data length x'" + subrecordData.length + "'\n");
-		dumpData.append("\n       0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
+		dumpData.append("\n      0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F\n");
 		StringBuffer dumpHex = new StringBuffer(48);
 		StringBuffer dumpLine = new StringBuffer(16);
 		for (int i = 0; i < subrecordData.length; i += 16)

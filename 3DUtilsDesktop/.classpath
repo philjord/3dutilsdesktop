@@ -5,7 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/3DTools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/BSAManager"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/ESMManager"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ESFileManager"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jbullet1.1"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jnif"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jnifj3d"/>

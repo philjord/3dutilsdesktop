@@ -6,7 +6,7 @@ import org.jogamp.java3d.MediaContainer;
 
 import bsa.gui.BSAFileSetWithStatus;
 import bsa.source.BsaSoundSource;
-import esmio.utils.source.EsmSoundKeyToName;
+import esfilemanager.utils.source.EsmSoundKeyToName;
 
 public class BsaRecordedSoundSource extends BsaSoundSource
 {

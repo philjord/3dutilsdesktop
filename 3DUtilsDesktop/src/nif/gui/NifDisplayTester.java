@@ -131,8 +131,8 @@ public class NifDisplayTester
 			System.exit(0);
 		}
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
-		//ASTC or DDS
-		//FileTextureSource.compressionType = FileTextureSource.CompressionType.KTX;
+		 
+		BsaTextureSource.allowedTextureFormats = BsaTextureSource.AllowedTextureFormats.DDS;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 

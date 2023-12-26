@@ -3,7 +3,7 @@ package esm.analyzer;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
-import esmio.common.data.record.Subrecord;
+import esfilemanager.common.data.record.Subrecord;
 import tools.io.ESMByteConvert;
 
 public class SubrecordStats
