@@ -2,6 +2,8 @@ package esm.display;
 
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,6 +37,7 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		button.addActionListener(this);
 		buttonPane.add(button);
 		contentPane.add(buttonPane);
+		contentPane.setMinimumSize(new Dimension(400, 50));
 		setContentPane(contentPane);
 	}
 
@@ -57,8 +60,8 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 				int offset = i + j;
 				if (offset == subrecordData.length)
 					break;
-				//dumpHex.append(String.format(" %02X", new Object[] { Byte.valueOf(subrecordData[offset])}));
-				dumpHex.append(" " + subrecordData[offset]);
+				dumpHex.append(String.format(" %02X", new Object[] { Byte.valueOf(subrecordData[offset])}));
+				//dumpHex.append(" " + subrecordData[offset]);
 				if (subrecordData[offset] >= 32 && subrecordData[offset] < 127)
 					dumpLine.append(new String(subrecordData, offset, 1));
 				else
@@ -70,7 +73,7 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 			for (; dumpLine.length() < 16; dumpLine.append(" "))
 				;
 			//dumpData.append(String.format("%04X:", new Object[] { Integer.valueOf(i)}));
-			dumpData.append("" + i + ":");
+			dumpData.append((i< 10 ? " " : "") + (i < 100 ? " " : "") + i + ":");
 			dumpData.append(dumpHex);
 			dumpData.append("  *");
 			dumpData.append(dumpLine);
@@ -82,6 +85,7 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		}
 
 		JTextArea textArea = new JTextArea(dumpData.toString());
+		textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		scrollPane.setVerticalScrollBarPolicy(22);
 

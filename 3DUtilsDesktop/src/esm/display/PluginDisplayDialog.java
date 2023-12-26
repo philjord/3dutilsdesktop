@@ -28,8 +28,8 @@ import javax.swing.tree.TreePath;
 
 import esm.EsmFileLocations;
 import esmio.common.PluginException;
-import esmio.common.data.plugin.Plugin;
-import esmio.common.data.plugin.PluginFile;
+import esmio.common.data.display.Plugin;
+import esmio.common.data.display.PluginFile;
 import esmio.common.data.plugin.PluginGroup;
 import esmio.common.data.plugin.PluginRecord;
 import esmio.common.data.plugin.PluginSubrecord;
@@ -56,9 +56,10 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 
 				PluginDisplayDialog displayDialog = new PluginDisplayDialog(plugin);
 				displayDialog.setTitle("Display of " + pluginFile.getName());
-				displayDialog.setSize(800, 800);
+				displayDialog.setSize(1200, 800);
 				displayDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				displayDialog.setVisible(true);
+				displayDialog.setLocationRelativeTo(null); 
 
 				System.out.println("Finished loading in " + (System.currentTimeMillis() - startTime));
 			}
@@ -87,9 +88,6 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		pluginTree.setScrollsOnExpand(true);
 		pluginTree.addTreeExpansionListener(this);
 		JScrollPane pluginScrollPane = new JScrollPane(pluginTree);
-		pluginScrollPane.setHorizontalScrollBarPolicy(32);
-		pluginScrollPane.setVerticalScrollBarPolicy(22);
-		pluginScrollPane.setPreferredSize(new Dimension(380, 380));
 
 		JPanel treePane = new JPanel();
 		treePane.setLayout(new BoxLayout(treePane, 0));
@@ -134,6 +132,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent ae)
 	{
 		String action = ae.getActionCommand();
@@ -257,6 +256,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		}
 	}
 
+	@Override
 	public void treeExpanded(TreeExpansionEvent event)
 	{
 		JTree tree = (JTree) event.getSource();
@@ -277,6 +277,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		}
 	}
 
+	@Override
 	public void treeCollapsed(TreeExpansionEvent treeexpansionevent)
 	{
 	}
