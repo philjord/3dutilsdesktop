@@ -20,6 +20,7 @@ import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
+import texture.Texture2DDisplay;
 import tools.ddstexture.utils.DDSTextureLoaderTester;
 import utils.source.DummyTextureSource;
 
@@ -91,7 +92,7 @@ public class DisplayTask extends Thread
 							getNifDisplayer().showNif(fileName, new BsaMeshSource(bsaFileSet), new BsaTextureSource(bsaFileSet));
 						}
 					}
-					else if (ext.equals(".dds"))
+					else if (ext.equals(".dds") || ext.equals(".ktx"))
 					{
 						if (verifyOnly)
 						{
@@ -112,8 +113,12 @@ public class DisplayTask extends Thread
 						}
 						else
 						{
-							DDSTextureLoaderTester.showImage(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName),
-									entries.size() < 10 ? 5000 : 500);
+							//FIXME: use the Texture2DDisplay instead
+							
+							Texture2DDisplay.showImageInShape(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName));
+							
+							//DDSTextureLoaderTester.showImage(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName),
+							//		entries.size() < 10 ? 5000 : 500);
 						}
 					}
 					else if (ext.equals(".kf"))

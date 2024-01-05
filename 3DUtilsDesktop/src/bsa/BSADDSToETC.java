@@ -6,8 +6,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
@@ -23,19 +21,14 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 
 import bsa.gui.ArchiveNode;
 import bsa.gui.BSAFileSetWithStatus;
-import bsa.gui.FileNode;
-import bsa.gui.FolderNode;
 import bsa.gui.StatusDialog;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.CreateTaskFromBSA;
 import bsa.tasks.LoadTask;
 import bsa.tasks.Main;
-import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.DBException;
 
@@ -86,6 +79,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 		 
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent ae)
 	{
 		try
@@ -190,77 +184,6 @@ public class BSADDSToETC extends JFrame implements ActionListener
 		}
 
 	}
-
-	 
-
-	private void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException
-	{
-		if (bsaFileSet == null)
-		{
-			JOptionPane.showMessageDialog(this, "You must open an archive file", "No archive file", 0);
-			return;
-		}
-		StatusDialog statusDialog = new StatusDialog(this, "Displaying files from " + bsaFileSet.getName());
-
-		List<ArchiveEntry> entries = null;
-		if (displayAllFiles)
-		{
-			entries = bsaFileSet.getEntries(statusDialog);
-		}
-		else
-		{
-			TreePath treePaths[] = tree.getSelectionPaths();
-			if (treePaths == null)
-			{
-				JOptionPane.showMessageDialog(this, "You must select one or more files to extract", "No files selected", 0);
-				return;
-			}
-			entries = new ArrayList<ArchiveEntry>(100);
-			for (int i = 0; i < treePaths.length; i++)
-			{
-				TreePath treePath = treePaths[i];
-				Object obj = treePath.getLastPathComponent();
-				if (obj instanceof FolderNode)
-				{
-					addFolderChildren((FolderNode) obj, entries);
-					continue;
-				}
-				if (!(obj instanceof FileNode))
-					continue;
-				ArchiveEntry entry = ((FileNode) obj).getEntry();
-				if (!entries.contains(entry))
-					entries.add(entry);
-			}
-
-		}
-
-		DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly, false);
-		displayTask.start();
-		statusDialog.showDialog();
-		displayTask.join();
-	}
-
-	private void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries)
-	{
-		int count = folderNode.getChildCount();
-		for (int i = 0; i < count; i++)
-		{
-			TreeNode node = folderNode.getChildAt(i);
-			if (node instanceof FolderNode)
-			{
-				addFolderChildren((FolderNode) node, entries);
-				continue;
-			}
-			if (!(node instanceof FileNode))
-				continue;
-			ArchiveEntry entry = ((FileNode) node).getEntry();
-			if (!entries.contains(entry))
-				entries.add(entry);
-		}
-
-	}
-
- 
  
 	
 	public static void main(String args[])

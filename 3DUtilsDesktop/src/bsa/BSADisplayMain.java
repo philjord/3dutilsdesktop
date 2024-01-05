@@ -1,5 +1,6 @@
 package bsa;
 
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -62,7 +63,11 @@ public class BSADisplayMain extends Main
 		{
 			mainWindow = new BSAContentDisplayTest();
 			mainWindow.pack();
+			mainWindow.setLocationRelativeTo(null);
 			mainWindow.setVisible(true);
+			
+			//might as well open an archive, not much will happen otherwise
+			((BSAContentDisplayTest)mainWindow).actionPerformed(new ActionEvent(mainWindow, -1, "open"));
 		}
 		catch (Throwable exc)
 		{

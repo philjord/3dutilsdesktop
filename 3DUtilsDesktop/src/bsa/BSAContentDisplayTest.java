@@ -138,6 +138,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 
 		tree.addMouseListener(new MouseAdapter()
 		{
+			@Override
 			public void mouseClicked(MouseEvent e)
 			{
 				if (e.getClickCount() == 2)
@@ -155,6 +156,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		});
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent ae)
 	{
 		try
@@ -355,16 +357,19 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 
 		}
 
+		@Override
 		public void windowIconified(WindowEvent we)
 		{
 			windowMinimized = true;
 		}
 
+		@Override
 		public void windowDeiconified(WindowEvent we)
 		{
 			windowMinimized = false;
 		}
 
+		@Override
 		public void windowClosing(WindowEvent we)
 		{
 			try
