@@ -21,24 +21,22 @@ import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
 import texture.Texture2DDisplay;
-import tools.ddstexture.utils.DDSTextureLoaderTester;
 import utils.source.DummyTextureSource;
 
-public class DisplayTask extends Thread
-{
-	private BSAFileSetWithStatus bsaFileSet;
+public class DisplayTask extends Thread {
+	private BSAFileSetWithStatus	bsaFileSet;
 
-	private List<ArchiveEntry> entries;
+	private List<ArchiveEntry>		entries;
 
-	private StatusDialog statusDialog;
+	private StatusDialog			statusDialog;
 
-	private boolean verifyOnly;
+	private boolean					verifyOnly;
 
-	private boolean sopErrOnly;
-	private boolean completed;
+	private boolean					sopErrOnly;
+	private boolean					completed;
 
-	public DisplayTask(BSAFileSetWithStatus bsaFileSet, List<ArchiveEntry> entries, StatusDialog statusDialog, boolean verifyOnly, boolean sopErrOnly)
-	{
+	public DisplayTask(	BSAFileSetWithStatus bsaFileSet, List<ArchiveEntry> entries, StatusDialog statusDialog,
+						boolean verifyOnly, boolean sopErrOnly) {
 		completed = false;
 		this.bsaFileSet = bsaFileSet;
 		this.entries = entries;
@@ -48,8 +46,7 @@ public class DisplayTask extends Thread
 	}
 
 	@Override
-	public void run()
-	{
+	public void run() {
 
 		statusDialog.updateMessage("" + (verifyOnly ? "Verifying files" : "Displaying Files"));
 		statusDialog.updateProgress(0);
@@ -57,83 +54,59 @@ public class DisplayTask extends Thread
 		int fileCount = entries.size();
 		int filesProcessCount = 0;
 		float currentProgress = 0;
-		for (ArchiveEntry entry : entries)
-		{
-			try
-			{
-				InputStream in = ((Displayable) entry).getArchiveFile().getInputStream(entry);
+		for (ArchiveEntry entry : entries) {
+			try {
+				InputStream in = ((Displayable)entry).getArchiveFile().getInputStream(entry);
 
-				String fileName = ((Displayable) entry).getName();
+				String fileName = ((Displayable)entry).getName();
 
 				int sep = fileName.lastIndexOf('.');
-				if (sep >= 0)
-				{
+				if (sep >= 0) {
 					String ext = fileName.substring(sep);
-					if (ext.equals(".nif"))
-					{
-						if (verifyOnly)
-						{
-							NifJ3dVisRoot nr = NifToJ3d.loadShapes(fileName, new BsaMeshSource(bsaFileSet), new DummyTextureSource());
-							if (nr != null)
-							{
-								if (!sopErrOnly)
-								{
+					if (ext.equals(".nif")) {
+						if (verifyOnly) {
+							NifJ3dVisRoot nr = NifToJ3d.loadShapes(fileName, new BsaMeshSource(bsaFileSet),
+									new DummyTextureSource());
+							if (nr != null) {
+								if (!sopErrOnly) {
 									System.out.println("verified: " + fileName);
 								}
-							}
-							else
-							{
+							} else {
 								System.out.println("issue: " + fileName);
 							}
 							NifToJ3d.clearCache();
+						} else {
+							getNifDisplayer().showNif(fileName, new BsaMeshSource(bsaFileSet),
+									new BsaTextureSource(bsaFileSet));
 						}
-						else
-						{
-							getNifDisplayer().showNif(fileName, new BsaMeshSource(bsaFileSet), new BsaTextureSource(bsaFileSet));
-						}
-					}
-					else if (ext.equals(".dds") || ext.equals(".ktx"))
-					{
-						if (verifyOnly)
-						{
+					} else if (ext.equals(".dds") || ext.equals(".ktx")) {
+						if (verifyOnly) {
 							Texture tex = new BsaTextureSource(bsaFileSet).getTexture(fileName);
-							if (tex != null)
-							{
-								if (!sopErrOnly)
-								{
+							if (tex != null) {
+								if (!sopErrOnly) {
 									System.out.println("verified: " + fileName);
 								}
-							}
-							else
-							{
+							} else {
 								System.out.println("issue: " + fileName);
 							}
 
 							CompressedTextureLoader.clearCache();
+						} else {
+							//FIXME: why do I have 2 types of load system for a Texture, does it matter
+
+							//Texture2DDisplay.showImageInShape(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName));
+
+							Texture2DDisplay.showImageInShape(fileName,
+									new BsaTextureSource(bsaFileSet).getTexture(fileName));
 						}
-						else
-						{
-							//FIXME: use the Texture2DDisplay instead
-							
-							Texture2DDisplay.showImageInShape(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName));
-							
-							//DDSTextureLoaderTester.showImage(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName),
-							//		entries.size() < 10 ? 5000 : 500);
-						}
-					}
-					else if (ext.equals(".kf"))
-					{
+					} else if (ext.equals(".kf")) {
 						//only verify with no skeleton
 						KfJ3dRoot kr = NifToJ3d.loadKf(fileName, new BsaMeshSource(bsaFileSet));
-						if (kr != null)
-						{
-							if (!sopErrOnly)
-							{
+						if (kr != null) {
+							if (!sopErrOnly) {
 								System.out.println("verified: " + fileName);
 							}
-						}
-						else
-						{
+						} else {
 							System.out.println("issue: " + fileName);
 						}
 						NifToJ3d.clearCache();
@@ -165,55 +138,38 @@ public class DisplayTask extends Thread
 						}
 					
 					}*/
-					else if (ext.equals(".wav"))
-					{
+					else if (ext.equals(".wav")) {
 
-						if (!sopErrOnly)
-						{
+						if (!sopErrOnly) {
 							System.out.println("I would have played you a wav just now! " + fileName);
 						}
 
-					}
-					else if (ext.equals(".lip"))
-					{
+					} else if (ext.equals(".lip")) {
 
-						if (!sopErrOnly)
-						{
+						if (!sopErrOnly) {
 							System.out.println("display lip file? " + fileName);
 						}
 
-					}
-					else if (ext.equals(".mp3"))
-					{
+					} else if (ext.equals(".mp3")) {
 
-						if (!sopErrOnly)
-						{
+						if (!sopErrOnly) {
 							System.out.println("I would have played you a mp3 just now! " + fileName);
 						}
 
-					}
-					else if (ext.equals(".ogg"))
-					{
+					} else if (ext.equals(".ogg")) {
 
-						if (!sopErrOnly)
-						{
+						if (!sopErrOnly) {
 							System.out.println("I would have played you a ogg just now! " + fileName);
 						}
 
-					}
-					else if (ext.equals(".xml"))
-					{
+					} else if (ext.equals(".xml")) {
 
-						if (!sopErrOnly)
-						{
+						if (!sopErrOnly) {
 							System.out.println("display xml file? " + fileName);
 						}
 
-					}
-					else
-					{
-						if (!sopErrOnly)
-						{
+					} else {
+						if (!sopErrOnly) {
 							System.out.println("unknown file : " + fileName);
 						}
 					}
@@ -222,27 +178,19 @@ public class DisplayTask extends Thread
 				in.close();
 
 				filesProcessCount++;
-				float newProgress = filesProcessCount / (float) fileCount;
+				float newProgress = filesProcessCount / (float)fileCount;
 
-				if ((newProgress - currentProgress) > 0.01)
-				{
+				if ((newProgress - currentProgress) > 0.01) {
 					statusDialog.updateMessage("" + (verifyOnly ? "Verifying " : "Displaying ") + fileName);
 					statusDialog.updateProgress((filesProcessCount * 100) / fileCount);
 					currentProgress = newProgress;
 				}
-			}
-			catch (IOException exc)
-			{
+			} catch (IOException exc) {
 				Main.logException("I/O error while extracting files", exc);
-			}
-			catch (Throwable exc)
-			{
-				if (verifyOnly)
-				{
+			} catch (Throwable exc) {
+				if (verifyOnly) {
 					exc.printStackTrace();
-				}
-				else
-				{
+				} else {
 					Main.logException("Exception while extracting files", exc);
 				}
 			}
@@ -250,8 +198,7 @@ public class DisplayTask extends Thread
 		completed = true;
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
-			public void run()
-			{
+			public void run() {
 				statusDialog.closeDialog(completed);
 			}
 		});
@@ -259,10 +206,8 @@ public class DisplayTask extends Thread
 
 	private NifDisplayTester nifDisplay;
 
-	private NifDisplayTester getNifDisplayer()
-	{
-		if (nifDisplay == null)
-		{
+	private NifDisplayTester getNifDisplayer() {
+		if (nifDisplay == null) {
 			nifDisplay = new NifDisplayTester();
 		}
 

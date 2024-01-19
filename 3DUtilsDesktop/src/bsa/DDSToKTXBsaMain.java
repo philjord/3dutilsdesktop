@@ -26,13 +26,13 @@ import bsa.gui.ArchiveNode;
 import bsa.gui.BSAFileSetWithStatus;
 import bsa.gui.StatusDialog;
 import bsa.tasks.ArchiveFileFilter;
-import bsa.tasks.CreateTaskFromBSA;
+import bsa.tasks.CreateTaskDDStoKTXBsa;
 import bsa.tasks.LoadTask;
 import bsa.tasks.Main;
 import bsaio.ArchiveFile;
 import bsaio.DBException;
 
-public class BSADDSToETC extends JFrame implements ActionListener
+public class DDSToKTXBsaMain extends JFrame implements ActionListener
 {	
 	private static Preferences prefs;
 	
@@ -44,11 +44,11 @@ public class BSADDSToETC extends JFrame implements ActionListener
 
 	private ArchiveFile archiveFile;
 
-	public BSADDSToETC()
+	public DDSToKTXBsaMain()
 	{
-		super("BSA DSS to ETC display");
+		super("BSA DSS to ETC converter");
 		
-		prefs = Preferences.userNodeForPackage(BSADDSToETC.class);
+		prefs = Preferences.userNodeForPackage(DDSToKTXBsaMain.class);
 		
 		setDefaultCloseOperation(2);
  
@@ -74,8 +74,13 @@ public class BSADDSToETC extends JFrame implements ActionListener
 		contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 		contentPane.add(scrollPane);
 		setContentPane(contentPane);
-		 
-
+		
+		try {
+			//might as well open an archive, not much will happen otherwise
+			openFile();
+		} catch (Throwable exc) {
+			Main.logException("Exception while processing action event", exc);
+		}
 		 
 	}
 
@@ -99,7 +104,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 
 	private void openFile() throws IOException
 	{
-		String baseDir = prefs.get("BSADDSToETCBase", System.getProperty("user.dir"));
+		String baseDir = prefs.get("DDSToKTXBsaMain", System.getProperty("user.dir"));
 		JFileChooser  chooser = new JFileChooser(baseDir);
  
 		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
@@ -111,7 +116,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 
 			bsaFileSet = new BSAFileSetWithStatus(file.getAbsolutePath(), false, true);
 			
-			prefs.put("BSADDSToETCBase", file.getParent());
+			prefs.put("DDSToKTXBsaMain", file.getParent());
 
 			//record the archive as the input file
 			this.archiveFile = bsaFileSet.get(0);
@@ -129,7 +134,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 	}
 	private void saveFile() throws InterruptedException, IOException, DBException {
 		 
-		String baseDir = prefs.get("BSADDSToETCBaseOut", System.getProperty("user.dir"));
+		String baseDir = prefs.get("DDSToKTXBsaMain", System.getProperty("user.dir"));
 		JFileChooser  chooser = new JFileChooser(baseDir);
  
 		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
@@ -139,7 +144,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 		if (chooser.showOpenDialog(this) != 0)
 			return;
 		File file = chooser.getSelectedFile();
-		prefs.put("BSADDSToETCBaseOut", file.getParent());
+		prefs.put("DDSToKTXBsaMain", file.getParent());
 		
 		if (file.exists()) {
 			int option = JOptionPane.showConfirmDialog(this,
@@ -154,7 +159,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 	
 		long tstart = System.currentTimeMillis();
 		StatusDialog statusDialog = new StatusDialog(this, "Creating " + file.getPath());
-		CreateTaskFromBSA createTask = new CreateTaskFromBSA(file, archiveFile, statusDialog);
+		CreateTaskDDStoKTXBsa createTask = new CreateTaskDDStoKTXBsa(file, archiveFile, statusDialog);
 		createTask.start();
 		int status = statusDialog.showDialog();
 		createTask.join();
@@ -188,7 +193,7 @@ public class BSADDSToETC extends JFrame implements ActionListener
 	
 	public static void main(String args[])
 	{
-		BSADDSToETC mainWindow = new BSADDSToETC();
+		DDSToKTXBsaMain mainWindow = new DDSToKTXBsaMain();
 		mainWindow.pack();
 		mainWindow.setLocationRelativeTo(null);
 		mainWindow.setVisible(true);

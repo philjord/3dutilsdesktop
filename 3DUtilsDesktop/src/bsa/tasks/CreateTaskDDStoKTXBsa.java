@@ -1,10 +1,13 @@
 package bsa.tasks;
 
 import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,12 +18,14 @@ import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 import org.jogamp.java3d.compressedtexture.dktxtools.dds.DDSDecompressor;
 
 import bsa.gui.StatusDialog;
+import bsa.source.DDSToKTXBsaConverter;
+import bsa.source.DDSToKTXBsaConverter.StatusUpdateListener;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.ArchiveFile.SIG;
 import bsaio.DBException;
 import bsaio.HashCode;
-import bsaio.displayables.DisplayableArchiveEntry;
+import bsaio.displayables.Displayable;
 import compressedtexture.DDSImage;
 import etcpack.ETCPack.FORMAT;
 import texture.DDSToKTXConverter;
@@ -30,7 +35,7 @@ import tools.io.FileChannelRAF;
 /**
  * This is prmarily a dds to ktx archive converter, but it is the basis of all bsa source archive create tasks
  */
-public class CreateTaskFromBSA extends Thread {
+public class CreateTaskDDStoKTXBsa extends Thread {
 
 	private static final boolean CONVERT_DDS_to_KTX = true;
 
@@ -58,65 +63,86 @@ public class CreateTaskFromBSA extends Thread {
 
 	private ArrayList<Folder>		folders;
 
-	public CreateTaskFromBSA(java.io.File outputArchiveFile, ArchiveFile inputArchive, StatusDialog statusDialog) {
-		completed = false;
-		this.outputArchiveFile = outputArchiveFile;
-		this.inputArchive = inputArchive;
+	private DDSToKTXBsaConverter ddsToKTXBsaConverter;
+
+	public CreateTaskDDStoKTXBsa(java.io.File outputArchiveFile, ArchiveFile inputArchive, StatusDialog statusDialog) {
 		this.statusDialog = statusDialog;
+		try {
+			FileChannel fco = new java.io.RandomAccessFile(outputArchiveFile, "rw").getChannel();
+		
+			// I can use fco twice because it comes from a RAF		
+			ddsToKTXBsaConverter = new DDSToKTXBsaConverter(fco, fco, inputArchive, statusDialog);
+        
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void run() {
-		FileChannelRAF out = null;
-		try {
-			entries = new ArrayList<ArchiveEntry>(256);
-			folders = new ArrayList<Folder>(256);
-			archiveFlags = 3; // this is  2  and 1 being folders and filenames :  4 is compressed, (0x100==256) is required for names to be written
-			
-			if(inputArchive.getSig() != SIG.TES3)//tes3 no compression
-				archiveFlags |= 4;
-			fileFlags = 0;
-			
-			List<ArchiveEntry> inEntries = inputArchive.getEntries(); 
-			// notice we require the loader to have keep the displayable version which holds the folder name per entry
-			for (ArchiveEntry entry : inEntries) {				
-				insertEntry(entry);				
-			}
-
-			if (fileCount != 0) {
-				if (outputArchiveFile.exists() && !outputArchiveFile.delete())
-					throw new IOException("Unable to delete '" + outputArchiveFile.getPath() + "'");
-				out = new FileChannelRAF(new java.io.RandomAccessFile(outputArchiveFile, "rw"), "rw");
-				writeArchive(out);
-				out.close();
-				out = null;
-			}
-			completed = true;
-		} catch (DBException exc) {
-			Main.logException("Format error while creating archive", exc);
-		} catch (IOException exc) {
-			Main.logException("I/O error while creating archive", exc);
-		} catch (Throwable exc) {
-			Main.logException("Exception while creating archive", exc);
-		}
-
-		if (!completed && out != null) {
+		
+		if(true) {
+			ddsToKTXBsaConverter.start();
 			try {
-				out.close();
-				out = null;
-				if (outputArchiveFile.exists())
-					outputArchiveFile.delete();
+				ddsToKTXBsaConverter.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}	
+			if(statusDialog != null)
+				statusDialog.closeDialog(completed);
+		} else {
+		
+			FileChannelRAF out = null;
+			try {
+				entries = new ArrayList<ArchiveEntry>(256);
+				folders = new ArrayList<Folder>(256);
+				archiveFlags = 3; // this is  2  and 1 being folders and filenames :  4 is compressed, (0x100==256) is required for names to be written
+				
+				if(inputArchive.getSig() != SIG.TES3)//tes3 no compression
+					archiveFlags |= 4;
+				fileFlags = 0;
+				
+				List<ArchiveEntry> inEntries = inputArchive.getEntries(); 
+				// notice we require the loader to have keep the displayable version which holds the folder name per entry
+				for (ArchiveEntry entry : inEntries) {				
+					insertEntry(entry);				
+				}
+	
+				if (fileCount != 0) {
+					if (outputArchiveFile.exists() && !outputArchiveFile.delete())
+						throw new IOException("Unable to delete '" + outputArchiveFile.getPath() + "'");
+					out = new FileChannelRAF(new java.io.RandomAccessFile(outputArchiveFile, "rw"), "rw");
+					writeArchive(out);
+					out.close();
+					out = null;
+				}
+				completed = true;
+			} catch (DBException exc) {
+				Main.logException("Format error while creating archive", exc);
 			} catch (IOException exc) {
-				Main.logException("I/O error while cleaning up", exc);
+				Main.logException("I/O error while creating archive", exc);
+			} catch (Throwable exc) {
+				Main.logException("Exception while creating archive", exc);
 			}
+	
+			if (!completed && out != null) {
+				try {
+					out.close();
+					out = null;
+					if (outputArchiveFile.exists())
+						outputArchiveFile.delete();
+				} catch (IOException exc) {
+					Main.logException("I/O error while cleaning up", exc);
+				}
+			}
+			if(statusDialog != null)
+				statusDialog.closeDialog(completed);	
 		}
-		if(statusDialog != null)
-			statusDialog.closeDialog(completed);			
 	}
   
 
 	private void insertEntry(ArchiveEntry entry) throws DBException {
-		String folderName = ((DisplayableArchiveEntry) entry).getFolderName();
+		String folderName = ((Displayable) entry).getFolderName();
 		//String baseName = "";// no base as we are coming from a BSA file
 
 		//folderName = folderName.substring(baseName.length() + 1);
@@ -129,7 +155,7 @@ public class CreateTaskFromBSA extends Thread {
 			entry.setFileName(entry.getFileName().replace(".dds",".ktx"));
 		}
 		
-		String fileName = ((DisplayableArchiveEntry) entry).getName();
+		String fileName = ((Displayable) entry).getName();
 		if (fileName.length() > 254) {
 			throw new DBException("Maximum file name length is 254 characters");
 		}
@@ -142,8 +168,8 @@ public class CreateTaskFromBSA extends Thread {
 			ArchiveEntry listEntry = entries.get(i);
 			int diff = entry.compareTo(listEntry);
 			if (diff == 0) {
-				throw new DBException("Hash collision: '"	+ ((DisplayableArchiveEntry)entry).getName() + "' and '"
-						+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
+				throw new DBException("Hash collision: '"	+ ((Displayable)entry).getName() + "' and '"
+						+ ((Displayable)listEntry).getName() + "'");
 			}
 			if (diff < 0) {
 				insert = false;
@@ -333,12 +359,12 @@ public class CreateTaskFromBSA extends Thread {
 				
 				// convert to etc2 if needed
 				if(CONVERT_DDS_to_KTX && entry.getFileName().endsWith(".ktx")) {
-					ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in, ((DisplayableArchiveEntry) entry).getName());
+					ByteBuffer bbKtx = DDSToKTXConverter.convertDDSToKTX(in, ((Displayable) entry).getName());
 					if(bbKtx != null) {
 						in = new ByteBufferBackedInputStream(bbKtx);					
 						entry.setFileLength(bbKtx.limit());
 					} else {
-						System.out.println("Conversion failed for " + ((DisplayableArchiveEntry) entry).getName());
+						System.out.println("Conversion failed for " + ((Displayable) entry).getName());
 					}
 				}
 				
@@ -401,7 +427,7 @@ public class CreateTaskFromBSA extends Thread {
 				if (deflater != null)
 					deflater.reset();
 			} catch (IOException e) {
-				System.out.println("IOException "+ ((DisplayableArchiveEntry) entry).getName());
+				System.out.println("IOException "+ ((Displayable) entry).getName());
 				if (in != null)
 					in.close();
 				if (deflater != null)

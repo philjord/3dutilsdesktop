@@ -9,7 +9,9 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
-public class StatusDialog extends JDialog
+import bsa.source.DDSToKTXBsaConverter.StatusUpdateListener;
+
+public class StatusDialog extends JDialog implements StatusUpdateListener
 {
 	private JFrame parent;
 
@@ -75,6 +77,7 @@ public class StatusDialog extends JDialog
 			deferredText = text;
 			SwingUtilities.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					messageText.setText(deferredText);
@@ -83,6 +86,7 @@ public class StatusDialog extends JDialog
 		}
 	}
 
+	@Override
 	public void updateProgress(int progress)
 	{
 		if (SwingUtilities.isEventDispatchThread())
@@ -94,6 +98,7 @@ public class StatusDialog extends JDialog
 			deferredProgress = progress;
 			SwingUtilities.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					progressBar.setValue(deferredProgress);

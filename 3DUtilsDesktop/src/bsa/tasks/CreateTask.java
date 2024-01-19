@@ -10,12 +10,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.Deflater;
 
-import javax.swing.SwingUtilities;
-
 import bsa.gui.StatusDialog;
 import bsaio.ArchiveEntry;
 import bsaio.DBException;
 import bsaio.HashCode;
+import bsaio.displayables.Displayable;
 import bsaio.displayables.DisplayableArchiveEntry;
 import tools.io.FileChannelRAF;
 
@@ -132,6 +131,7 @@ public class CreateTask extends Thread {
 			throw new DBException("Maximum file name length is 254 characters");
 		}
 
+		// used as a has comparator
 		DisplayableArchiveEntry entry = new DisplayableArchiveEntry(null, folderName, fileName);
 		boolean insert = true;
 
@@ -142,7 +142,7 @@ public class CreateTask extends Thread {
 			int diff = entry.compareTo(listEntry);
 			if (diff == 0) {
 				throw new DBException("Hash collision: '"	+ entry.getName() + "' and '"
-										+ ((DisplayableArchiveEntry)listEntry).getName() + "'");
+										+ ((Displayable)listEntry).getName() + "'");
 			}
 			if (diff < 0) {
 				insert = false;
@@ -286,7 +286,7 @@ public class CreateTask extends Thread {
 		}
 
 		for (ArchiveEntry entry : entries) {
-			String fileName = ((DisplayableArchiveEntry)entry).getFileName();
+			String fileName = ((Displayable)entry).getFileName();
 			byte[] nameBuffer = fileName.getBytes();
 			if (nameBuffer.length != fileName.length()) {
 				throw new DBException("Encoded file name is longer than character name");
@@ -304,14 +304,14 @@ public class CreateTask extends Thread {
 			Deflater deflater = null;
 
 			try {
-				File file = new File(dirFile.getPath() + "\\" + ((DisplayableArchiveEntry)entry).getName());
+				File file = new File(dirFile.getPath() + "\\" + ((Displayable)entry).getName());
 				int residualLength = (int)file.length();
 				entry.setFileOffset(out.getFilePointer());
 				entry.setFileLength(residualLength);
 				in = new FileInputStream(file);
 
 				if ((archiveFlags & 0x100) != 0) {
-					byte nameBuffer2[] = ((DisplayableArchiveEntry)entry).getName().getBytes();
+					byte nameBuffer2[] = ((Displayable)entry).getName().getBytes();
 					buffer [0] = (byte)nameBuffer2.length;
 					out.write(buffer, 0, 1);
 					out.write(nameBuffer2);
@@ -389,7 +389,7 @@ public class CreateTask extends Thread {
 				ArchiveEntry entry = entries.get(entryIndex++);
 				int count;
 				if ((archiveFlags & 0x100) != 0) {
-					count = ((DisplayableArchiveEntry)entry).getName().getBytes().length + 1;
+					count = ((Displayable)entry).getName().getBytes().length + 1;
 				} else {
 					count = 0;
 				}

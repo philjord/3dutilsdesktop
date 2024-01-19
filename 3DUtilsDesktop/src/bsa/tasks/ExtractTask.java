@@ -6,12 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.swing.SwingUtilities;
-
 import bsa.gui.StatusDialog;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
-import bsaio.displayables.DisplayableArchiveEntry;
+import bsaio.displayables.Displayable;
+ 
 
 public class ExtractTask extends Thread
 {
@@ -47,7 +46,7 @@ public class ExtractTask extends Thread
 			for (ArchiveEntry entry : entries)
 			{
 				String folderPath = (new StringBuilder()).append(basePath).append("\\")
-						.append(((DisplayableArchiveEntry) entry).getFolderName()).toString();
+						.append(((Displayable) entry).getFolderName()).toString();
 				File folderFile = new File(folderPath);
 				if (!folderFile.exists())
 				{
@@ -58,7 +57,7 @@ public class ExtractTask extends Thread
 					folderFile.delete();
 					folderFile.mkdir();
 				}
-				String filePath = (new StringBuilder()).append(basePath).append("\\").append(((DisplayableArchiveEntry) entry).getName())
+				String filePath = (new StringBuilder()).append(basePath).append("\\").append(((Displayable) entry).getName())
 						.toString();
 				File file = new File(filePath);
 				if (file.exists())
