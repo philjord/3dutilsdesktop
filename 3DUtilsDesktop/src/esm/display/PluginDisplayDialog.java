@@ -1,12 +1,12 @@
 package esm.display;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.StringCharacterIterator;
 import java.util.Enumeration;
 import java.util.zip.DataFormatException;
 
@@ -46,7 +46,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		if (generalEsmFile != null)
 		{
 			long startTime = System.currentTimeMillis();
-			System.out.println("loading file " + generalEsmFile);
+			System.out.println("loading file " + generalEsmFile + " TODO: put the lovely BSA stye status dialog up and get this guy cleaned up compared to");
 
 			File pluginFile = new File(generalEsmFile);
 			Plugin plugin = new PluginFile(pluginFile);
@@ -172,7 +172,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		{
 			for (PluginGroup group : plugin.getGroupList())
 			{
-				DefaultMutableTreeNode groupNode = new DefaultMutableTreeNode(group);
+				PluginRecordTreeNode groupNode = new PluginRecordTreeNode(group);
 				createGroupChildren(groupNode, group);
 				root.add(groupNode);
 			}
@@ -199,7 +199,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		for (Record r : group.getRecordList())
 		{
 			PluginRecord record = (PluginRecord) r;
-			DefaultMutableTreeNode recordNode = new DefaultMutableTreeNode(record);
+			PluginRecordTreeNode recordNode = new PluginRecordTreeNode(record);
 			boolean insertNode = false;
 			int index = 0;
 			if (record instanceof PluginGroup)
@@ -280,6 +280,37 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 	@Override
 	public void treeCollapsed(TreeExpansionEvent treeexpansionevent)
 	{
+	}
+	
+	
+	private static class PluginRecordTreeNode extends DefaultMutableTreeNode {
+		public PluginRecordTreeNode(PluginRecord record) {
+			super(record);
+		}
+
+		@Override
+		public String toString() {
+			if (userObject == null) {
+	            return "";
+	        } else if (userObject instanceof PluginGroup) {
+	            return userObject.toString() + " : " + humanReadableByteCountSI(((PluginGroup)userObject).getRecordDeepDataSize());	            
+	        } else if (userObject instanceof PluginRecord) {
+	            return userObject.toString() + " : " + humanReadableByteCountSI(((PluginRecord)userObject).getRecordDataLen());
+	        } else {
+	            return userObject.toString();
+	        }
+		}
+		public static String humanReadableByteCountSI(long bytes) {
+		    if (-1000 < bytes && bytes < 1000) {
+		        return bytes + " B";
+		    }
+		    StringCharacterIterator ci = new StringCharacterIterator("kMGTPE");
+		    while (bytes <= -999_950 || bytes >= 999_950) {
+		        bytes /= 1000;
+		        ci.next();
+		    }
+		    return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+		}
 	}
 
 }

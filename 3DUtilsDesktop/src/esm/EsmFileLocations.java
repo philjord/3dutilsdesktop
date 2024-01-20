@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 public class EsmFileLocations
 {
@@ -127,6 +128,7 @@ public class EsmFileLocations
 		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fc.setSelectedFile(new File(defaultFile));
 		fc.setDialogTitle(title);
+		fc.setFileFilter(new ESMFileFilter());
 		int result = fc.showOpenDialog(null);
 		if (result == JFileChooser.APPROVE_OPTION)
 		{
@@ -139,4 +141,31 @@ public class EsmFileLocations
 		}
 	}
 
+	public static class ESMFileFilter extends FileFilter {
+
+		public ESMFileFilter() {
+		}
+
+		@Override
+		public String getDescription() {
+			return "ESM Files (*.esm)";
+		}
+
+		@Override
+		public boolean accept(File file) {
+			boolean accept = false;
+			if (file.isFile()) {
+				String name = file.getName();
+				int sep = name.lastIndexOf('.');
+				if (sep > 0) {
+					String extension = name.substring(sep);
+					if (extension.equalsIgnoreCase(".esm"))
+						accept = true;
+				}
+			} else {
+				accept = true;
+			}
+			return accept;
+		}
+	}
 }
