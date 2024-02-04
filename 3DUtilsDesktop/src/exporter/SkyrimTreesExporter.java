@@ -22,7 +22,7 @@ public class SkyrimTreesExporter
 
 	public Preferences prefs;
 
-	public static String outputFolderTrees = "F:\\game_media\\output\\skyrimTrees";
+	public static String outputFolderTrees = "D:\\game_media\\output\\skyrimTrees";
 
 	private SkyrimTreesExporter() throws IOException
 	{

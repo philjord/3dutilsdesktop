@@ -52,7 +52,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 			Plugin plugin = new PluginFile(pluginFile);
 			try
 			{
-				plugin.loadch(!SHOW_ALL);
+				plugin.load(!SHOW_ALL);
 
 				PluginDisplayDialog displayDialog = new PluginDisplayDialog(plugin);
 				displayDialog.setTitle("Display of " + pluginFile.getName());
