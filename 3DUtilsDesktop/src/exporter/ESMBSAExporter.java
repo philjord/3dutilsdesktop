@@ -394,7 +394,7 @@ public class ESMBSAExporter extends JFrame
 									for (int y = -96; y < 96; y += scale)
 									{
 										long xyStartTime = System.currentTimeMillis();
-										Object od = j3dCellFactory.makeLODLandscape(x, y, scale, lodWorldFormId);
+										Object od = j3dCellFactory.makeLODLandscape(formId, x, y, scale, lodWorldFormId);
 										if (od != null)
 											System.out.println("x " + x + " y " + y + " scale " + scale + " complete in "
 													+ (System.currentTimeMillis() - xyStartTime) + "ms");
