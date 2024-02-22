@@ -40,6 +40,8 @@ import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
 import awt.tools3d.resolution.QueryProperties;
+import bsa.source.BsaTextureSource;
+import bsaio.BSArchiveSetFile;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import nif.character.AttachedParts;
@@ -54,6 +56,8 @@ import tools.swing.TitledJFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.scenegraph.SpinTransform;
 import utils.source.MediaSources;
+import utils.source.MeshSource;
+import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
 import utils.source.file.FileSoundSource;
 import utils.source.file.FileTextureSource;
@@ -94,7 +98,10 @@ public class KfDisplayTester
 	private Background background = new Background();
 
 	//private JFrame win = new JFrame("Nif model");
-
+	
+	private MeshSource meshSource = null;
+	private TextureSource textureSource = null;
+//  figure out a good algorith to get a decent set of isdles anims out fo each game, put that into J3dCREA etc for each
 	public KfDisplayTester()
 	{
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
@@ -105,7 +112,24 @@ public class KfDisplayTester
 			System.exit(0);
 		}
 
+		BsaTextureSource.allowedTextureFormats = BsaTextureSource.AllowedTextureFormats.DDS;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
+		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
+
+		meshSource = new FileMeshSource();
+		//textureSource = new FileTextureSource();
+
+		//Test for android
+		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
+		BSArchiveSetFile bsaFileSet = new BSArchiveSetFile(new String[] { //
+				"D:\\game_media\\Morrowind", //use the newer one with a few bits extra in it
+				"D:\\game_media\\Oblivion", //
+				"D:\\game_media\\Fallout3", //
+				"D:\\game_media\\FalloutNV", //
+				"D:\\game_media\\Skyrim", //
+				"D:\\game_media\\Fallout4", //
+		}, true);
+		textureSource = new BsaTextureSource(bsaFileSet);
 
 		//win.setVisible(true);
 		//win.setLocation(400, 0);
@@ -330,7 +354,7 @@ public class KfDisplayTester
 
 		NifJ3dSkeletonRoot.showBoneMarkers = true;
 		J3dNiSkinInstance.showSkinBoneMarkers = false;//TODO: this doesn't show anything?
-		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
+		MediaSources mediaSources = new MediaSources(meshSource, textureSource, new FileSoundSource());
 
 		ArrayList<String> idleAnimations = new ArrayList<String>();
 
@@ -360,7 +384,7 @@ public class KfDisplayTester
 
 		NifJ3dSkeletonRoot.showBoneMarkers = true;
 		J3dNiSkinInstance.showSkinBoneMarkers = false;//TODO: this doesn't show anything?
-		MediaSources mediaSources = new MediaSources(new FileMeshSource(), new FileTextureSource(), new FileSoundSource());
+		MediaSources mediaSources = new MediaSources(meshSource, textureSource, new FileSoundSource());
 
 		AttachedParts attachFileNames = new AttachedParts();
 		attachFileNames.addPart(AttachedParts.Part.Root, skinNifFiles2.get(0));
