@@ -196,7 +196,8 @@ public class NifLoaderTester
 			else
 			{
 				FileMeshSource fileMeshSource = new FileMeshSource();
-				BgsmSource.setBgsmSource(fileMeshSource);
+				//TODO: this has probably broekn
+				BgsmSource.setBgsmSource(null);
 
 				if (NO_J3D)
 				{

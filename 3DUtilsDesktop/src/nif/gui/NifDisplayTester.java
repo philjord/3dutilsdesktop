@@ -31,7 +31,6 @@ import org.jogamp.java3d.WakeupCondition;
 import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
-import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
@@ -44,6 +43,7 @@ import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
 import awt.tools3d.resolution.QueryProperties;
+import bsa.source.BsaMaterialsSource;
 import bsa.source.BsaTextureSource;
 import bsaio.BSArchiveSetFile;
 import nif.BgsmSource;
@@ -121,6 +121,7 @@ public class NifDisplayTester
 
 	private MeshSource meshSource = null;
 	private TextureSource textureSource = null;
+	private BsaMaterialsSource materialsSource = null;
 
 	public NifDisplayTester()
 	{
@@ -150,6 +151,10 @@ public class NifDisplayTester
 				"D:\\game_media\\Fallout4", //
 		}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
+		materialsSource = new BsaMaterialsSource(bsaFileSet);
+		
+		//TODO: clean up this stupid
+		BgsmSource.setBgsmSource(materialsSource);
 		
 		//TODO: this entire nif display system needs to simply allow browsing a bsa and use the 
 		// sibling bsa and folders for textures, like the game does, basically one data file location that's searched properly
@@ -511,7 +516,7 @@ public class NifDisplayTester
 
 	public void showNif(String filename, MeshSource meshSource, TextureSource textureSource)
 	{
-		BgsmSource.setBgsmSource(meshSource);
+
 		try {
 			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
 		}catch(Exception e) {
