@@ -7,6 +7,9 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.StringCharacterIterator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.zip.DataFormatException;
 
@@ -170,12 +173,26 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode(plugin);
 		try
 		{
+			// these things are too hard to work in the natural order so alphabetize them
+			ArrayList<PluginRecordTreeNode> groups = new ArrayList<PluginRecordTreeNode>();
 			for (PluginGroup group : plugin.getGroupList())
 			{
 				PluginRecordTreeNode groupNode = new PluginRecordTreeNode(group);
 				createGroupChildren(groupNode, group);
-				root.add(groupNode);
+				groups.add(groupNode);			
 			}
+			
+			//sort
+			Collections.sort(groups, new Comparator<PluginRecordTreeNode>() {
+			    @Override
+				public int compare(PluginRecordTreeNode p1, PluginRecordTreeNode p2) {
+			        return p1.toString().compareTo(p2.toString());
+			    }
+			});
+			// add to tree
+			for (PluginRecordTreeNode groupNode : groups)
+				root.add(groupNode);
+			
 		}
 		catch (DataFormatException e)
 		{
