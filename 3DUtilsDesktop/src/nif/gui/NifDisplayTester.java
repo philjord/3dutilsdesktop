@@ -149,6 +149,7 @@ public class NifDisplayTester
 				"D:\\game_media\\FalloutNV", //
 				"D:\\game_media\\Skyrim", //
 				"D:\\game_media\\Fallout4", //
+				"D:\\game_media\\Fallout76", //
 		}, true);
 		textureSource = new BsaTextureSource(bsaFileSet);
 		materialsSource = new BsaMaterialsSource(bsaFileSet);
