@@ -27,7 +27,6 @@ import org.jogamp.java3d.Light;
 import org.jogamp.java3d.Node;
 import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader.DDS;
 import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
@@ -60,7 +59,6 @@ import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
 import utils.source.file.FileSoundSource;
-import utils.source.file.FileTextureSource;
 
 /**
  * Usage note
@@ -365,7 +363,8 @@ public class KfDisplayTester
 
 		// now add the root to the scene so the controller sequence is live
 
-		NifCharacter nifCharacter = new NifCharacter(skeletonNifFile, skinNifFiles2, mediaSources, idleAnimations);
+		NifCharacter nifCharacter = new NifCharacter(skeletonNifFile, skinNifFiles2, mediaSources);
+		nifCharacter.setIdleAnimations(idleAnimations);
 		nifCharacter.setCapability(Node.ALLOW_BOUNDS_READ);
 		bg.addChild(nifCharacter);
 

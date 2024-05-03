@@ -114,14 +114,14 @@ public class LoadTask extends Thread {
 					
 					// TODO: this is slow should I do this sort at the end or something?
 					int count = parentNode.getChildCount();
-					String name = entry.getFileName();
+					String name = ((Displayable)entry).getFileName();
 					int index2;
 					for (index2 = 0; index2 < count; index2++) {
 						TreeNode compare = parentNode.getChildAt(index2);
 						if (!(compare instanceof FileNode))
 							continue;
 						FileNode fileNode2 = (FileNode)compare;
-						if (name.compareTo(fileNode2.getEntry().getFileName()) < 0)
+						if (name.compareTo(((Displayable)fileNode2.getEntry()).getFileName()) < 0)
 							break;
 					}
 

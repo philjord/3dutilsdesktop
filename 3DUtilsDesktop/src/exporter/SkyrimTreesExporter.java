@@ -8,6 +8,8 @@ import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
 import awt.tools3d.resolution.QueryProperties;
 import bsa.gui.BSAFileSetWithStatus;
+import bsaio.ArchiveEntry;
+import bsaio.displayables.Displayable;
 import esfilemanager.loader.ESMManagerFile;
 import esfilemanager.loader.IESMManager;
 import esfilemanager.utils.source.EsmSoundKeyToName;
@@ -56,16 +58,16 @@ public class SkyrimTreesExporter
 		long startTime = System.currentTimeMillis();
 		System.out.println("starting trees/plants nif load and record...");
 		// for each cell picked
-		for (String tree : meshSource.getFilesInFolder("Meshes\\landscape\\trees"))
+		for (ArchiveEntry tree : meshSource.getEntriesInFolder("Meshes\\landscape\\trees"))
 		{
 			System.out.println("Tree: " + tree);
-			NifToJ3d.loadNif(tree, meshSource, textureSource);
+			NifToJ3d.loadNif(((Displayable)tree).getFileName(), meshSource, textureSource);
 		}
 		
-		for (String tree : meshSource.getFilesInFolder("Meshes\\landscape\\plants"))
+		for (ArchiveEntry tree : meshSource.getEntriesInFolder("Meshes\\landscape\\plants"))
 		{
 			System.out.println("Plant: " + tree);
-			NifToJ3d.loadNif(tree, meshSource, textureSource);
+			NifToJ3d.loadNif(((Displayable)tree).getFileName(), meshSource, textureSource);
 		}
 		System.out.println("finished trees/plants load, starting copy");
 		File outputFolder = new File(outputFolderTrees);

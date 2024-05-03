@@ -6,6 +6,8 @@ import java.util.prefs.Preferences;
 
 import awt.tools3d.resolution.QueryProperties;
 import bsa.gui.BSAFileSetWithStatus;
+import bsaio.ArchiveEntry;
+import bsaio.displayables.Displayable;
 import esfilemanager.loader.ESMManagerFile;
 import esfilemanager.loader.IESMManager;
 import esfilemanager.utils.source.EsmSoundKeyToName;
@@ -142,13 +144,13 @@ public class FOCharsExporter
 		{
 			System.out.println("starting " + sourcefolder + "...");
 			// for each cell picked
-			for (String file : meshSource.getFilesInFolder("Meshes\\" + sourcefolder))
+			for (ArchiveEntry file : meshSource.getEntriesInFolder("Meshes\\" + sourcefolder))
 			{
-				System.out.println("file: " + file);
-				if (file.endsWith(".nif"))
-					NifToJ3d.loadNif(file, meshSource, textureSource);
-				else if (file.endsWith(".kf"))
-					NifToJ3d.loadKf(file, meshSource);
+				System.out.println("file: " + ((Displayable)file).getFileName());
+				if (((Displayable)file).getFileName().endsWith(".nif"))
+					NifToJ3d.loadNif(((Displayable)file).getFileName(), meshSource, textureSource);
+				else if (((Displayable)file).getFileName().endsWith(".kf"))
+					NifToJ3d.loadKf(((Displayable)file).getFileName(), meshSource);
 				else
 					System.out.println("skipping file: " + file);
 			}
