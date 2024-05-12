@@ -45,10 +45,12 @@ public class SubrecordStats2
 	public int countOfString = 0;
 	public int countOfNif = 0;
 	public int countOfDds = 0;
+	public int countOfKf = 0;
 	
 	public int countOfInts = 0;
 	public int countOfFloats = 0;
-
+	public int countOfVec3 = 0;
+	public int countOfVec4 = 0;
 
 	public SubrecordStats2(String st)
 	{
@@ -77,6 +79,7 @@ public class SubrecordStats2
 				maxSubPos = ord;
 		}
 		
+		fewSizes.addAll(srd.fewSizes);
 
 		countOfString += srd.countOfString;
 		countOfNif += srd.countOfNif;
@@ -84,7 +87,8 @@ public class SubrecordStats2
 		
 		countOfInts += srd.countOfInts;
 		countOfFloats += srd.countOfFloats;
-		
+		countOfVec3 += srd.countOfVec3;
+		countOfVec4 += srd.countOfVec4;
 		if (minLength > srd.minLength)
 		{
 			minLength = srd.minLength;

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -135,7 +136,7 @@ public class EsmMetaDataToCsv {
 			
 			// output header row
 			out.append("num,");
-			out.append("EsmFileName,");
+			//out.append("EsmFileName,");
 			out.append("RecordType,");
 			out.append("FormID,");
 			out.append("RecordFlags1,");
@@ -174,9 +175,7 @@ public class EsmMetaDataToCsv {
 				if (group.getGroupType() == 0) {
 					String groupRecordType = group.getGroupRecordType();					
 					
-					// to ease the burden slightly skip some trivial ones, negate this to get them decoded
-					if(skipit(groupRecordType))
-						continue;					
+										
 					
 					String editorID = record.getEditorID();
 					int formID = record.getFormID();					
@@ -192,60 +191,73 @@ public class EsmMetaDataToCsv {
 					}
 					recordDataList.add(recordData);
 					
+					// to ease the file size slightly skip some trivial ones, negate this to get them decoded
+					if(!skipit(groupRecordType)) {
+						 
+						int currentSubOrderNum = 0;
+						List<Subrecord> subs = record.getSubrecords();
+						for (int i = 0; i < subs.size(); i++)
+						{
+							Subrecord sub = subs.get(i);
+							
+							// skip the editorid we know about that guy
+							if (sub.getSubrecordType().equals("EDID"))
+								continue;
+									
+							//RECO header info, repeated everytime
+							out.append(""+currentRowOrderNum++);
+							out.append(",");
+							//out.append(esmFileName);
+							//out.append(",");
+							out.append(groupRecordType);
+							out.append(",");
+							out.append(""+formID);
+							out.append(",");
+							out.append(""+recordFlags1);
+							out.append(",");
+							out.append(""+recordFlags2);
+							out.append(",");
+							out.append(editorID);// this has no spaces 
+							out.append(",");						
+							out.append(sub.getSubrecordType()); 
+							out.append(",");
+							out.append(""+currentSubOrderNum++);
+							out.append(",");
+							out.append(""+sub.getSubrecordData().length); 
+							out.append(",");
+							String couldBeFormID = couldBeFormID(sub.getSubrecordData());
+							out.append(couldBeFormID == null ? "" : couldBeFormID); 
+							out.append(",");
+							String couldBeString = couldBeString(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
+							out.append(couldBeString == null ? "" : escape(couldBeString)); 							
+																		
+							
+							out.newLine();
+							
+							optionalDecodeOutput(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
+						}
+					}
 					
+					/// stats for md builder
 					int currentSubOrderNum = 0;
 					List<Subrecord> subs = record.getSubrecords();
 					for (int i = 0; i < subs.size(); i++)
-					{
+					{ 
 						Subrecord sub = subs.get(i);
 						
 						// skip the editorid we know about that guy
 						if (sub.getSubrecordType().equals("EDID"))
 							continue;
-								
-						//RECO header info, repeated everytime
-						out.append(""+currentRowOrderNum++);
-						out.append(",");
-						out.append(esmFileName);
-						out.append(",");
-						out.append(groupRecordType);
-						out.append(",");
-						out.append(""+formID);
-						out.append(",");
-						out.append(""+recordFlags1);
-						out.append(",");
-						out.append(""+recordFlags2);
-						out.append(",");
-						out.append(editorID);// this has no spaces 
-						out.append(",");						
-						out.append(sub.getSubrecordType()); 
-						out.append(",");
-						out.append(""+currentSubOrderNum++);
-						out.append(",");
-						out.append(""+sub.getSubrecordData().length); 
-						out.append(",");
-						String couldBeFormID = couldBeFormID(sub.getSubrecordData());
-						out.append(couldBeFormID == null ? "" : couldBeFormID); 
-						out.append(",");
-						String couldBeString = couldBeString(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
-						out.append(couldBeString == null ? "" : escape(couldBeString)); 							
-																	
-						
-						out.newLine();
-						
-						optionalDecodeOutput(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
 						
 						
-							
-						 
-						/// stats for md builder
 						String subTypeBefore = null;
 						String subTypeAfter = null;
 						if(i> 0)
 							subTypeBefore = subs.get(i-1).getSubrecordType();						
 						if(i>subs.size()-1)
 							subTypeAfter = subs.get(i+1).getSubrecordType();
-						
+						String couldBeFormID = couldBeFormID(sub.getSubrecordData());
+						String couldBeString = couldBeString(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
 						SubrecordData srs = new SubrecordData(sub, groupRecordType, currentSubOrderNum, subTypeBefore, subTypeAfter, couldBeFormID, couldBeString);
 						recordData.subrecordStatsList.add(srs);
 						
@@ -265,10 +277,16 @@ public class EsmMetaDataToCsv {
 	
 
 	private static boolean skipit(String recType) {
-		if (esmFileName.equals("Fallout4.esm")
-			&& (recType.equals("GMST") || recType.equals("KYWD") || recType.equals("LCRT") || recType.equals("GLOB")))
+		if (esmFileName.equals("Skyrim.esm") &&
+				(recType.equals("GMST") || recType.equals("KYWD") || recType.equals("LCRT") 
+						|| recType.equals("GLOB")
+						|| recType.equals("TXST")
+						|| recType.equals("STAT")))
 			return true;
 		
+		
+		//PACK is a huge one as well
+		//DIAL//QUST
 		
 		
 		return false;
@@ -295,16 +313,26 @@ public class EsmMetaDataToCsv {
 	public static String couldBeFormID(byte[] bs) {
 		if (bs.length == 4) {
 			String ret = "";
-			int possFormId = ESMByteConvert.extractInt3(bs, 0);
-			if (possFormId >= 0 || possFormId < 1000000) {
-				FormInfo fi = pluginToAnalyze.getFormMap().get(possFormId);
-				//GRUP is low number probably just an int
-				if(fi != null && !fi.getRecordType().equals("GRUP"))
-					ret += fi.getRecordType();
+			int asInt = ESMByteConvert.extractInt3(bs, 0);
+			if (asInt >= 1000 && asInt < 1000000) {
+				FormInfo fi = pluginToAnalyze.getFormMap().get(asInt);
+				if(fi != null)
+					ret += fi.getRecordType() + ": ";
 			}
 			
-			ret += ": " + ESMByteConvert.extractInt(bs, 0);
-			ret += ";/lm: " + ESMByteConvert.extractFloat(bs, 0);
+			 
+			if(asInt>-1000 && asInt<100000)
+			ret += asInt + " ";
+			
+			// odd floats are a waste of space
+			try {
+				float f = ESMByteConvert.extractFloat(bs, 0);
+				BigDecimal possF = new BigDecimal(f);
+			if(possF.scale()<4&&possF.scale()>-4)
+				ret += f +"f";	
+			} catch (Exception e) {}
+			
+					
 			
 			return ret;
 		}  
@@ -509,6 +537,10 @@ public class EsmMetaDataToCsv {
 					subrecordStats.dataType = "Int";
 				else if(subrecordStats.countOfFloats > totalCount * 0.2)
 					subrecordStats.dataType = "Float";
+				else if(subrecordStats.countOfVec3 > totalCount * 0.2)
+					subrecordStats.dataType = "Vec3";
+				else if(subrecordStats.countOfVec4 > totalCount * 0.2)
+					subrecordStats.dataType = "Vec4";
 				else if(formTypeCountsLen > 2) {
 					subrecordStats.dataType = "FormId?";//suspect cos to many types pointed at
 				} else {

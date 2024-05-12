@@ -35,6 +35,8 @@ public class SubrecordData
 	
 	public int countOfInts = 0;
 	public int countOfFloats = 0;
+	public int countOfVec3 = 0;
+	public int countOfVec4 = 0;
 
 	public SubrecordData(Subrecord sub, String inRec, int orderNo, String subTypeBefore, String subTypeAfter, String couldBeFormID, String couldBeString)
 	{		
@@ -45,7 +47,7 @@ public class SubrecordData
 		
 		count++;
 		
-		if(couldBeFormID != null) {
+		if(couldBeFormID != null && couldBeFormID.indexOf(":") != -1) {
 			String formIdType = couldBeFormID.substring(0,couldBeFormID.indexOf(":"));
 	 		if(formIdType.length() == 4) {
 	 			if(formTypeCounts.get(formIdType) == null) {
@@ -84,13 +86,38 @@ public class SubrecordData
 		if (bs.length == 4) {
 
 			int possI = ESMByteConvert.extractInt(bs, 0);
-			BigDecimal possF = new BigDecimal(ESMByteConvert.extractFloat(bs, 0));
-			if(possI>-1000&& possI<10000)
+		
+			if(possI>-1000&& possI<100000)
 				countOfInts++;
+			
+			try {
+				BigDecimal possF = new BigDecimal(ESMByteConvert.extractFloat(bs, 0));
 			if(possF.scale()<4&&possF.scale()>-4)
 				countOfFloats++;
-		}  
-		
+			} catch (Exception e) {}
+		} else if (bs.length == 12) {
+			try {
+				BigDecimal possF1 = new BigDecimal(ESMByteConvert.extractFloat(bs, 0));
+				BigDecimal possF2 = new BigDecimal(ESMByteConvert.extractFloat(bs, 4));
+				BigDecimal possF3 = new BigDecimal(ESMByteConvert.extractFloat(bs, 8));
+			if(possF1.scale()<4 && possF1.scale()>-4 &&
+					possF2.scale()<4 && possF2.scale()>-4 &&
+					possF3.scale()<4 && possF3.scale()>-4)
+				countOfVec3++;
+			} catch (Exception e) {}
+		} else if (bs.length == 16) {			
+			try {
+				BigDecimal possF1 = new BigDecimal(ESMByteConvert.extractFloat(bs, 0));
+				BigDecimal possF2 = new BigDecimal(ESMByteConvert.extractFloat(bs, 4));
+				BigDecimal possF3 = new BigDecimal(ESMByteConvert.extractFloat(bs, 8));
+				BigDecimal possF4 = new BigDecimal(ESMByteConvert.extractFloat(bs, 12));
+			if(possF1.scale()<4 && possF1.scale()>-4 &&
+					possF2.scale()<4 && possF2.scale()>-4 &&
+					possF3.scale()<4 && possF3.scale()>-4 &&
+					possF4.scale()<4 && possF4.scale()>-4)
+				countOfVec4++;
+			} catch (Exception e) {}
+		}
 	  
 	}
 	@Override
