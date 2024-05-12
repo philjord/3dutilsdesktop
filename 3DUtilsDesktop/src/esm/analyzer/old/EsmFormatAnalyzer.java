@@ -1,8 +1,9 @@
-package esm.analyzer;
+package esm.analyzer.old;
 
 import java.awt.GridLayout;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -190,7 +191,7 @@ public class EsmFormatAnalyzer
 		root = new DefaultMutableTreeNode(esmManager.getName());
 		tree = new JTree(root);
 		System.out.println("Stats " + recordStatsList.size());
-		Map<String, RecordStats> sortedRecsMap = getSortedRecsMap();
+		Map<String, RecordStats> sortedRecsMap = getSortedRecsMap(recordStatsList);
 		for (RecordStats rs : sortedRecsMap.values())
 		{
 			String desc = PluginGroup.typeMap.get(rs.type);
@@ -239,7 +240,7 @@ public class EsmFormatAnalyzer
 		asNode.add(stringfsubsNode);
 		System.out.println("A String format");
 
-		Map<String, SubrecordStats> sortedSubsMap = getSortedSubsMap();
+		Map<String, SubrecordStats> sortedSubsMap = getSortedSubsMapAlpha(allSubrecordStatsList);
 
 		for (SubrecordStats srs : sortedSubsMap.values())
 		{
@@ -349,7 +350,7 @@ public class EsmFormatAnalyzer
 		rootNode.add(node);
 	}
 
-	private static Map<String, SubrecordStats> getSortedSubsMap()
+	public static Map<String, SubrecordStats> getSortedSubsMapAlpha(Map<String, SubrecordStats> allSubrecordStatsList)
 	{
 		List<Map.Entry<String, SubrecordStats>> entries = new ArrayList<Map.Entry<String, SubrecordStats>>(
 				allSubrecordStatsList.entrySet());
@@ -368,8 +369,11 @@ public class EsmFormatAnalyzer
 
 		return sortedMap;
 	}
+	
+	
 
-	private static Map<String, RecordStats> getSortedRecsMap()
+
+	public static Map<String, RecordStats> getSortedRecsMap(Map<String, RecordStats> recordStatsList)
 	{
 		List<Map.Entry<String, RecordStats>> entries = new ArrayList<Map.Entry<String, RecordStats>>(recordStatsList.entrySet());
 		Collections.sort(entries, new Comparator<Map.Entry<String, RecordStats>>() {

@@ -1,4 +1,4 @@
-package esm.analyzer;
+package esm.analyzer.old;
 
 import java.util.LinkedHashMap;
 
@@ -6,6 +6,10 @@ import esfilemanager.common.data.record.Record;
 
 public class RecordStatsList extends LinkedHashMap<String, RecordStats>
 {	
+	public void applyRecord(Record rec, boolean interior, boolean exterior)
+	{
+		applyRecord(rec, interior, exterior, null);
+	}
 	public void applyRecord(Record rec, boolean interior, boolean exterior, SubrecordStatsList allSubrecordStatsList)
 	{
 		// are we updating or creating

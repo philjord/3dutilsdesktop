@@ -1,4 +1,4 @@
-package esm.analyzer;
+package esm.analyzer.old;
 
 import java.util.List;
 
@@ -21,7 +21,16 @@ public class RecordStats
 	{
 		this.type = t;
 	}
-
+	// if subs are recorded sepeately
+	public void applyRecord(Record rec)
+	{
+		count++;
+	}
+	
+	public void applyRecord(Record rec, boolean interior, boolean exterior)
+	{
+		 applyRecord(rec, interior, exterior, null);
+	}
 	public void applyRecord(Record rec, boolean interior, boolean exterior, SubrecordStatsList allSubrecordStatsList)
 	{
 		appearsInIntCELL = appearsInIntCELL || interior;
@@ -29,17 +38,28 @@ public class RecordStats
 		count++;
 
 		List<Subrecord> subs = rec.getSubrecords();
+		
+		
+		
 		for (int i = 0; i < subs.size(); i++)
 		{
 			Subrecord sub = subs.get(i);
+			String subTypeBefore = null;
+			String subTypeAfter = null;
+			if(i> 0)
+				subTypeBefore = subs.get(i-1).getSubrecordType();
+			
+			if(i>subs.size()-1)
+				subTypeAfter = subs.get(i+1).getSubrecordType();
 
-			// heaps of madness in some records
-			if (sub.getSubrecordType().endsWith("0TX") || sub.getSubrecordType().endsWith("IAD"))
-				continue;
-
-			subrecordStatsList.applySub(sub, rec.getRecordType(), i);
+			subrecordStatsList.applySub(sub, rec.getRecordType(), i, subTypeBefore, subTypeAfter);
+			
+ 
+			
+			
 			// also put into the global sub stats list
-			allSubrecordStatsList.applySub(sub, rec.getRecordType(), i);
+			if(allSubrecordStatsList != null)
+				allSubrecordStatsList.applySub(sub, rec.getRecordType(), i, subTypeBefore, subTypeAfter);
 		}
 
 		EsmFormatAnalyzer.loadRecord(rec);

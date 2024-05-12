@@ -1,4 +1,4 @@
-package esm.analyzer;
+package esm.analyzer.old;
 
 import java.util.HashSet;
 import java.util.regex.Pattern;
@@ -19,25 +19,39 @@ public class SubrecordStats
 	public boolean isString = true; // any false leaves it as false only all trues leave it
 
 	public boolean couldBeFormId = true;
+	
+	public HashSet<Integer> hasOrderOf = new HashSet<Integer>();	
 
 	public HashSet<String> appearsIn = new HashSet<String>();
 
-	public HashSet<Integer> hasOrderOf = new HashSet<Integer>();
+	public HashSet<Integer> fewSizes = new HashSet<Integer>();	
+	
+	public HashSet<String> subTypesBefore = new HashSet<String>();
+	
+	public HashSet<String> subTypesAfter = new HashSet<String>();
 
 	public SubrecordStats(String st)
 	{
 		this.subrecordType = st;
 	}
 
-	public void applySub(Subrecord sub, String inRec, int orderNo)
+	public void applySub(Subrecord sub, String inRec, int orderNo, String subTypeBefore, String subTypeAfter)
 	{
-
-
 		appearsIn.add(inRec);
 		hasOrderOf.add(orderNo);
-
+		subTypesBefore.add(subTypeBefore);
+		subTypesAfter.add(subTypeAfter);
+		
+		
+		
 		count++;
 		byte[] bs = sub.getSubrecordData();
+		
+		// after 5 size variations its not worth trying to pin it down, presumably strings and randos
+		if(fewSizes.size() < 6)
+			fewSizes.add(bs.length);
+
+		
 		if (minLength > bs.length)
 		{
 			minLength = bs.length;

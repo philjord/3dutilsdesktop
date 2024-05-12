@@ -1,4 +1,4 @@
-package esm.analyzer;
+package esm.analyzer.old;
 
 import java.util.LinkedHashMap;
 
@@ -6,7 +6,7 @@ import esfilemanager.common.data.record.Subrecord;
 
 public class SubrecordStatsList extends LinkedHashMap<String, SubrecordStats>
 {
-	public void applySub(Subrecord sub, String inRec, int orderNo)
+	public void applySub(Subrecord sub, String inRec, int orderNo, String subTypeBefore, String subTypeAfter)
 	{
 		// are we updating or creating
 		SubrecordStats subrecordStats = get(sub.getSubrecordType());
@@ -16,7 +16,7 @@ public class SubrecordStatsList extends LinkedHashMap<String, SubrecordStats>
 			put(sub.getSubrecordType(), subrecordStats);
 		}
 
-		subrecordStats.applySub(sub, inRec, orderNo);
+		subrecordStats.applySub(sub, inRec, orderNo, subTypeBefore, subTypeAfter);
 
 	}
 }
