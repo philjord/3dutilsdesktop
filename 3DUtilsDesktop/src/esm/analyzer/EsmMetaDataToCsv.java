@@ -60,10 +60,16 @@ public class EsmMetaDataToCsv {
 	public static String					OUTPUT_FILE_KEY			= "outputFile";
 
 	public static boolean					ANALYZE_CELLS			= true;
+	
+	public static boolean					WRITE_CSV			= false;
+	
+	public static boolean					WRITE_MD			= true;
+	
+	public static boolean					WRITE_JAVA			= true;
 
 	public static File 						outputFolder;
 	
-	public static BufferedWriter 			out;
+	public static BufferedWriter 			csvOut;
 
 	public static Plugin					pluginToAnalyze;
 
@@ -84,17 +90,24 @@ public class EsmMetaDataToCsv {
 
 		// this is for csv full details output 
 		if (generalEsmFile != null) {
+			esmFileName = generalEsmFile.substring(generalEsmFile.lastIndexOf("\\") + 1);
 			prefs = Preferences.userNodeForPackage(EsmMetaDataToCsv.class);
-			outputFolder = TitledJFileChooser.requestFolderName("Select Output Folder", prefs.get(OUTPUT_FILE_KEY, ""), null);
+			outputFolder = TitledJFileChooser.requestFolderName("Select Output Folder (" + esmFileName.substring(0,esmFileName.lastIndexOf(".")) + " will be created as a sub folder)", prefs.get(OUTPUT_FILE_KEY, ""), null);
 
 			if (outputFolder != null) {
 				prefs.put(OUTPUT_FILE_KEY, outputFolder.getAbsolutePath());
-				esmFileName = generalEsmFile.substring(generalEsmFile.lastIndexOf("\\") + 1);
+
 				try {
-					File csv = new File(outputFolder, esmFileName + ".csv");
-					if(!csv.exists())
-						csv.createNewFile();
-					out = new BufferedWriter(new FileWriter(csv));
+					
+					if(WRITE_CSV) {
+						File csv = new File(outputFolder, esmFileName + ".csv");
+						if(!csv.exists())
+							csv.createNewFile();
+						csvOut = new BufferedWriter(new FileWriter(csv));
+					}
+					
+					
+					
 					long startTime = System.currentTimeMillis();
 					System.out.println("loading file "	+ generalEsmFile);
 	
@@ -113,8 +126,9 @@ public class EsmMetaDataToCsv {
 					
 					analzePlugin(plugin);
 					
-					
+					 
 					writeOutMdFile();
+				 
 					
 					
 					System.out.println("Finished loading in " + (System.currentTimeMillis() - startTime));
@@ -133,27 +147,29 @@ public class EsmMetaDataToCsv {
 	private static void analzePlugin(Plugin plugin) {
 		pluginToAnalyze = plugin;
 		try {
-			
-			// output header row
-			out.append("num,");
-			//out.append("EsmFileName,");
-			out.append("RecordType,");
-			out.append("FormID,");
-			out.append("RecordFlags1,");
-			out.append("RecordFlags2,");
-			out.append("EditorID,");
-			out.append("SubrecordType,");
-			out.append("SubOrder,");
-			out.append("DataLen,");
-			out.append("CouldBeFormID,");						
-			out.append("CouldBeString,"); 							
-			
-			out.newLine();
+			if(WRITE_CSV) {
+				// output header row
+				csvOut.append("num,");
+				//out.append("EsmFileName,");
+				csvOut.append("RecordType,");
+				csvOut.append("FormID,");
+				csvOut.append("RecordFlags1,");
+				csvOut.append("RecordFlags2,");
+				csvOut.append("EditorID,");
+				csvOut.append("SubrecordType,");
+				csvOut.append("SubOrder,");
+				csvOut.append("DataLen,");
+				csvOut.append("CouldBeFormID,");						
+				csvOut.append("CouldBeString,"); 							
+				
+				csvOut.newLine();
+			}
 			for (PluginGroup group : pluginToAnalyze.getGroupList()) {
 				analzeGroupChildren(group);
 			}
-
-			out.close();
+			if(WRITE_CSV) {
+				csvOut.close();
+			}
 		} catch (DataFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -172,8 +188,8 @@ public class EsmMetaDataToCsv {
 			if (record instanceof PluginGroup) {
 				analzeGroupChildren((PluginGroup)record);
 			} else {
-				if (group.getGroupType() == 0) {
-					String groupRecordType = group.getGroupRecordType();					
+				if (ANALYZE_CELLS || group.getGroupType() == 0) {
+					//String groupRecordType = group.getGroupRecordType();					
 					
 										
 					
@@ -183,58 +199,61 @@ public class EsmMetaDataToCsv {
 					int recordFlags2 = record.getRecordFlags2();
 					
 					//for md building
-					RecordData recordData = new RecordData(groupRecordType, formID);
-					ArrayList<RecordData> recordDataList = recordDataLists.get(groupRecordType);
+					RecordData recordData = new RecordData(record.getRecordType(), formID);
+					ArrayList<RecordData> recordDataList = recordDataLists.get(record.getRecordType());
 					if(recordDataList == null) {	
 						recordDataList = new ArrayList<RecordData>();
-						recordDataLists.put(groupRecordType, recordDataList);
+						recordDataLists.put(record.getRecordType(), recordDataList);
 					}
 					recordDataList.add(recordData);
 					
-					// to ease the file size slightly skip some trivial ones, negate this to get them decoded
-					if(!skipit(groupRecordType)) {
-						 
-						int currentSubOrderNum = 0;
-						List<Subrecord> subs = record.getSubrecords();
-						for (int i = 0; i < subs.size(); i++)
-						{
-							Subrecord sub = subs.get(i);
-							
-							// skip the editorid we know about that guy
-							if (sub.getSubrecordType().equals("EDID"))
-								continue;
-									
-							//RECO header info, repeated everytime
-							out.append(""+currentRowOrderNum++);
-							out.append(",");
-							//out.append(esmFileName);
-							//out.append(",");
-							out.append(groupRecordType);
-							out.append(",");
-							out.append(""+formID);
-							out.append(",");
-							out.append(""+recordFlags1);
-							out.append(",");
-							out.append(""+recordFlags2);
-							out.append(",");
-							out.append(editorID);// this has no spaces 
-							out.append(",");						
-							out.append(sub.getSubrecordType()); 
-							out.append(",");
-							out.append(""+currentSubOrderNum++);
-							out.append(",");
-							out.append(""+sub.getSubrecordData().length); 
-							out.append(",");
-							String couldBeFormID = couldBeFormID(sub.getSubrecordData());
-							out.append(couldBeFormID == null ? "" : couldBeFormID); 
-							out.append(",");
-							String couldBeString = couldBeString(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
-							out.append(couldBeString == null ? "" : escape(couldBeString)); 							
-																		
-							
-							out.newLine();
-							
-							optionalDecodeOutput(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
+					if(WRITE_CSV) {
+						// to ease the file size slightly skip some trivial ones, negate this to get them decoded
+						if(!skipitForCSV(record.getRecordType())) {
+							 
+							int currentSubOrderNum = 0;
+							List<Subrecord> subs = record.getSubrecords();
+							for (int i = 0; i < subs.size(); i++)
+							{
+								Subrecord sub = subs.get(i);
+								
+								// skip the editorid we know about that guy
+								if (sub.getSubrecordType().equals("EDID"))
+									continue;
+										
+								//RECO header info, repeated everytime
+								csvOut.append(""+currentRowOrderNum++);
+								csvOut.append(",");
+								//out.append(esmFileName);
+								//out.append(",");
+								csvOut.append(record.getRecordType());
+								csvOut.append(",");
+								csvOut.append(""+formID);
+								csvOut.append(",");
+								csvOut.append(""+recordFlags1);
+								csvOut.append(",");
+								csvOut.append(""+recordFlags2);
+								csvOut.append(",");
+								csvOut.append(editorID);// this has no spaces 
+								csvOut.append(",");						
+								csvOut.append(sub.getSubrecordType()); 
+								csvOut.append(",");
+								csvOut.append(""+currentSubOrderNum++);
+								csvOut.append(",");
+								csvOut.append(""+sub.getSubrecordData().length); 
+								csvOut.append(",");
+								String couldBeFormID = couldBeFormID(sub.getSubrecordData());
+								csvOut.append(couldBeFormID == null ? "" : couldBeFormID); 
+								csvOut.append(",");
+								String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(), sub.getSubrecordData());
+								csvOut.append(couldBeString == null ? "" : escape(couldBeString)); 							
+																			
+								
+								csvOut.newLine();
+								csvOut.flush();
+								
+								optionalDecodeOutput(record.getRecordType(), sub.getSubrecordType(), sub.getSubrecordData());
+							}
 						}
 					}
 					
@@ -257,13 +276,13 @@ public class EsmMetaDataToCsv {
 						if(i>subs.size()-1)
 							subTypeAfter = subs.get(i+1).getSubrecordType();
 						String couldBeFormID = couldBeFormID(sub.getSubrecordData());
-						String couldBeString = couldBeString(groupRecordType, sub.getSubrecordType(), sub.getSubrecordData());
-						SubrecordData srs = new SubrecordData(sub, groupRecordType, currentSubOrderNum, subTypeBefore, subTypeAfter, couldBeFormID, couldBeString);
+						String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(), sub.getSubrecordData());
+						SubrecordData srs = new SubrecordData(sub, record.getRecordType(), currentSubOrderNum, subTypeBefore, subTypeAfter, couldBeFormID, couldBeString);
 						recordData.subrecordStatsList.add(srs);
 						
 					}
 					
-					out.flush();
+					
 
 					
 				}
@@ -276,7 +295,7 @@ public class EsmMetaDataToCsv {
 	
 	
 
-	private static boolean skipit(String recType) {
+	private static boolean skipitForCSV(String recType) {
 		if (esmFileName.equals("Skyrim.esm") &&
 				(recType.equals("GMST") || recType.equals("KYWD") || recType.equals("LCRT") 
 						|| recType.equals("GLOB")
@@ -409,45 +428,51 @@ public class EsmMetaDataToCsv {
 	
 	private static void writeOutMdFile() throws IOException
 	{
-		File mdFile = new File(outputFolder, esmFileName + ".md");
-		if(!mdFile.exists())
-			mdFile.createNewFile();
-		BufferedWriter mdOut = new BufferedWriter(new FileWriter(mdFile));
-		
-		//TODO: customize per esm File!
-		String header = "Esm Record Formats \n\n"+
-				"=== \n\n"+				 
-				"## URL \n\n"+
-				"<p><a href=\"https://en.uesp.net/wiki/Oblivion:Oblivion\">https://en.uesp.net/wiki/Oblivion:Oblivion</a></p> \n\n"+
-				"<p><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:Modding#Toolmaker_Info\">https://en.uesp.net/wiki/Oblivion_Mod:Modding#Toolmaker_Info</a></p> \n\n"+
-				"<p><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:Mod_File_Format\">https://en.uesp.net/wiki/Oblivion_Mod:Mod_File_Format</a></p> \n\n"+				 
-				"## My cut of it   \n\n";
-		
-		mdOut.append(header);		
-		
+		BufferedWriter mdOut = null;
+		if(WRITE_MD) {
+			File mdFile = new File(outputFolder, esmFileName + ".md");
+			if(!mdFile.exists())
+				mdFile.createNewFile();
+			mdOut = new BufferedWriter(new FileWriter(mdFile));
+			
+			//TODO: customize per esm File!
+			String header = "Esm Record Formats \n\n"+
+					"=== \n\n"+				 
+					"## URL \n\n"+
+					"<p><a href=\"https://en.uesp.net/wiki/Oblivion:Oblivion\">https://en.uesp.net/wiki/Oblivion:Oblivion</a></p> \n\n"+
+					"<p><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:Modding#Toolmaker_Info\">https://en.uesp.net/wiki/Oblivion_Mod:Modding#Toolmaker_Info</a></p> \n\n"+
+					"<p><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:Mod_File_Format\">https://en.uesp.net/wiki/Oblivion_Mod:Mod_File_Format</a></p> \n\n"+				 
+					"## My cut of it   \n\n";
+			
+			mdOut.append(header);		
+		}
 		 
 		//Note we want RECO in alpha order but not subs!
 		Map<String, ArrayList<RecordData>> sortedRecsMap = getSortedRecsMap(recordDataLists);
 		for (ArrayList<RecordData> rds : sortedRecsMap.values())
 		{			
 			String desc = PluginGroup.typeMap.get(rds.get(0).type);
-			String h2 = "<p><b>" + rds.get(0).type + "</b> "+desc+"</p> \n\n"+	
-			"<table class=\"wikitable\" width=\"100%\"> \n\n"+	
-			"<tbody><tr> \n\n"+	
-			"<th width=\"5%\">C</th> \n\n"+	
-			"<th width=\"5%\">Subrecord</th> \n\n"+	
-			"<th width=\"10%\"><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:File_Format_Conventions\" title=\"Oblivion Mod:File Format Conventions\">Type</a></th> \n\n"+	
-			"<th>Info</th> \n\n"+	
-			"</tr> \n\n"+	
-			"<tr> \n\n"+	
-			"<td>1</td> \n\n"+	
-			"<td>EDID</td> \n\n"+	
-			"<td>ZString</td> \n\n"+	
-			"<td>Editor ID, used only by consturction kit, not loaded at runtime</td> \n\n"+	
-			"</tr> \n\n";	
-			mdOut.append(h2);
+			if(WRITE_MD) {
+				String h2 = "<p><b>" + rds.get(0).type + "</b> "+desc+"</p> \n\n"+	
+				"<table class=\"wikitable\" width=\"100%\"> \n\n"+	
+				"<tbody><tr> \n\n"+	
+				"<th width=\"5%\">C</th> \n\n"+	
+				"<th width=\"5%\">Subrecord</th> \n\n"+	
+				"<th width=\"10%\"><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:File_Format_Conventions\" title=\"Oblivion Mod:File Format Conventions\">Type</a></th> \n\n"+	
+				"<th>Info</th> \n\n"+	
+				"</tr> \n\n"+	
+				"<tr> \n\n"+	
+				"<td>1</td> \n\n"+	
+				"<td>EDID</td> \n\n"+	
+				"<td>ZString</td> \n\n"+	
+				"<td>Editor ID, used only by consturction kit, not loaded at runtime</td> \n\n"+	
+				"</tr> \n\n";	
+				mdOut.append(h2);
+				
+				System.out.println("Writing rECO to md file : " + rds.get(0).type);
+			}
 			
-			//TODO: I have all records and their list of subs now
+			//I have all records and their list of subs now
 			/// so I need to build a list of subreco type and for each one work out the cardinality, type and likely data (formid pointer or string style)
 			int maxSubCount = 0;
 			HashSet<String> allsubTypes = new HashSet<String>();
@@ -599,21 +624,36 @@ public class EsmMetaDataToCsv {
 				  		
 			}		
 			
-			// for each one build a table
-			for (SubrecordStats2 subrecordStats : sortedAllSubTypesData)
-			{				
-				String sr = "<tr> \n\n" +
-				"<td>"+subrecordStats.C+"</td> \n\n" +
-				"<td>"+subrecordStats.subrecordType+"</td> \n\n" +
-				"<td>"+subrecordStats.dataType+"</td> \n\n" +
-				"<td>"+subrecordStats.desc+"</td> \n\n" +
-				"</tr> \n\n";
-				 	 			
-				mdOut.append(sr);		
+			if(WRITE_MD) {
+				// for each one build a table
+				for (SubrecordStats2 subrecordStats : sortedAllSubTypesData)
+				{				
+					String sr = "<tr> \n\n" +
+					"<td>"+subrecordStats.C+"</td> \n\n" +
+					"<td>"+subrecordStats.subrecordType+"</td> \n\n" +
+					"<td>"+subrecordStats.dataType+"</td> \n\n" +
+					"<td>"+subrecordStats.desc+"</td> \n\n" +
+					"</tr> \n\n";
+					 	 			
+					mdOut.append(sr);		
+				}
+			 
+			 
+				mdOut.append("</table></tbody>");
+
+				System.out.println("End writing RECO to md file : " + rds.get(0).type);
+				mdOut.flush();
 			}
-		 
-		 
-			mdOut.append("</table></tbody>");
+			
+			
+			
+			
+			
+			//////////NOW to build java classes of the same!!!
+			if(WRITE_JAVA) {
+				createJavaClass(rds.get(0), desc, sortedAllSubTypesData);	
+			}
+			
 		}
 
 		
@@ -621,6 +661,8 @@ public class EsmMetaDataToCsv {
 	}
 	
 	
+	
+
 	public static Map<String, ArrayList<RecordData>> getSortedRecsMap(Map<String, ArrayList<RecordData>> recordStatsList)
 	{
 		List<Map.Entry<String, ArrayList<RecordData>>> entries = new ArrayList<Map.Entry<String, ArrayList<RecordData>>>(recordStatsList.entrySet());
@@ -661,6 +703,48 @@ public class EsmMetaDataToCsv {
 		return sorted;
 	}
 	
+	
+	private static void createJavaClass(RecordData recordData, String desc,
+										ArrayList<SubrecordStats2> sortedAllSubTypesData) throws IOException {
+		
+		File javaRECOFolder = new File(outputFolder, esmFileName.substring(0,esmFileName.lastIndexOf(".")));
+		javaRECOFolder.mkdirs();
+				
+		File javaClassOut = new File(javaRECOFolder, recordData.type + ".java");
+		if(!javaClassOut.exists())
+			javaClassOut.createNewFile();
+		csvOut = new BufferedWriter(new FileWriter(javaClassOut));
+
+		 
+		/**
+		 * Concept
+		 * Create a compilable java class, that I can open a project with adn load an esm of the appropriate version
+		 * each game version will ahve a package space in this test project
+		 * load the esm into java classes with members and zero erros, then fire every esm at it.
+		 * 
+		 * after all esm incl 76 are working perfectly, then integration with current code can happen (member names getting modded etc)
+		 * 
+		 * 
+		 * note morrowind not currently going
+		 */
+		
+		
+		
+		/*recordData.type;
+		
+		//for each one build a table
+		for (SubrecordStats2 subrecordStats : sortedAllSubTypesData)
+		{				
+			String sr = "<tr> \n\n" +
+			"<td>"+subrecordStats.C+"</td> \n\n" +
+			"<td>"+subrecordStats.subrecordType+"</td> \n\n" +
+			"<td>"+subrecordStats.dataType+"</td> \n\n" +
+			"<td>"+subrecordStats.desc+"</td> \n\n" +
+			"</tr> \n\n";
+			 	 			
+			mdOut.append(sr);		
+		}*/
+	}
 	
 	
 }
