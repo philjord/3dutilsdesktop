@@ -9,6 +9,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import tools.io.FileChannelRAF;
 
 public class MainWindow extends JFrame implements ActionListener {
 	private boolean windowMinimized = false;
@@ -400,7 +400,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		File pluginFile = chooser.getSelectedFile();
 
-		FileChannelRAF in = null;
+		RandomAccessFile in = null;
 		float version = 0.0F;
 		String creator = null;
 		String summary = null;
@@ -409,7 +409,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			if ((!pluginFile.exists()) || (!pluginFile.isFile())) {
 				throw new IOException("'" + pluginFile.getName() + "' does not exist");
 			}
-			in = new FileChannelRAF(pluginFile, "r");
+			in = new RandomAccessFile(pluginFile, "r");
 			PluginHeader header = new PluginHeader(pluginFile);
 			header.read(in);
 			version = header.getVersion();
@@ -473,7 +473,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			return;
 		}
 
-		FileChannelRAF in = null;
+		RandomAccessFile in = null;
 		boolean descriptionSet = false;
 		String creator = null;
 		String summary = null;
@@ -482,7 +482,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			if ((!pluginFile.exists()) || (!pluginFile.isFile())) {
 				throw new IOException("'" + pluginFile.getName() + "' does not exist");
 			}
-			in = new FileChannelRAF(pluginFile, "r");
+			in = new RandomAccessFile(pluginFile, "r");
 			PluginHeader header = new PluginHeader(pluginFile);
 			header.read(in);
 			creator = header.getCreator();

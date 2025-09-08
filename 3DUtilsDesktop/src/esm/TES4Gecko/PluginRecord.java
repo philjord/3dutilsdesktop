@@ -2,6 +2,7 @@ package esm.TES4Gecko;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -11,8 +12,6 @@ import java.util.ListIterator;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
-
-import tools.io.FileChannelRAF;
 
 public class PluginRecord extends SerializedElement implements Cloneable {
 	private static final String	dummyEditorID	= new String();
@@ -708,7 +707,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 		return text;
 	}
 
-	public void load(File file, FileChannelRAF in, int recordLength)
+	public void load(File file, RandomAccessFile in, int recordLength)
 			throws PluginException, IOException, DataFormatException {
 		int offset = 0;
 		int overrideLength = 0;
@@ -761,7 +760,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 			throw new PluginException(file.getName() + ": " + this.recordType + " record is incomplete");
 	}
 
-	public void store(FileChannelRAF out) throws IOException {
+	public void store(RandomAccessFile out) throws IOException {
 		byte[] prefix = new byte[20];
 		System.arraycopy(this.recordType.getBytes(), 0, prefix, 0, 4);
 		setInteger(this.recordLength, prefix, 4);

@@ -2,10 +2,9 @@ package esm.TES4Gecko;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
-
-import tools.io.FileChannelRAF;
 
 public class PluginSpill {
 	private File				spillFile;
@@ -14,7 +13,7 @@ public class PluginSpill {
 
 	private Map<Long, byte[]>	cacheMap;
 
-	private FileChannelRAF		spill;
+	private RandomAccessFile		spill;
 
 	private long				nextWrite		= 0L;
 
@@ -28,7 +27,7 @@ public class PluginSpill {
 			spillFile.delete();
 		}
 
-		this.spill = new FileChannelRAF(spillFile, "rw");
+		this.spill = new RandomAccessFile(spillFile, "rw");
 
 		this.cacheMap = new HashMap<Long, byte[]>(1000);
 

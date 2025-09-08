@@ -2,6 +2,7 @@ package esm.TES4Gecko;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,8 +10,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.zip.DataFormatException;
-
-import tools.io.FileChannelRAF;
 
 public class PluginGroup extends PluginRecord {
 	public static final int				TOP					= 0;
@@ -492,7 +491,7 @@ public class PluginGroup extends PluginRecord {
 	}
 
 	@Override
-	public void load(File file, FileChannelRAF in, int groupLength)
+	public void load(File file, RandomAccessFile in, int groupLength)
 			throws PluginException, IOException, DataFormatException {
 		int dataLength = groupLength;
 
@@ -529,7 +528,7 @@ public class PluginGroup extends PluginRecord {
 	}
 
 	@Override
-	public void store(FileChannelRAF out) throws IOException {
+	public void store(RandomAccessFile out) throws IOException {
 		byte[] prefix = new byte[20];
 		long groupPosition = out.getFilePointer();
 		out.write(prefix);

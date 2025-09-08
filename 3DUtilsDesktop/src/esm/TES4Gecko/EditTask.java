@@ -3,11 +3,11 @@ package esm.TES4Gecko;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import tools.io.FileChannelRAF;
 
 public class EditTask extends WorkerTask {
 	private File		inFile;
@@ -38,7 +38,7 @@ public class EditTask extends WorkerTask {
 	@Override
 	public void run() {
 		File outFile = new File(this.inFile.getParent() + Main.fileSeparator + "Gecko.tmp");
-		FileChannelRAF in = null;
+		RandomAccessFile in = null;
 		FileOutputStream out = null;
 		byte[] buffer = new byte[4096];
 		boolean completed = false;
@@ -49,7 +49,7 @@ public class EditTask extends WorkerTask {
 			if (outFile.exists()) {
 				outFile.delete();
 			}
-			in = new FileChannelRAF(this.inFile, "r");
+			in = new RandomAccessFile(this.inFile, "r");
 			out = new FileOutputStream(outFile);
 			long fileSize = this.inFile.length();
 			long processedCount = 0L;

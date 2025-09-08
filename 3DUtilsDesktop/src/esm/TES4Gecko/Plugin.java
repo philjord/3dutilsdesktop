@@ -2,13 +2,12 @@ package esm.TES4Gecko;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
-
-import tools.io.FileChannelRAF;
 
 public class Plugin extends SerializedElement {
 	private File						pluginFile;
@@ -826,7 +825,7 @@ public class Plugin extends SerializedElement {
 	}
 
 	public void load(WorkerTask task) throws PluginException, DataFormatException, IOException, InterruptedException {
-		FileChannelRAF in = null;
+		RandomAccessFile in = null;
 		StatusDialog statusDialog = null;
 		if (task != null) {
 			statusDialog = task.getStatusDialog();
@@ -840,7 +839,7 @@ public class Plugin extends SerializedElement {
 			if ((!this.pluginFile.exists()) || (!this.pluginFile.isFile())) {
 				throw new IOException("Plugin file '" + this.pluginFile.getName() + "' does not exist");
 			}
-			in = new FileChannelRAF(this.pluginFile, "r");
+			in = new RandomAccessFile(this.pluginFile, "r");
 
 			this.pluginHeader.read(in);
 			int recordCount = this.pluginHeader.getRecordCount();
@@ -932,7 +931,7 @@ public class Plugin extends SerializedElement {
 
 	public void store(WorkerTask task) throws DataFormatException, IOException, InterruptedException {
 		File outFile = null;
-		FileChannelRAF out = null;
+		RandomAccessFile out = null;
 		boolean groupsWritten = false;
 		StatusDialog statusDialog = null;
 		if (task != null) {
@@ -957,7 +956,7 @@ public class Plugin extends SerializedElement {
 			if (outFile.exists()) {
 				outFile.delete();
 			}
-			out = new FileChannelRAF(outFile, "rw");
+			out = new RandomAccessFile(outFile, "rw");
 
 			this.pluginHeader.write(out);
 			int groupCount = this.groupList.size();

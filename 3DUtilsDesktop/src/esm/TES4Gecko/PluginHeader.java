@@ -3,10 +3,9 @@ package esm.TES4Gecko;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
-
-import tools.io.FileChannelRAF;
 
 public class PluginHeader extends SerializedElement {
 	private File			pluginFile;
@@ -80,7 +79,7 @@ public class PluginHeader extends SerializedElement {
 		this.masterList = masterList;
 	}
 
-	public void read(FileChannelRAF in) throws PluginException, IOException {
+	public void read(RandomAccessFile in) throws PluginException, IOException {
 		byte[] prefix = new byte[20];
 		byte[] buffer = new byte[1024];
 
@@ -154,7 +153,7 @@ public class PluginHeader extends SerializedElement {
 		out.write(headerRecord);
 	}
 
-	public void write(FileChannelRAF out) throws IOException {
+	public void write(RandomAccessFile out) throws IOException {
 		byte[] headerRecord = buildHeader();
 		out.write(headerRecord);
 	}

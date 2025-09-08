@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +12,6 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import tools.io.FileChannelRAF;
 
 public class Master extends SerializedElement {
 	private static final int		INDEX_VERSION	= 5;
@@ -73,7 +72,7 @@ public class Master extends SerializedElement {
 
 	public PluginRecord getRecord(int formID) throws DataFormatException, IOException, PluginException {
 		PluginRecord record = null;
-		FileChannelRAF in = null;
+		RandomAccessFile in = null;
 
 		int masterFormID = formID;
 		FormInfo formInfo = this.formMap.get(new Integer(masterFormID));
@@ -84,7 +83,7 @@ public class Master extends SerializedElement {
 		byte[] prefix = new byte[20];
 		long fileOffset = ((Long)formInfo.getSource()).longValue();
 		try {
-			in = new FileChannelRAF(this.masterFile, "r");
+			in = new RandomAccessFile(this.masterFile, "r");
 			in.seek(fileOffset);
 			int count = in.read(prefix);
 			if (count != 20) {
@@ -115,9 +114,9 @@ public class Master extends SerializedElement {
 			throw new IOException("Master file '" + this.masterFile.getName() + "' does not exist");
 		}
 
-		FileChannelRAF in = null;
+		RandomAccessFile in = null;
 		try {
-			in = new FileChannelRAF(this.masterFile, "r");
+			in = new RandomAccessFile(this.masterFile, "r");
 			this.masterHeader.read(in);
 		} finally {
 			if (in != null) {
@@ -277,7 +276,7 @@ public class Master extends SerializedElement {
 	private void buildIndexFile(WorkerTask task, File indexFile)
 			throws DataFormatException, InterruptedException, IOException, PluginException {
 		boolean completed = false;
-		FileChannelRAF in = null;
+		RandomAccessFile in = null;
 		FileOutputStream out = null;
 		GZIPOutputStream deflater = null;
 		byte[] prefix = new byte[20];
@@ -290,7 +289,7 @@ public class Master extends SerializedElement {
 		int recordCount = this.masterHeader.getRecordCount();
 		this.formList = new ArrayList<FormInfo>(recordCount);
 		try {
-			in = new FileChannelRAF(this.masterFile, "r");
+			in = new RandomAccessFile(this.masterFile, "r");
 			long fileSize = this.masterFile.length();
 			int currentProgress = 0;
 
@@ -390,7 +389,7 @@ public class Master extends SerializedElement {
 		}
 	}
 
-	private void buildGroup(FileChannelRAF in, byte[] prefix, List<FormInfo> formList)
+	private void buildGroup(RandomAccessFile in, byte[] prefix, List<FormInfo> formList)
 			throws DataFormatException, InterruptedException, IOException, PluginException {
 		int masterID = this.masterHeader.getMasterList().size();
 
