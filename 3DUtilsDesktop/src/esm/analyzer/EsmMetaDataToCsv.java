@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +28,7 @@ import esfilemanager.common.data.plugin.PluginRecord;
 import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esm.EsmFileLocations;
+import esmj3d.data.shared.records.InstRECO;
 import tools.io.ESMByteConvert;
 import tools.swing.TitledJFileChooser;
 
@@ -61,7 +64,7 @@ public class EsmMetaDataToCsv {
 
 	public static boolean										ANALYZE_CELLS		= true;
 
-	public static boolean										WRITE_CSV			= true;
+	public static boolean										WRITE_CSV			= false;
 
 	public static boolean										WRITE_MD			= true;
 
@@ -318,6 +321,7 @@ public class EsmMetaDataToCsv {
 	 * @param bs
 	 * @return
 	 */
+
 	public static String couldBeFormID(byte[] bs) {
 		if (bs.length == 4) {
 			String ret = "";
@@ -334,8 +338,8 @@ public class EsmMetaDataToCsv {
 			// odd floats are a waste of space
 			try {
 				float f = ESMByteConvert.extractFloat(bs, 0);
-				BigDecimal possF = new BigDecimal(f);
-				if (possF.scale() < 4 && possF.scale() > -4)
+				int scale = floatScale(f);				
+				if (scale < 4 && scale > -4)
 					ret += f + "f";
 			} catch (Exception e) {
 			}
@@ -346,6 +350,34 @@ public class EsmMetaDataToCsv {
 		return null;
 	}
 
+	// Taken straight from BigDecimal
+	public static int floatScale(float val) {
+        // Translate the double into sign, exponent and significand, according
+        // to the formulae in JLS, Section 20.10.22.
+        int valBits = Float.floatToIntBits(val);
+        //int sign = ((valBits >> 63) == 0 ? 1 : -1);
+        int exponent = (int) ((valBits >> 52) & 0x7ffL);
+        int significand = (exponent == 0
+                ? (valBits & ((1 << 52) - 1)) << 1
+                : (valBits & ((1 << 52) - 1)) | (1 << 52));
+        exponent -= 1075;
+        // At this point, val == sign * significand * 2**exponent.
+
+        /*
+         * Special case zero to supress nonterminating normalization and bogus
+         * scale calculation.
+         */
+        if (significand == 0) {
+            return 0;
+        }
+        // Normalize
+        while ((significand & 1) == 0) { // i.e., significand is even
+            significand >>= 1;
+            exponent++;
+        }
+             
+        return exponent;            
+    }
 	public static String couldBeFormID(int formId) {
 
 		if (formId >= 0 || formId < 1000000) {
@@ -645,13 +677,31 @@ public class EsmMetaDataToCsv {
 										ArrayList<SubrecordStats2> sortedAllSubTypesData)
 			throws IOException {
 
-		File javaRECOFolder = new File(outputFolder, esmFileName.substring(0, esmFileName.lastIndexOf(".")));
+		String betterJavaName = PluginGroup.typeMap.get(recordData.type);
+
+		if (betterJavaName == null)
+			System.out.println("Not recordData.type " + recordData.type);
+
+		// did we have no lookup, or a questionable lookup
+		if (betterJavaName == null || betterJavaName.indexOf("?") != -1) {
+			betterJavaName = recordData.type;
+		} else {
+			int bracketOpen = betterJavaName.indexOf("(");
+			if (bracketOpen != -1)
+				betterJavaName = betterJavaName.substring(0, bracketOpen);
+			betterJavaName = betterJavaName.replaceAll(" ", "");
+		}
+
+		String esmClean = esmFileName.substring(0, esmFileName.lastIndexOf("."));
+
+		File javaRECOFolder = new File(outputFolder, esmClean);
 		javaRECOFolder.mkdirs();
 
-		File javaClassOut = new File(javaRECOFolder, recordData.type + ".java");
+		File javaClassOut = new File(javaRECOFolder, betterJavaName + ".java");
 		if (!javaClassOut.exists())
 			javaClassOut.createNewFile();
-		csvOut = new BufferedWriter(new FileWriter(javaClassOut));
+
+		BufferedWriter javaBW = new BufferedWriter(new FileWriter(javaClassOut));
 
 		/**
 		 * Concept Create a compilable java class, that I can open a project with adn load an esm of the appropriate
@@ -661,25 +711,35 @@ public class EsmMetaDataToCsv {
 		 * after all esm incl 76 are working perfectly, then integration with current code can happen (member names
 		 * getting modded etc)
 		 * 
-		 * Possibly I could make a custom editor for each version to make the editor a bit sexier to make them all build?
+		 * Possibly I could make a custom editor for each version to make the editor a bit sexier to make them all
+		 * build?
 		 * 
-		 * note morrowind not currently going
 		 */
 
-		/*recordData.type;
-		
+		javaBW.append("package esmj3d." + esmClean + ".records; \n");
+		javaBW.newLine();
+		javaBW.append("import esfilemanager.common.data.record.Record;\n");
+		javaBW.append("import esfilemanager.common.data.record.Subrecord;\n");
+		javaBW.append("import esmj3d.data.shared.records.RECO;\n");
+		javaBW.append("import esmj3d.data.shared.subrecords.FormID;\n");
+		javaBW.append("import esmj3d.data.shared.subrecords.LString;\n");
+		javaBW.append("import esmj3d.data.shared.subrecords.MODL;\n");
+		javaBW.newLine();
+		javaBW.append("public class " + betterJavaName + " extends InstRECO { \n");
+		javaBW.newLine();
+
 		//for each one build a table
-		for (SubrecordStats2 subrecordStats : sortedAllSubTypesData)
-		{				
-			String sr = "<tr> \n\n" +
-			"<td>"+subrecordStats.C+"</td> \n\n" +
-			"<td>"+subrecordStats.subrecordType+"</td> \n\n" +
-			"<td>"+subrecordStats.dataType+"</td> \n\n" +
-			"<td>"+subrecordStats.desc+"</td> \n\n" +
-			"</tr> \n\n";
-			 	 			
-			mdOut.append(sr);		
-		}*/
+		for (SubrecordStats2 subrecordStats : sortedAllSubTypesData) {
+			javaBW.append("\t" + subrecordStats.subrecordType + " " + subrecordStats.dataType + ";\n");
+			javaBW.newLine();
+		}
+		javaBW.newLine();
+		javaBW.append("\tpublic " + betterJavaName + "(Record recordData){ \n");
+		javaBW.append("\t} \n");
+		javaBW.append("} \n");
+		javaBW.flush();
+		javaBW.close();
+
 	}
 
 }
