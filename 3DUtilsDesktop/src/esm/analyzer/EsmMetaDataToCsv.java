@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.prefs.Preferences;
 import java.util.zip.DataFormatException;
 
@@ -60,8 +61,10 @@ public class EsmMetaDataToCsv {
 	public static String										OUTPUT_FILE_KEY		= "outputFile";
 
 	public static boolean										ANALYZE_CELLS		= false;
+	
+	public static boolean										WRITE_BIG_TYPES		= false;
 
-	public static boolean										WRITE_CSV			= false;
+	public static boolean										WRITE_CSV			= true;
 
 	public static boolean										WRITE_MD			= true;
 
@@ -81,6 +84,10 @@ public class EsmMetaDataToCsv {
 
 	// just the meta data of records and subs to be turned into overall stats after full collection
 	public static LinkedHashMap<String, ArrayList<RecordData>>	recordDataLists		= new LinkedHashMap<String, ArrayList<RecordData>>();
+
+	// for noting at teh end of sorting
+
+	public static ArrayList<String>								complexSortRecords	= new ArrayList<String>();
 
 	public static void main(String args[]) {
 		String generalEsmFile = EsmFileLocations.getGeneralEsmFile();
@@ -155,7 +162,7 @@ public class EsmMetaDataToCsv {
 				csvOut.append("RecordType,");
 				csvOut.append("FormID,");
 				csvOut.append("RecordFlags1,");
-				csvOut.append("RecordFlags2,");
+				csvOut.append("VersionInfo,");
 				csvOut.append("EditorID,");
 				csvOut.append("SubrecordType,");
 				csvOut.append("SubOrder,");
@@ -190,97 +197,101 @@ public class EsmMetaDataToCsv {
 				analzeGroupChildren((PluginGroup)record);
 			} else {
 				if (ANALYZE_CELLS || group.getGroupType() == 0) {
-					//String groupRecordType = group.getGroupRecordType();					
+					//String groupRecordType = group.getGroupRecordType();		
 
-					String editorID = record.getEditorID();
-					int formID = record.getFormID();
-					int recordFlags1 = record.getRecordFlags1();
-					int recordFlags2 = record.getRecordFlags2();
+					// special case of no subs or a single EDID, these just cloud real data skip them
+					// I suspect any 1 sub RECO is not a real one (many have 2 or 3)
+					if (record.getSubrecords().size() > 1) {
 
-					//for md building
-					RecordData recordData = new RecordData(record.getRecordType(), formID);
-					ArrayList<RecordData> recordDataList = recordDataLists.get(record.getRecordType());
-					if (recordDataList == null) {
-						recordDataList = new ArrayList<RecordData>();
-						recordDataLists.put(record.getRecordType(), recordDataList);
-					}
-					recordDataList.add(recordData);
+						String editorID = record.getEditorID();
+						int formID = record.getFormID();
+						int recordFlags1 = record.getRecordFlags1();
+						int versionInfo = record.getRecordFlags2();
 
-					if (WRITE_CSV) {
-						// to ease the file size slightly skip some trivial ones, negate this to get them decoded
-						if (!skipitForCSV(record.getRecordType())) {
+						//for md building
+						RecordData recordData = new RecordData(record.getRecordType(), formID);
+						ArrayList<RecordData> recordDataList = recordDataLists.get(record.getRecordType());
+						if (recordDataList == null) {
+							recordDataList = new ArrayList<RecordData>();
+							recordDataLists.put(record.getRecordType(), recordDataList);
+						}
+						recordDataList.add(recordData);
 
-							int currentSubOrderNum = 0;
-							List<Subrecord> subs = record.getSubrecords();
-							for (int i = 0; i < subs.size(); i++) {
-								Subrecord sub = subs.get(i);
+						if (WRITE_CSV) {
+							// to ease the file size slightly skip some trivial ones, negate this to get them decoded
+							if (!skipitForCSV(record.getRecordType())) {
 
-								// skip the editorid we know about that guy
-								if (sub.getSubrecordType().equals("EDID"))
-									continue;
+								int currentSubOrderNum = 0;
+								List<Subrecord> subs = record.getSubrecords();
+								for (int i = 0; i < subs.size(); i++) {
+									Subrecord sub = subs.get(i);
 
-								//RECO header info, repeated everytime
-								csvOut.append("" + currentRowOrderNum++);
-								csvOut.append(",");
-								//out.append(esmFileName);
-								//out.append(",");
-								csvOut.append(record.getRecordType());
-								csvOut.append(",");
-								csvOut.append("" + formID);
-								csvOut.append(",");
-								csvOut.append("" + recordFlags1);
-								csvOut.append(",");
-								csvOut.append("" + recordFlags2);
-								csvOut.append(",");
-								csvOut.append(editorID);// this has no spaces 
-								csvOut.append(",");
-								csvOut.append(sub.getSubrecordType());
-								csvOut.append(",");
-								csvOut.append("" + currentSubOrderNum++);
-								csvOut.append(",");
-								csvOut.append("" + sub.getSubrecordData().length);
-								csvOut.append(",");
-								String couldBeFormID = couldBeFormID(sub.getSubrecordData());
-								csvOut.append(couldBeFormID == null ? "" : couldBeFormID);
-								csvOut.append(",");
-								String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(),
-										sub.getSubrecordData());
-								csvOut.append(couldBeString == null ? "" : escape(couldBeString));
+									// skip the editorid we know about that guy
+									if (sub.getSubrecordType().equals("EDID"))
+										continue;
 
-								csvOut.newLine();
-								csvOut.flush();
+									//RECO header info, repeated everytime
+									csvOut.append("" + currentRowOrderNum++);
+									csvOut.append(",");
+									//out.append(esmFileName);
+									//out.append(",");
+									csvOut.append(record.getRecordType());
+									csvOut.append(",");
+									csvOut.append("" + formID);
+									csvOut.append(",");
+									csvOut.append("" + recordFlags1);
+									csvOut.append(",");
+									csvOut.append("" + versionInfo);
+									csvOut.append(",");
+									csvOut.append(editorID);// this has no spaces 
+									csvOut.append(",");
+									csvOut.append(sub.getSubrecordType());
+									csvOut.append(",");
+									csvOut.append("" + currentSubOrderNum++);
+									csvOut.append(",");
+									csvOut.append("" + sub.getSubrecordData().length);
+									csvOut.append(",");
+									String couldBeFormID = couldBeFormID(sub.getSubrecordData());
+									csvOut.append(couldBeFormID == null ? "" : couldBeFormID);
+									csvOut.append(",");
+									String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(),
+											sub.getSubrecordData());
+									csvOut.append(couldBeString == null ? "" : escape(couldBeString));
 
-								optionalDecodeOutput(record.getRecordType(), sub.getSubrecordType(),
-										sub.getSubrecordData());
+									csvOut.newLine();
+									csvOut.flush();
+
+									optionalDecodeOutput(record.getRecordType(), sub.getSubrecordType(),
+											sub.getSubrecordData());
+								}
 							}
 						}
+
+						/// stats for md builder
+						int currentSubOrderNum = 0;
+						List<Subrecord> subs = record.getSubrecords();
+						for (int i = 0; i < subs.size(); i++) {
+							Subrecord sub = subs.get(i);
+
+							// skip the editorid we know about that guy
+							//if (sub.getSubrecordType().equals("EDID"))
+							//	continue;
+
+							String subTypeBefore = null;
+							String subTypeAfter = null;
+							if (i > 0)
+								subTypeBefore = subs.get(i - 1).getSubrecordType();
+							if (i < subs.size() - 1)
+								subTypeAfter = subs.get(i + 1).getSubrecordType();
+							String couldBeFormID = couldBeFormID(sub.getSubrecordData());
+							String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(),
+									sub.getSubrecordData());
+							SubrecordData srs = new SubrecordData(sub, record.getRecordType(), currentSubOrderNum,
+									subTypeBefore, subTypeAfter, couldBeFormID, couldBeString);
+							recordData.subrecordStatsList.add(srs);
+
+						}
 					}
-
-					/// stats for md builder
-					int currentSubOrderNum = 0;
-					List<Subrecord> subs = record.getSubrecords();
-					for (int i = 0; i < subs.size(); i++) {
-						Subrecord sub = subs.get(i);
-
-						// skip the editorid we know about that guy
-						//if (sub.getSubrecordType().equals("EDID"))
-						//	continue;
-
-						String subTypeBefore = null;
-						String subTypeAfter = null;
-						if (i > 0)
-							subTypeBefore = subs.get(i - 1).getSubrecordType();
-						if (i < subs.size() - 1)
-							subTypeAfter = subs.get(i + 1).getSubrecordType();
-						String couldBeFormID = couldBeFormID(sub.getSubrecordData());
-						String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(),
-								sub.getSubrecordData());
-						SubrecordData srs = new SubrecordData(sub, record.getRecordType(), currentSubOrderNum,
-								subTypeBefore, subTypeAfter, couldBeFormID, couldBeString);
-						recordData.subrecordStatsList.add(srs);
-
-					}
-
 				}
 			}
 
@@ -289,14 +300,18 @@ public class EsmMetaDataToCsv {
 	}
 
 	private static boolean skipitForCSV(String recType) {
-		if (esmFileName.equals("Skyrim.esm")
-			&& (recType.equals("GMST")	|| recType.equals("KYWD")
+		if(!WRITE_BIG_TYPES) {
+		if (//esmFileName.equals("Skyrim.esm") && 
+				
+				(recType.equals("GMST")	|| recType.equals("KYWD")
 				|| recType.equals("LCRT") || recType.equals("GLOB") || recType.equals("TXST")
-				|| recType.equals("STAT")))
+				|| recType.equals("STAT") || recType.equals("PACK") || recType.equals("DIAL")
+				|| recType.equals("QUST")))
 			return true;
 
 		//PACK is a huge one as well
-		//DIAL//QUST		
+		//DIAL//QUST	
+		}
 
 		return false;
 	}
@@ -452,10 +467,12 @@ public class EsmMetaDataToCsv {
 
 		//Note we want RECO in alpha order but not subs!
 		Map<String, ArrayList<RecordData>> sortedRecsMap = getSortedRecsMap(recordDataLists);
+
 		for (ArrayList<RecordData> rds : sortedRecsMap.values()) {
-			String desc = PluginGroup.typeMap.get(rds.get(0).type);
+			String recType = rds.get(0).type;
+			String desc = PluginGroup.typeMap.get(recType);
 			if (WRITE_MD) {
-				String h2 = "<p><b>"	+ rds.get(0).type + "</b> " + desc + " count=" + rds.size() + "</p> \n\n"
+				String h2 = "<p><b>"	+ recType + "</b> " + desc + " count=" + rds.size() + "</p> \n\n"
 							+ "<table class=\"wikitable\" width=\"100%\"> \n\n" + "<tbody><tr> \n\n"
 							+ "<th width=\"5%\">C________</th> \n\n" + "<th width=\"5%\">Subrecord</th> \n\n"
 							+ "<th width=\"10%\"><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:File_Format_Conventions\" title=\"Oblivion Mod:File Format Conventions\">Type______</a></th> \n\n"
@@ -476,9 +493,8 @@ public class EsmMetaDataToCsv {
 				for (SubrecordData srd : subrecordStatsList) {
 					allsubTypes.add(srd.subrecordType);
 
-					//TODO: delete this debug out
-					//if (rds.get(0).type.equals("ALCH"))// note I re order the records to alpha perhaps I should do that earlier to make debg easier?
-					//	System.out.println(rd.formId + " " + "ALCH putting " + srd.subrecordType);
+					//if (rds.get(0).type.equals("CREA"))// note I re order the records to alpha perhaps I should do that earlier to make debg easier?
+					//	System.out.println(rd.formId + " " + "CREA sub " + srd.subrecordType);
 				}
 
 				if (maxSubCount < subrecordStatsList.size())
@@ -491,34 +507,23 @@ public class EsmMetaDataToCsv {
 			// for each one build a cardinality and type
 			for (String subType : allsubTypes) {
 
-				SubrecordStats subrecordStats = new SubrecordStats(subType);
+				SubrecordStats subrecordStats = new SubrecordStats(subType, recType);
 				allSubTypesData.put(subType, subrecordStats);
 
 				for (RecordData rd : rds) {
 					int countForRecord = 0;
 
 					List<SubrecordData> subrecordStatsList = rd.subrecordStatsList;
+
 					for (SubrecordData srd : subrecordStatsList) {
 						if (srd.subrecordType.equals(subType)) {
-							subrecordStats.totalCount++;
 							countForRecord++;// cardinality		
-
 							subrecordStats.applySub(srd);
 						}
 					}
 
-					if (countForRecord != 1)
-						subrecordStats.cardexact1 = false;// all must be 1!
-
-					if (countForRecord == 0)
-						subrecordStats.cardZero = true;// any must be 0
-
-					if (countForRecord > 1)
-						subrecordStats.cardMult = true;// any must be multi		
-
 					subrecordStats.cardMax = subrecordStats.cardMax < countForRecord ? countForRecord : subrecordStats.cardMax;
 					subrecordStats.cardMin = subrecordStats.cardMin > countForRecord ? countForRecord : subrecordStats.cardMin;
-
 				}
 
 				subrecordStats.organiseDerivedData();
@@ -527,28 +532,32 @@ public class EsmMetaDataToCsv {
 
 			///////////////////////////SORT THE SUBS!
 			// now in order roll through the subs stats with the determined C and type and desc
-			ArrayList<SubrecordStats> sortedAllSubTypesData = getSortedSubRecs(allSubTypesData);
 
 			//NOTCIE BIG TIME, WITNESS ME!!!! ALCH has the FULL type used twice! so it has 2 positions and is not good for testing
 			//  but that might just be a real system, in which case at the stats gathering stage I have to do something weird! super weird.
+			System.out.println("debug for " + recType);
+			ArrayList<SubRecTuple> tuples = getSortedSubRecTuples(recType, allSubTypesData);
 
-			ArrayList<SubRecTuple> tups = getSortedSubRecTuples(allSubTypesData);
-
-			System.out.println("debug for " + rds.get(0).type);
 			//debug just print them
-			for (SubRecTuple s : tups) {
+			for (SubRecTuple s : tuples) {
 				System.out.println(" tuple = " + s);
 			}
 
 			if (WRITE_MD) {
 				// for each one build a table
-				for (SubrecordStats subrecordStats : sortedAllSubTypesData) {
-					String sr = "<tr> \n\n" + "<td>" + subrecordStats.C + "</td> \n\n" + "<td>"
-								+ subrecordStats.subrecordType + "</td> \n\n" + "<td>" + subrecordStats.dataType
-								+ "</td> \n\n" + "<td>" + subrecordStats.locationDesc + ". " + subrecordStats.desc
-								+ "</td> \n\n" + "</tr> \n\n";
+				for (int t = 0; t < tuples.size(); t++) {
+					SubRecTuple tup = tuples.get(t);
+					for (int i = 0; i < tup.items.size(); i++) {
+						SubrecordStats subrecordStats = tup.items.get(i).stat;
+						boolean tupleOptional = tup.items.get(i).optional;
+						String tupleDesc = t + "-" + (tup.items.size() == 1 ? "" : i) + (tupleOptional ? "opt" : "");
+						String sr = "<tr> \n\n" + "<td>" + subrecordStats.C + "</td> \n\n" + "<td>"
+									+ subrecordStats.subrecordType + "</td> \n\n" + "<td>" + subrecordStats.dataType
+									+ "</td> \n\n" + "<td>" + tupleDesc + ". " + subrecordStats.locationDesc + ". "
+									+ subrecordStats.desc + "</td> \n\n" + "</tr> \n\n";
 
-					mdOut.append(sr);
+						mdOut.append(sr);
+					}
 				}
 
 				mdOut.append("</table></tbody>");
@@ -559,9 +568,14 @@ public class EsmMetaDataToCsv {
 
 			//////////NOW to build java classes of the same!!!
 			if (WRITE_JAVA) {
-				createJavaClass(rds.get(0), desc, sortedAllSubTypesData);
+				createJavaClass(rds.get(0), desc, tuples);
 			}
 
+		}
+
+		// now finsih wiht a list of recos that were too complex for my sorter
+		for (String t : complexSortRecords) {
+			System.out.println("Complex RECO " + t);
 		}
 
 	}
@@ -584,45 +598,23 @@ public class EsmMetaDataToCsv {
 		return sortedMap;
 	}
 
-	public static ArrayList<SubrecordStats> getSortedSubRecs(LinkedHashMap<String, SubrecordStats> allSubTypesData) {
-		ArrayList<SubrecordStats> sorted = new ArrayList<SubrecordStats>(allSubTypesData.values());
-
-		///TODO: can't have transitive comparision, it doesn't work like that'
-		///
-		///so I have to say if after.contains, or if any of the afters.after contains etc
-		///gonna be a tricky one, probably not able to us ehte .sort method
-		/*		Collections.sort(sorted, new Comparator<SubrecordStats>() {
-					@Override
-					public int compare(SubrecordStats a, SubrecordStats b) {
-						if (a.subTypesAfter.contains(b.subrecordType))//|| b.subTypesBefore.contains(a.subrecordType))
-							return -1;
-						else if (b.subTypesAfter.contains(a.subrecordType))//|| a.subTypesBefore.contains(b.subrecordType))
-							return 1;
-						else
-							return 0;
-		
-					}
-				});*/
-
-		return sorted;
-	}
-
 	/**
-	 * Note the groups and optionally after etc is actually going to need ot be encoded so I can build editors and
-	 * loaders, so my current cardinality is only for display to a user but the groupsings are going to need their own
-	 * data strucuture proper. That wa I can Also write out a good description too - data of SubRecoTuples each one in
-	 * order with optionality to and a descripton writer the SubRecTuples then get in order (they have a front info and
+	 * Note the groups and optionally after etc is actually going to need to be encoded so I can build editors and
+	 * loaders, so my current cardinality is only for display to a user but the groupings are going to need their own
+	 * data structure proper. That wa I can Also write out a good description too - data of SubRecoTuples each one in
+	 * order with optionality to and a description writer the SubRecTuples then get in order (they have a front info and
 	 * back info) then the write out comes in fact from them
 	 * 
 	 * 
-	 * So I see somethigns taht have "always followed by" which makes them pairs, if the followed by has always after
+	 * So I see somethings that have "always followed by" which makes them pairs, if the followed by has always after
 	 * too
 	 * 
-	 * In these case the cardinalit should be idnetical too, so I've got to get pairs or triplets or more into a single
-	 * fixed unti then I've got the optional but always follows tpe of one.
+	 * In these case the cardinality should be identical too, so I've got to get pairs or triplets or more into a single
+	 * fixed until then I've got the optional but always follows type of one.
 	 * 
 	 */
-	public static ArrayList<SubRecTuple> getSortedSubRecTuples(LinkedHashMap<String, SubrecordStats> allSubTypesData) {
+	public static ArrayList<SubRecTuple> getSortedSubRecTuples(	String recType,
+																LinkedHashMap<String, SubrecordStats> allSubTypesData) {
 		ArrayList<SubRecTuple> tuples = new ArrayList<SubRecTuple>();
 		ArrayList<SubRecTuple> sortedTuples = new ArrayList<SubRecTuple>();
 
@@ -640,7 +632,7 @@ public class EsmMetaDataToCsv {
 				SubRecTuple t = tuples.get(i);
 				for (int j = i + 1; j < tuples.size(); j++) {
 					SubRecTuple tuple2 = tuples.get(j);
-					if (t.test(tuple2)) {
+					if (t.testAndMerge(tuple2)) {
 						// this tuple2 gets removed from the over all list as it's now found a home inside this tuple
 						tuples.remove(j);
 						// move us backward by 1 so the new item at the pos i is tested
@@ -652,13 +644,241 @@ public class EsmMetaDataToCsv {
 			}
 		}
 
-		// now take the head and tail of each tuple and compare to put them in sorted tuples
-		for (SubRecTuple t : tuples) {
-			//if(t.)
-			//sortedTuples
+		// ok how about if this tuple head can be behind tuples that are optional at the head (ignoring itself)
+		// and the chain of opt to man is not at teh same mandatory then this head is multiple appearances
+
+		// to do this analyss I need each tuple to have a "branched head" pointer to the various heads in front
+		// which will need to pull out a self loop as well to not include that in the branching heads
+		// a bracnh head consolidates all the "lead bys" to find the various tuples they are in 
+		//(so that optioanl tails get consolidated into one)
+
+		// once I have the branching heads info that may clear up some of the complexes
+
+		organiseHeads(tuples);
+
+		// debug out put
+		for (int i = 0; i < tuples.size(); i++) {
+			SubRecTuple t1 = tuples.get(i);
+			System.out.print(
+					"tuple " + t1.getHeadStat().subrecordType + (t1.items.get(0).optional ? "o" : "") + " lead by ");
+			for (SubRecTuple ht : t1.tupleHeads) {
+				if (ht == null)
+					System.out.print(" first, ");
+				else
+					System.out.print(ht.getHeadStat().subrecordType + ", ");
+			}
+			System.out.print("manda ");
+			for (SubRecTuple ht : t1.mandaTuplePath) {
+				if (ht == null)
+					System.out.print(" first, ");
+				else
+					System.out.print(ht.getHeadStat().subrecordType + ", ");
+			}
+			System.out.println("");
 		}
 
-		return tuples;
+		//notie tha manda paths that contian themsleves are fine, this is just a looper
+
+		// afte that, follow heads to head s as they branch and find mandatory paths (to min >0 or null for first)
+		// and we'll see hwo has more than 1 
+
+		/*		for (int i = 0; i < tuples.size(); i++) {
+					SubRecTuple t1 = tuples.get(i);
+					//System.out.println("t1 "+t1.getHeadStat().subrecordType);
+					//let's see what mandatory heads existin for it
+					ArrayList<SubRecTuple> mandaHeads = new ArrayList<>();
+		
+					// for each behind
+		
+					// find the mandatory head (by jumping from head to next tail)
+					for (int j = 0; j < tuples.size(); j++) {
+						SubRecTuple t2 = tuples.get(j);
+						if (t2 != t1) {
+		
+							// have we found a mandatory head that we link to?
+							if (t2.contains(t1.getHeadStat().subrecordType) && t2.getHeadStat().cardMin != 0)
+		
+								if (t1.equals(t2)) {
+									//						behindSelf = true;
+								} else {
+									//						behindOthers++;
+									// System.out.println(" behind " + t2.getHeadStat().subrecordType);
+		
+									Integer t1lesdbyt2 = t1.getHeadStat().leadBySubTypes.get(t2.getTailStat().subrecordType);
+									if (t1lesdbyt2 != null && t1lesdbyt2 == t2.getTailStat().totalCount) {
+										//								System.out.println(" counts are teh smae? " + "t1 " + t1.getHeadStat().subrecordType
+										//													+ " t2 " + t2.getTailStat().subrecordType);
+									}
+		
+								}
+						}
+		
+					}
+				}*/
+
+		/*	if(recType.equals("ALCH")) 
+			{
+				System.out.println("complexity tests " + recType);
+				//now how about any head that could be after 2 other tuples gets highlighted as an example of exceptions?
+				for (int i = 0; i < tuples.size(); i++) {
+					SubRecTuple t1 = tuples.get(i);
+					//System.out.println("t1 "+t1.getHeadStat().subrecordType);
+					boolean behindSelf = false;
+					int behindOthers = 0;
+		
+					// count how many other tuples it could potentially be behind (it's ok to be itself and the header)
+					for (int j = 0; j < tuples.size(); j++) {
+						SubRecTuple t2 = tuples.get(j);
+						if (t2.test(t1)) {
+							if (t1.equals(t2)) {
+								behindSelf = true;
+							} else {
+								behindOthers++;
+								// System.out.println(" behind " + t2.getHeadStat().subrecordType);
+		
+								Integer t1lesdbyt2 = t1.getHeadStat().leadBySubTypes.get(t2.getTailStat().subrecordType);
+								if (t1lesdbyt2 != null && t1lesdbyt2 == t2.getTailStat().totalCount) {
+									System.out.println(" counts are teh smae? " + "t1 " + t1.getHeadStat().subrecordType
+														+ " t2 " + t2.getTailStat().subrecordType);
+								}
+		
+							}
+						}
+		
+					}
+		
+					System.out.println("behindSelf " + behindSelf + " behindOthers " +behindOthers);
+				}
+			}*/
+
+		// new thing, put all into sorted
+		// for each take out, then check form back to front and put behind the farthest back one
+		// do this until no one moves in a iteration, not efficient but only maybe 50 tuples max in starfield
+		sortedTuples.addAll(tuples);
+		boolean changeMade = true;
+		int loopCount1 = 0;//Obivion->ALCH-FULL will cause infinite so a max and out of here
+		while (changeMade && loopCount1 < 10) {
+			loopCount1++;
+			changeMade = false;
+			//System.out.println("a loop happening");
+			int loopCount2 = 0;//Obivion->ALCH-FULL will cause infinite so a max and out of here
+			// for each grab it, but don't take it out yet
+			for (int i = 0; i < sortedTuples.size() && loopCount2 < 20; i++) {
+				loopCount2++;
+
+				SubRecTuple tup = sortedTuples.get(i);
+				//System.out.println("tup i" + i + " " + tup.getHeadStat().subrecordType);
+				//starting at the back up to the current point?
+				for (int j = sortedTuples.size() - 1; j > i; j--) {
+					//compare if it's supposed to be behind
+					SubRecTuple tup2 = sortedTuples.get(j);
+					//System.out.println("tup2 j" + j + " " + tup2.getHeadStat().subrecordType);
+					//System.out.println("tup.compare(tup2) " + tup.compare(tup2));
+					if (tup.compare(tup2) == 1) {
+						// we should be behind, so pluck from current and place here
+						sortedTuples.remove(i);// note moves all indexes down
+						sortedTuples.add(j, tup);// so j is equivalent to j+1
+						changeMade = true;
+						// now the i value needs to move back down 1 to account for the moved item.
+						i--;
+						break;//from the j loop
+					}
+				}
+
+			}
+		}
+
+		System.out.println("loopCount1 " + loopCount1);
+
+		if (loopCount1 > 8) {
+			complexSortRecords.add(recType);
+			System.out.println("!!!!!Complex Reco many loops required " + recType);
+		}
+
+		return sortedTuples;
+	}
+
+	private static void organiseHeads(ArrayList<SubRecTuple> tuples) {
+		// step one get my heads in tuple form, so heads that repaeat in the asme tuple are coned
+		// should have a lot less heads at that point
+		for (int i1 = 0; i1 < tuples.size(); i1++) {
+			SubRecTuple t1 = tuples.get(i1);
+
+			// this is only the head item?
+			SubRecTuple.Item headItem = t1.items.get(0);
+			// for that item go through alls it head strings
+			for (String headStr : headItem.stat.leadBySubTypes.keySet()) {
+				if (headStr == null) {
+					t1.tupleHeads.add(null);// it is at the front
+				} else {
+					// for that string go through all tuples and find out if it's in it and record
+					for (int i2 = 0; i2 < tuples.size(); i2++) {
+						SubRecTuple t2 = tuples.get(i2);
+						for (SubRecTuple.Item item2 : t2.items) {
+							if (item2.stat.subrecordType.equals(headStr)) {
+								t1.tupleHeads.add(t2);
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+		// so in looking at actual I see that some records are just crazy out of order, like the 
+		// oringal Obliv had ACBS in one place for CREA adn it just moved for later expansions
+		// so I'll probably have to just carefully examine complexies
+
+		//	if (tuples.get(0).items.get(0).stat.inRecType.equals("QUST")) 
+		{
+			// now we get a mandatory head end point for each tuple
+			for (int i1 = 0; i1 < tuples.size(); i1++) {
+				SubRecTuple t1 = tuples.get(i1);
+				for (SubRecTuple tupleHead : t1.tupleHeads) {
+					if (tupleHead != t1) {
+						HashSet<SubRecTuple> path = new HashSet<SubRecTuple>();
+						path.add(t1);
+						t1.mandaTuplePath.addAll(findMandaHead(tupleHead, path));
+					}
+				}
+				t1.mandaHeadFilled = true;
+			}
+		}
+	}
+
+	/**
+	 * rootTuple is so we don't loop infinitely
+	 * @param tupleHead
+	 * @param rootTuple
+	 * @return
+	 */
+	private static HashSet<SubRecTuple> findMandaHead(SubRecTuple tupleHead, HashSet<SubRecTuple> path) {
+
+		if (tupleHead == null) {// this rootTuple counts as a mandatory head path if it could be first
+			HashSet<SubRecTuple> ret = new HashSet<SubRecTuple>();
+			ret.add(tupleHead);
+			return ret;
+		} else if (tupleHead.mandaHeadFilled) {
+			// we've already been filled just hand us back
+			return tupleHead.mandaTuplePath;
+		} else if (tupleHead.items.get(0).optional == false) {
+			// create a single mandahead that is this tuple to indicate it is a mandahead
+			tupleHead.mandaTuplePath.add(tupleHead);
+			tupleHead.mandaHeadFilled = true;
+			return tupleHead.mandaTuplePath;
+		} else {
+			// create the manda heads if they don't exist otherwise return them
+			path.add(tupleHead);
+			HashSet<SubRecTuple> ret = new HashSet<SubRecTuple>();
+			for (SubRecTuple th : tupleHead.tupleHeads) {
+				if (!path.contains(th)) {// don't  loop
+					ret.addAll(findMandaHead(th, path));
+				}
+			}
+			tupleHead.mandaTuplePath.addAll(ret);
+			tupleHead.mandaHeadFilled = true;
+			return ret;
+		}
 	}
 
 	private static class SubRecTuple {
@@ -677,10 +897,15 @@ public class EsmMetaDataToCsv {
 
 		}
 
-		public ArrayList<Item> items = new ArrayList<Item>();
+		public ArrayList<Item>		items			= new ArrayList<Item>();
+
+		// calc'ed after to make anaylysis easier
+		public HashSet<SubRecTuple>	tupleHeads		= new HashSet<SubRecTuple>();
+		public HashSet<SubRecTuple>	mandaTuplePath	= new HashSet<SubRecTuple>();
+		public boolean				mandaHeadFilled	= false;
 
 		/**
-		 * Kick off with a single header and see if any others get added, if we end at size 1 we discard this structure
+		 * Kick off with a single header and see if any others get added, no probs if they don't a single tuple is fine
 		 * @param header
 		 */
 		public SubRecTuple(SubrecordStats header) {
@@ -692,24 +917,76 @@ public class EsmMetaDataToCsv {
 			return items.get(0).stat;
 		}
 
-		// might be interesting if there is multiple optional at the end of a tuple?? can that exist?
+		// what about multiple optional at the end of a tuple, make sure you work up the list
 		public SubrecordStats getTailStat() {
 			return items.get(items.size() - 1).stat;
 		}
 
 		/**
-		 * This will test the tuple for being part of this tuple (after the current parts) and also merge it into teh
+		 * Close to the normal sort, but I can't support transitive compares so have to do something like iterate until
+		 * no further changes -1 if a in front(before) of b, 0 if the same tuple and -1 if a behind(after) b
+		 * @param tup1
+		 * @param tup1
+		 * @return
+		 */
+		public static int compare(SubRecTuple a, SubRecTuple b) {
+
+			if (a == b)
+				return 0;
+
+			for (Item ai : a.items) {
+				for (String aAfterStr : ai.stat.leadBySubTypes.keySet()) {
+					for (Item bi : b.items) {
+						if (bi.stat.subrecordType.equals(aAfterStr))
+							return 1;
+					}
+				}
+			}
+			for (Item bi : b.items) {
+				for (String bAfterStr : bi.stat.leadBySubTypes.keySet()) {
+					for (Item ai : a.items) {
+						if (ai.stat.subrecordType.equals(bAfterStr))
+							return -1;
+					}
+				}
+			}
+
+			return 0;
+		}
+
+		public int compare(SubRecTuple b) {
+			return compare(this, b);
+		}
+
+		public boolean contains(String subrecType) {
+			for (Item item : items) {
+				if (item.stat.subrecordType.equals(subrecType))
+					return true;
+			}
+			return false;
+		}
+
+		/**
+		 * This will test the tuple for being part of this tuple (after the current parts) and also merge it into the
 		 * back
 		 * @param potentialNextItem
 		 * @return if a match has made
 		 */
-		public boolean test(SubRecTuple potentialNextTuple) {
+		public boolean testAndMerge(SubRecTuple potentialNextTuple) {
 
 			SubrecordStats tail = getTailStat();
 			SubrecordStats potHead = potentialNextTuple.getHeadStat();
+
 			// is the potential always and only after one of our elements
 			// if so we'd better see it in the sub types after!
 			if (potHead.alwaysAfter() != null && potHead.alwaysAfter().equals(tail.subrecordType)) {
+
+				// one more test, things that have many entries should not be tupled with a singleton afterwards
+				// so any 2+ set of cardMax can  only be tupled with other 2+ entries
+				// this WILL cause trouble for a MODL/MODB/MODT with exactly 2 entries, the MODT might drop off if it's 0 or 1
+				if (tail.cardMax > 1 && potHead.cardMax < 2)
+					return false;// no match
+
 				// now to discover the optionality of this guy
 				boolean optional = true;
 
@@ -718,17 +995,17 @@ public class EsmMetaDataToCsv {
 					optional = false;
 
 				// all at the tail
+				potentialNextTuple.items.get(0).optional = optional; //override only the front one
 				for (Item item : potentialNextTuple.items) {
-					item.optional = optional; //override it (whatever it was) 
-					//TODO: confirm there isn't some crazy optional set of 2 sub but they are always a pair
-					//so the second is in fact mandatory thou the set is optional
+					// there is some optional set of 2 sub but they are always a pair
+					//so the second is in fact mandatory thou the set is optional, this is confirmed and loads up ok
 					items.add(item);
 				}
 
 				//output any oddities
-				if (!tail.subTypesAfter.contains(potHead.subrecordType))
-					System.out.println("PROBLEM after but not in after list!! " + potHead.subrecordType + " "
-										+ tail.subrecordType);
+				if (!tail.followedBySubTypes.keySet().contains(potHead.subrecordType))
+					System.out.println("PROBLEM after but not in after list!! " + tail.inRecType + " "
+										+ potHead.subrecordType + " " + tail.subrecordType);
 
 				// can't be anywhere else I wager (false FULL in ALCH in Oblivion for example)
 				return true;
@@ -739,19 +1016,39 @@ public class EsmMetaDataToCsv {
 			return false;
 		}
 
+		/**
+		 * test for does it follow, but don't do anything
+		 * @param potentialNextTuple
+		 * @return
+		 */
+		public boolean test(SubRecTuple potentialNextTuple) {
+
+			SubrecordStats potHead = potentialNextTuple.getHeadStat();
+
+			for (int i = items.size() - 1; i >= 0; i--) {
+				SubrecordStats tail = items.get(i).stat;
+				if (tail.followedBySubTypes.containsKey(potHead.subrecordType))
+					return true;
+			}
+
+			//SubrecordStats tail = getTailStat();
+			//if (tail.followedBySubTypes.containsKey(potHead.subrecordType))
+			//	return true;
+			return false;
+		}
+
 		@Override
 		public String toString() {
-			String s = "SubRecTuple ";// make each one unique cos I can't get teh REc type here
+			String s = "SubRecTuple " + items.get(0).stat.inRecType + "-";// make each one unique cos I can't get the Rec type here
 			for (Item item : items) {
-				s += item.stat.subrecordType + " opt " + item.optional + ", ";
+				s += item.stat.subrecordType + (item.optional ? " opt" : "") + ", ";
 			}
 			return s;
 		}
 
 	}
 
-	private static void createJavaClass(RecordData recordData, String desc,
-										ArrayList<SubrecordStats> sortedAllSubTypesData)
+	private static void createJavaClass(RecordData recordData, String desc, ArrayList<SubRecTuple> tuples)
 			throws IOException {
 
 		String betterJavaName = PluginGroup.typeMap.get(recordData.type);
@@ -808,11 +1105,12 @@ public class EsmMetaDataToCsv {
 		javaBW.newLine();
 
 		//for each one build a table
-		for (SubrecordStats subrecordStats : sortedAllSubTypesData) {
-			javaBW.append("\t"	+ subrecordStats.subrecordType + " " + subrecordStats.dataType + ";// with a C of "
-							+ subrecordStats.C + "\n");
-			javaBW.newLine();
-		}
+		//TODO: new tuple data struct
+		/*		for (SubrecordStats subrecordStats : tuples) {
+					javaBW.append("\t"	+ subrecordStats.subrecordType + " " + subrecordStats.dataType + ";// with a C of "
+									+ subrecordStats.C + "\n");
+					javaBW.newLine();
+				}*/
 		javaBW.newLine();
 		javaBW.append("\tpublic " + betterJavaName + "(Record recordData) { \n");
 		javaBW.append("\t} \n");

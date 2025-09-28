@@ -2,64 +2,62 @@ package esm.analyzer;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map.Entry;
+
+import esfilemanager.common.data.plugin.PluginGroup;
 
 public class SubrecordStats {
 	public String							subrecordType;
+
+	public String							inRecType;
 
 	public String							C;
 
 	public String							dataType;
 
-	public String							desc			= "";
+	public String							desc				= "";
 
-	public int								count			= 0;
+	public int								totalCount			= 0;
 
-	public int								minLength		= Integer.MAX_VALUE;
+	public int								minLength			= Integer.MAX_VALUE;
 
-	public int								maxLength		= Integer.MIN_VALUE;
+	public int								maxLength			= Integer.MIN_VALUE;
 
-	//	public int minSubPos = Integer.MAX_VALUE;
+	public HashSet<Integer>					fewSizes			= new HashSet<Integer>();
 
-	//	public int maxSubPos = Integer.MIN_VALUE;	
+	public LinkedHashMap<String, Integer>	leadBySubTypes		= new LinkedHashMap<String, Integer>();
 
-	//	public HashSet<Integer> hasOrderOf = new HashSet<Integer>();		 
-
-	public HashSet<Integer>					fewSizes		= new HashSet<Integer>();
-
-	public HashSet<String>					subTypesBefore	= new HashSet<String>();
-
-	public HashSet<String>					subTypesAfter	= new HashSet<String>();
+	public LinkedHashMap<String, Integer>	followedBySubTypes	= new LinkedHashMap<String, Integer>();
 
 	// count of formId pointer types
-	public LinkedHashMap<String, Integer>	formTypeCounts	= new LinkedHashMap<String, Integer>();
+	public LinkedHashMap<String, Integer>	formTypeCounts		= new LinkedHashMap<String, Integer>();
 
-	public int								countOfString	= 0;
-	public int								countOfNif		= 0;
-	public int								countOfDds		= 0;
-	public int								countOfKf		= 0;
+	public int								countOfString		= 0;
+	public int								countOfNif			= 0;
+	public int								countOfDds			= 0;
+	public int								countOfKf			= 0;
 
-	public int								countOfInts		= 0;
-	public int								countOfFloats	= 0;
-	public int								countOfVec3		= 0;
-	public int								countOfVec4		= 0;
+	public int								countOfInts			= 0;
+	public int								countOfFloats		= 0;
+	public int								countOfVec3			= 0;
+	public int								countOfVec4			= 0;
 
 	// details filled in after all sub are applied
-	private boolean							locked			= false;
+	private boolean							locked				= false;
 
-	public int								totalCount		= 0;
+	public boolean							cardexact1			= true;									// is exactly always 1
+	public boolean							cardZero			= false;								// can be zero
+	public boolean							cardMult			= false;								// can be greater than 1
 
-	public boolean							cardexact1		= true; // is exactly always 1
-	public boolean							cardZero		= false;// can be zero
-	public boolean							cardMult		= false;// can be greater than 1
-
-	public int								cardMax			= 0;
-	public int								cardMin			= Integer.MAX_VALUE;
+	public int								cardMax				= 0;
+	public int								cardMin				= Integer.MAX_VALUE;
 
 	public String							locationDesc;
 
-	public SubrecordStats(String st) {
-		this.subrecordType = st;
+	public SubrecordStats(String subrecordType, String inRecType) {
+		this.subrecordType = subrecordType;
+		this.inRecType = inRecType;
 	}
 
 	public void applySub(SubrecordData srd) {
@@ -67,11 +65,16 @@ public class SubrecordStats {
 		if (locked)
 			System.err.println("Can't apply subs after derived stats calculated!!!");
 
-		//		hasOrderOf.addAll(srd.hasOrderOf);
-		subTypesBefore.add(srd.subTypesBefore);
-		subTypesAfter.add(srd.subTypesAfter);
+		totalCount++;
+		if (leadBySubTypes.containsKey(srd.subTypesBefore))
+			leadBySubTypes.put(srd.subTypesBefore, leadBySubTypes.get(srd.subTypesBefore) + 1);
+		else
+			leadBySubTypes.put(srd.subTypesBefore, 1);
 
-		count += srd.count;
+		if (followedBySubTypes.containsKey(srd.subTypesAfter))
+			followedBySubTypes.put(srd.subTypesAfter, followedBySubTypes.get(srd.subTypesAfter) + 1);
+		else
+			followedBySubTypes.put(srd.subTypesAfter, 1);
 
 		// need to add up the formtype counts
 		for (Entry<String, Integer> entry : srd.formTypeCounts.entrySet()) {
@@ -79,14 +82,6 @@ public class SubrecordStats {
 			current = current == null ? 0 : current;
 			formTypeCounts.put(entry.getKey(), current + entry.getValue());
 		}
-
-		/*		for(int ord : srd.hasOrderOf) {
-					if(ord < minSubPos)
-						minSubPos = ord;
-					
-					if(ord > maxSubPos)
-						maxSubPos = ord;
-				}*/
 
 		fewSizes.add(srd.size);
 
@@ -126,6 +121,11 @@ public class SubrecordStats {
 		// ^1 always after the RECO before				
 		// ^? optionally after the one before
 
+		// basic stuff hardly needed, but handy to express
+		cardexact1 = (cardMin == 1 && cardMax == 1);
+		cardZero = cardMin == 0;// any must be 0
+		cardMult = cardMax > 1;// any must be multi		
+
 		// now get cardinality sorted out
 		C = cardexact1 ? "1" : (!cardZero && cardMult) ? "1+" : cardZero ? (cardMult ? "0+" : "0-1") : "??";
 
@@ -161,37 +161,52 @@ public class SubrecordStats {
 			}
 		}
 
+		desc = "";
 		if (countOfNif > 0)
 			desc += "Including names of nif files. ";
 		if (countOfDds > 0)
 			desc += "Including names to dds files. ";
-		if (formTypeCounts.keySet().size() < 5)// too many is suspect
-			for (String formRecordType : formTypeCounts.keySet())
+		if (formTypeCounts.keySet().size() < 5) {// too many is suspect
+			for (String formRecordType : formTypeCounts.keySet()) {
 				desc += "Pointers to " + formRecordType + ". ";
+			}
+		}
+		// if it's just the one pointer type swap to a friendly name
+		if (formTypeCounts.keySet().size() == 1) {
+			String formRecordType = formTypeCounts.keySet().iterator().next();
+			String niceName = PluginGroup.typeMap.containsKey(formRecordType) ? PluginGroup.typeMap
+					.get(formRecordType) : "";
+			desc = niceName + " Pointer. ";
+		}
 
-		if (subrecordType.equals("EDID"))
-			desc = "Editor ID, used only by consturction kit, not loaded at runtime";
+		if (PluginGroup.subRecDesc.containsKey(subrecordType)) {
+			desc = PluginGroup.subRecDesc.get(subrecordType);
+		}
 
 		// create a wee after type decriptor for fun
-		locationDesc = "After ";
-		for (String after : subTypesBefore)
-			locationDesc = (after == null ? "First Sub " : locationDesc + (after + ", "));
+		locationDesc = "Count=" + totalCount + " After ";
+		for (String leader : leadBySubTypes.keySet()) {
+			int count = leadBySubTypes.get(leader);
+			locationDesc += (leader == null ? " Head" : leader) + "(" + count + "), ";
+		}
 		locationDesc += " Followed by ";
-		for (String before : subTypesAfter)
-			locationDesc += (before == null ? " Last " : (before + ", "));
+		for (String follower : followedBySubTypes.keySet()) {
+			int count = followedBySubTypes.get(follower);
+			locationDesc += (follower == null ? " Last" : follower) + "(" + count + "), ";
+		}
 
 	}
 
 	public String alwaysAfter() {
-		if (subTypesBefore.size() == 1)
-			return subTypesBefore.iterator().next();
+		if (leadBySubTypes.size() == 1)
+			return leadBySubTypes.keySet().iterator().next();
 
 		return null;
 	}
 
 	public String alwaysBefore() {
-		if (subTypesAfter.size() == 1)
-			return subTypesAfter.iterator().next();
+		if (followedBySubTypes.size() == 1)
+			return followedBySubTypes.keySet().iterator().next();
 
 		return null;
 	}
