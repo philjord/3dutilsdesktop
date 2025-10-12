@@ -39,22 +39,22 @@ import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esm.EsmFileLocations;
 
-public class PluginDisplayDialog extends JFrame implements ActionListener, TreeExpansionListener
-{
-	public static boolean SHOW_ALL = true;// if false hide WRLD CELL and DIAL
+public class PluginDisplayDialog extends JFrame implements ActionListener, TreeExpansionListener {
+	public static boolean	SHOW_ALL			= true;	// if false hide WRLD CELL and DIAL
 
-	public static void main(String[] args)
-	{
+	public static boolean	SORT_ALPHA_GROUPS	= true;
+	public static boolean	SORT_EDID_RECORDS	= true;
+
+	public static void main(String[] args) {
 		String generalEsmFile = EsmFileLocations.getGeneralEsmFile();
-		if (generalEsmFile != null)
-		{
+		if (generalEsmFile != null) {
 			long startTime = System.currentTimeMillis();
-			System.out.println("loading file " + generalEsmFile + " TODO: put the lovely BSA stye status dialog up and get this guy cleaned up compared to");
+			System.out.println("loading file "	+ generalEsmFile
+								+ " TODO: put the lovely BSA stye status dialog up and get this guy cleaned up compared to");
 
 			File pluginFile = new File(generalEsmFile);
 			Plugin plugin = new PluginFile(pluginFile);
-			try
-			{
+			try {
 				plugin.load(!SHOW_ALL);
 
 				PluginDisplayDialog displayDialog = new PluginDisplayDialog(plugin);
@@ -62,31 +62,24 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 				displayDialog.setSize(1200, 800);
 				displayDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				displayDialog.setVisible(true);
-				displayDialog.setLocationRelativeTo(null); 
+				displayDialog.setLocationRelativeTo(null);
 
 				System.out.println("Finished loading in " + (System.currentTimeMillis() - startTime));
-			}
-			catch (PluginException e)
-			{
+			} catch (PluginException e) {
 				e.printStackTrace();
-			}
-			catch (DataFormatException e)
-			{
+			} catch (DataFormatException e) {
 				e.printStackTrace();
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private JTree pluginTree;
+	private JTree	pluginTree;
 
-	private JPanel displayPane;
+	private JPanel	displayPane;
 
-	public PluginDisplayDialog(Plugin plugin)
-	{
+	public PluginDisplayDialog(Plugin plugin) {
 		pluginTree = new JTree(createPluginNodes(plugin));
 		pluginTree.setScrollsOnExpand(true);
 		pluginTree.addTreeExpansionListener(this);
@@ -106,8 +99,7 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		pluginTree.addTreeSelectionListener(new TreeSelectionListener() {
 
 			@Override
-			public void valueChanged(TreeSelectionEvent e)
-			{
+			public void valueChanged(TreeSelectionEvent e) {
 				displaySubrecordData();
 			}
 
@@ -136,29 +128,23 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent ae)
-	{
+	public void actionPerformed(ActionEvent ae) {
 		String action = ae.getActionCommand();
-		if (action.equals("done"))
-		{
+		if (action.equals("done")) {
 			setVisible(false);
 			dispose();
 		}
 	}
 
-	private void displaySubrecordData()
-	{
+	private void displaySubrecordData() {
 		TreePath treePaths[] = pluginTree.getSelectionPaths();
-		if (treePaths != null)
-		{
-			for (TreePath treePath : treePaths)
-			{
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode) treePath.getLastPathComponent();
+		if (treePaths != null) {
+			for (TreePath treePath : treePaths) {
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
 				Object userObject = node.getUserObject();
-				if (userObject instanceof PluginSubrecord)
-				{
+				if (userObject instanceof PluginSubrecord) {
 					displayPane.removeAll();
-					displayPane.add(DisplaySubrecordDialog.getTextArea((PluginSubrecord) userObject));
+					displayPane.add(DisplaySubrecordDialog.getTextArea((PluginSubrecord)userObject));
 
 					this.validate();
 
@@ -168,42 +154,35 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 
 	}
 
-	private DefaultMutableTreeNode createPluginNodes(Plugin plugin)
-	{
+	private DefaultMutableTreeNode createPluginNodes(Plugin plugin) {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode(plugin);
-		try
-		{
+		try {
 			// these things are too hard to work in the natural order so alphabetize them
 			ArrayList<PluginRecordTreeNode> groups = new ArrayList<PluginRecordTreeNode>();
-			for (PluginGroup group : plugin.getGroupList())
-			{
+			for (PluginGroup group : plugin.getGroupList()) {
 				PluginRecordTreeNode groupNode = new PluginRecordTreeNode(group);
 				createGroupChildren(groupNode, group);
-				groups.add(groupNode);			
+				groups.add(groupNode);
 			}
-			
-			//sort
-			Collections.sort(groups, new Comparator<PluginRecordTreeNode>() {
-			    @Override
-				public int compare(PluginRecordTreeNode p1, PluginRecordTreeNode p2) {
-			        return p1.toString().compareTo(p2.toString());
-			    }
-			});
+
+			if (SORT_ALPHA_GROUPS) {
+				//sort
+				Collections.sort(groups, new Comparator<PluginRecordTreeNode>() {
+					@Override
+					public int compare(PluginRecordTreeNode p1, PluginRecordTreeNode p2) {
+						return p1.toString().compareTo(p2.toString());
+					}
+				});
+			}
 			// add to tree
 			for (PluginRecordTreeNode groupNode : groups)
 				root.add(groupNode);
-			
-		}
-		catch (DataFormatException e)
-		{
+
+		} catch (DataFormatException e) {
 			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		catch (PluginException e)
-		{
+		} catch (PluginException e) {
 			e.printStackTrace();
 		}
 
@@ -211,39 +190,31 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 	}
 
 	private void createGroupChildren(DefaultMutableTreeNode groupNode, PluginGroup group)
-			throws DataFormatException, IOException, PluginException
-	{
-		for (Record r : group.getRecordList())
-		{
-			PluginRecord record = (PluginRecord) r;
+			throws DataFormatException, IOException, PluginException {
+		for (Record r : group.getRecordList()) {
+			PluginRecord record = (PluginRecord)r;
 			PluginRecordTreeNode recordNode = new PluginRecordTreeNode(record);
 			boolean insertNode = false;
 			int index = 0;
-			if (record instanceof PluginGroup)
-			{
-				createGroupChildren(recordNode, (PluginGroup) record);
-			}
-			else
-			{
-				if (record.getSubrecords().size() > 0)
-				{
+			if (record instanceof PluginGroup) {
+				createGroupChildren(recordNode, (PluginGroup)record);
+			} else {
+				if (record.getSubrecords().size() > 0) {
 					recordNode.add(new DefaultMutableTreeNode(null));
 				}
-				if (group.getGroupType() == 0)
-				{
+				if (group.getGroupType() == 0) {
 					String groupRecordType = group.getGroupRecordType();
 
-					if (SHOW_ALL || (!groupRecordType.equals("WRLD") && !groupRecordType.equals("CELL") && !groupRecordType.equals("DIAL")))
-					{
+					// The WRLD, CELL and DIAL don't use EDID so their natural order is best
+					if (SORT_EDID_RECORDS && (!groupRecordType.equals("WRLD")	&& !groupRecordType.equals("CELL")
+												&& !groupRecordType.equals("DIAL"))) {
 						String editorID = record.getEditorID();
 						Enumeration<?> nodes = groupNode.children();
-						while (nodes.hasMoreElements())
-						{
-							DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodes.nextElement();
-							PluginRecord nodeRecord = (PluginRecord) node.getUserObject();
+						while (nodes.hasMoreElements()) {
+							DefaultMutableTreeNode node = (DefaultMutableTreeNode)nodes.nextElement();
+							PluginRecord nodeRecord = (PluginRecord)node.getUserObject();
 							String nodeEditorID = nodeRecord.getEditorID();
-							if (nodeEditorID != null && editorID.compareToIgnoreCase(nodeEditorID) < 0)
-							{
+							if (nodeEditorID != null && editorID.compareToIgnoreCase(nodeEditorID) < 0) {
 								insertNode = true;
 								break;
 							}
@@ -252,54 +223,44 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 					}
 				}
 			}
-			if (insertNode)
-			{
+			if (insertNode) {
 				groupNode.insert(recordNode, index);
-			}
-			else
-			{
+			} else {
 				groupNode.add(recordNode);
 			}
 		}
 
 	}
 
-	private static void createRecordChildren(DefaultMutableTreeNode recordNode, PluginRecord record)
-	{
-		for (Subrecord subrecord : record.getSubrecords())
-		{
+	private static void createRecordChildren(DefaultMutableTreeNode recordNode, PluginRecord record) {
+		for (Subrecord subrecord : record.getSubrecords()) {
 			DefaultMutableTreeNode subrecordNode = new DefaultMutableTreeNode(subrecord);
 			recordNode.add(subrecordNode);
 		}
 	}
 
 	@Override
-	public void treeExpanded(TreeExpansionEvent event)
-	{
-		JTree tree = (JTree) event.getSource();
+	public void treeExpanded(TreeExpansionEvent event) {
+		JTree tree = (JTree)event.getSource();
 		TreePath treePath = event.getPath();
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode) treePath.getLastPathComponent();
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode)treePath.getLastPathComponent();
 		Object userObject = node.getUserObject();
-		if ((userObject instanceof PluginRecord) && !(userObject instanceof PluginGroup))
-		{
-			PluginRecord record = (PluginRecord) userObject;
-			DefaultMutableTreeNode subrecordNode = (DefaultMutableTreeNode) node.getFirstChild();
-			if (subrecordNode.getUserObject() == null)
-			{
+		if ((userObject instanceof PluginRecord) && !(userObject instanceof PluginGroup)) {
+			PluginRecord record = (PluginRecord)userObject;
+			DefaultMutableTreeNode subrecordNode = (DefaultMutableTreeNode)node.getFirstChild();
+			if (subrecordNode.getUserObject() == null) {
 				node.removeAllChildren();
 				createRecordChildren(node, record);
-				DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+				DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
 				model.nodeStructureChanged(node);
 			}
 		}
 	}
 
 	@Override
-	public void treeCollapsed(TreeExpansionEvent treeexpansionevent)
-	{
+	public void treeCollapsed(TreeExpansionEvent treeexpansionevent) {
 	}
-	
-	
+
 	private static class PluginRecordTreeNode extends DefaultMutableTreeNode {
 		public PluginRecordTreeNode(PluginRecord record) {
 			super(record);
@@ -308,25 +269,28 @@ public class PluginDisplayDialog extends JFrame implements ActionListener, TreeE
 		@Override
 		public String toString() {
 			if (userObject == null) {
-	            return "";
-	        } else if (userObject instanceof PluginGroup) {
-	            return userObject.toString() + " : " + humanReadableByteCountSI(((PluginGroup)userObject).getRecordDeepDataSize());	            
-	        } else if (userObject instanceof PluginRecord) {
-	            return userObject.toString() + " : " + humanReadableByteCountSI(((PluginRecord)userObject).getRecordDataLen());
-	        } else {
-	            return userObject.toString();
-	        }
+				return "";
+			} else if (userObject instanceof PluginGroup) {
+				return userObject.toString()	+ " : "
+						+ humanReadableByteCountSI(((PluginGroup)userObject).getRecordDeepDataSize());
+			} else if (userObject instanceof PluginRecord) {
+				return userObject.toString()	+ " : "
+						+ humanReadableByteCountSI(((PluginRecord)userObject).getRecordDataLen());
+			} else {
+				return userObject.toString();
+			}
 		}
+
 		public static String humanReadableByteCountSI(long bytes) {
-		    if (-1000 < bytes && bytes < 1000) {
-		        return bytes + " B";
-		    }
-		    StringCharacterIterator ci = new StringCharacterIterator("kMGTPE");
-		    while (bytes <= -999_950 || bytes >= 999_950) {
-		        bytes /= 1000;
-		        ci.next();
-		    }
-		    return String.format("%.1f %cB", bytes / 1000.0, ci.current());
+			if (-1000 < bytes && bytes < 1000) {
+				return bytes + " B";
+			}
+			StringCharacterIterator ci = new StringCharacterIterator("kMGTPE");
+			while (bytes <= -999_950 || bytes >= 999_950) {
+				bytes /= 1000;
+				ci.next();
+			}
+			return String.format("%.1f %cB", bytes / 1000.0, ci.current());
 		}
 	}
 
