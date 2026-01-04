@@ -2,7 +2,6 @@ package esm.analyzer;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 
 import esfilemanager.common.data.plugin.PluginGroup;
@@ -37,6 +36,18 @@ public class SubrecordStats {
 	public int								countOfNif			= 0;
 	public int								countOfDds			= 0;
 	public int								countOfKf			= 0;
+	//hkx physics
+	//txt animation offsets
+	//bto land data
+	// lod for distance lods meshes
+	//xwm sounds
+	//fuz and lip fo76 voice data
+	// some fo76 geo data has a no extension but all files are just named "scenedesc"
+	//swf for interfaces
+	//wem sf has these in voices
+	// af and afx sf animation entries
+	//ffxanim sf for face animations
+	
 
 	public int								countOfInts			= 0;
 	public int								countOfFloats		= 0;
@@ -54,6 +65,10 @@ public class SubrecordStats {
 	public int								cardMin				= Integer.MAX_VALUE;
 
 	public String							locationDesc;
+
+	// these ones are for creating java classes form this
+	public String							javaVariableName;
+	public String							javaDataType;
 
 	public SubrecordStats(String subrecordType, String inRecType) {
 		this.subrecordType = subrecordType;
@@ -138,6 +153,7 @@ public class SubrecordStats {
 		int formTypeCountsLen = formTypeCounts.entrySet().size();
 		if (formTypeCountsLen > 0 && formTypeCountsLen < 3) {
 			dataType = "FormId";
+			javaDataType = "FormID";
 		} else if (countOfString > totalCount * 0.2)
 			dataType = "ZString";
 		else if (countOfInts > totalCount * 0.2)
@@ -162,10 +178,14 @@ public class SubrecordStats {
 		}
 
 		desc = "";
-		if (countOfNif > 0)
+		if (countOfNif > 0) {
 			desc += "Including names of nif files. ";
-		if (countOfDds > 0)
+			dataType = "BsaFileName";
+		}
+		if (countOfDds > 0) {
 			desc += "Including names to dds files. ";
+			dataType = "BsaFileName";
+		}
 		if (formTypeCounts.keySet().size() < 5) {// too many is suspect
 			for (String formRecordType : formTypeCounts.keySet()) {
 				desc += "Pointers to " + formRecordType + ". ";
@@ -194,6 +214,9 @@ public class SubrecordStats {
 			int count = followedBySubTypes.get(follower);
 			locationDesc += (follower == null ? " Last" : follower) + "(" + count + "), ";
 		}
+
+		// now java variable name
+		javaVariableName = "name go here";
 
 	}
 

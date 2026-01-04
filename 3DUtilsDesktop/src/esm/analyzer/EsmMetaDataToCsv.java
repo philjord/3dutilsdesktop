@@ -38,7 +38,7 @@ import tools.swing.TitledJFileChooser;
  * 
  * Records that have a modl, and what bits are attached
  * 
- * REcords that have and don't have EDIDs
+ * ALL records can have EDIDs REFR or anything everything sub classes off an EDIDable thing EDIDs
  * 
  * Sub records in each record, in order, and with optional, and with fixed occuarnce after XXXX sub record data range
  * size
@@ -53,6 +53,11 @@ import tools.swing.TitledJFileChooser;
  * 
  * I need to make a definitive format file that lives in each game root
  * 
+ * This says that records have a 16 bit versio control and after it a record version indicator
+ * https://en.m.uesp.net/wiki/Skyrim_Mod:Mod_File_Format#Groups
+ * I now read this so perhaps I can cehck the thingy?
+ * 
+ * 
  */
 public class EsmMetaDataToCsv {
 	private static String										OUTPUT_FILE_KEY		= "outputFile";
@@ -61,11 +66,11 @@ public class EsmMetaDataToCsv {
 
 	private static boolean										WRITE_BIG_TYPES		= false;
 
-	private static boolean										WRITE_CSV			= false;
+	private static boolean										WRITE_CSV			= true;
 
 	private static boolean										WRITE_MD			= true;
 
-	private static boolean										WRITE_JAVA			= true;
+	private static boolean										WRITE_JAVA			= false;
 
 	private static File											outputFolder;
 
@@ -196,8 +201,8 @@ public class EsmMetaDataToCsv {
 					if (record.getSubrecords().size() > 1) {
 
 						int formID = record.getFormID();
-						int recordFlags1 = record.getRecordFlags1();
-						int versionInfo = record.getRecordFlags2();
+						int recordFlags1 = record.getRecordFlags();
+						int formatVerison = record.getInternalVersion();
 
 						//if (record.getRecordType().equals("SCEN"))
 						//	System.out.println("" + record.getRecordType() + " " + group.getGroupType());
@@ -236,7 +241,7 @@ public class EsmMetaDataToCsv {
 								csvOut.append(",");
 								csvOut.append("");
 								csvOut.append(",");
-								csvOut.append("f-" + recordFlags1 + "-v-" + versionInfo);
+								csvOut.append("v-" + formatVerison);
 								csvOut.append(",");
 								csvOut.append("");
 								csvOut.newLine();
@@ -964,7 +969,6 @@ public class EsmMetaDataToCsv {
 		 * Possibly I could make a custom editor for each version to make the editor a bit sexier to make them all
 		 * build?
 		 * 
-		 * I don't seem to be analyzing the cell and REFR data I'm going to have to
 		 * 
 		 */
 
@@ -984,25 +988,38 @@ public class EsmMetaDataToCsv {
 		javaBW.append(
 				"public class " + betterJavaName + " extends " + (instanceType ? "InstForm" : "TypeForm") + " { \n");
 		javaBW.newLine();
+		
+		
+		
+		
+		//variable declarations here
+		for (int t = 0; t < tuples.size(); t++) {
+			SubRecTuple tup = tuples.get(t);
+			for (int i = 0; i < tup.items.size(); i++) {
+				SubrecordStats subrecordStats = tup.items.get(i).stat;
+				if (!subrecordStats.subrecordType.equals("EDID")) {
+					boolean tupleOptional = tup.items.get(i).optional;
+
+				
+
+					String sr = "//"	+ subrecordStats.C + " " + subrecordStats.subrecordType + " "
+								+ subrecordStats.dataType + " opt " + tupleOptional + " " + subrecordStats.desc + " "
+								+ "\n";
+
+					javaBW.append(sr);
+				}
+			}
+		}
 
 		javaBW.newLine();
 		javaBW.append("\tpublic " + betterJavaName + "(Record recordData) { \n");
 		javaBW.append("\t\tsuper(recordData);\n");
 		javaBW.append("\t\tSubRecoHandler srh = new SubRecoHandler(recordData);\n");
-		
-		
-		
-		if (!instanceType && tuples.get(0).items.get(0).stat.subrecordType.equals("EDID"))
-			javaBW.append("\t\tsetEDID(srh.next());\n");
 
-		
-		
-		
-		
-		
-		
-		
-		//TO DEBUG just chukc them out in order  a comments at the bottom
+		//everything might have an EDID
+		javaBW.append("\t\tsetEDID(srh.ifNext(\"EDID\"));\n");
+
+		//TO DEBUG just chuck them out in order  a comments at the bottom
 		for (int t = 0; t < tuples.size(); t++) {
 			SubRecTuple tup = tuples.get(t);
 			for (int i = 0; i < tup.items.size(); i++) {
@@ -1010,7 +1027,7 @@ public class EsmMetaDataToCsv {
 				boolean tupleOptional = tup.items.get(i).optional;
 
 				String sr = "//"	+ subrecordStats.C + " " + subrecordStats.subrecordType + " " + subrecordStats.dataType
-							+ " " + "\n";
+							+ " opt " + tupleOptional + " " + subrecordStats.desc + " " + "\n";
 
 				javaBW.append(sr);
 			}
