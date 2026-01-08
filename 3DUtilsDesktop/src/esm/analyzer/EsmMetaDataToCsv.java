@@ -54,10 +54,14 @@ import tools.swing.TitledJFileChooser;
  * I need to make a definitive format file that lives in each game root
  * 
  * This says that records have a 16 bit versio control and after it a record version indicator
- * https://en.m.uesp.net/wiki/Skyrim_Mod:Mod_File_Format#Groups
- * I now read this so perhaps I can cehck the thingy?
+ * https://en.m.uesp.net/wiki/Skyrim_Mod:Mod_File_Format#Groups I now read this so perhaps I can cehck the thingy?
  * 
- * 
+ * NOTES!! so sometimes version will dictate, if the format goes all chaos but sometime there's just a wee repeat reco
+ * in a format that just lives happily, I can find them by looking at the md file and the csv with my eyes Example
+ * Skyrim->AVIF The DESC tuple, needs an optional ANAM (which it does have) then an optional CNAM, and if that CNAM can
+ * be encoded before the analysis then the 0+ CNAM in the PNAM to INAM tuple should be found (I hope) Notice also that
+ * currently INAM is not spotted as the end of the tuple, but that might be cos of CNAM again maybe (ALCH in obliv is
+ * probably the same)
  */
 public class EsmMetaDataToCsv {
 	private static String										OUTPUT_FILE_KEY		= "outputFile";
@@ -65,6 +69,9 @@ public class EsmMetaDataToCsv {
 	private static boolean										ANALYZE_CELLS		= true;
 
 	private static boolean										WRITE_BIG_TYPES		= false;
+
+	//REFR,LAND,INFO
+	private static boolean										SKIP_HIGH_COUNT		= true;
 
 	private static boolean										WRITE_CSV			= true;
 
@@ -164,6 +171,7 @@ public class EsmMetaDataToCsv {
 				csvOut.append("SubrecordType,");
 				csvOut.append("SubOrder,");
 				csvOut.append("DataLen,");
+				csvOut.append("formatVersion,");
 				csvOut.append("CouldBeFormID,");
 				csvOut.append("CouldBeString,");
 
@@ -203,6 +211,7 @@ public class EsmMetaDataToCsv {
 						int formID = record.getFormID();
 						int recordFlags1 = record.getRecordFlags();
 						int formatVerison = record.getInternalVersion();
+						int unknownShort = record.getUnknownShort();
 
 						//if (record.getRecordType().equals("SCEN"))
 						//	System.out.println("" + record.getRecordType() + " " + group.getGroupType());
@@ -222,6 +231,50 @@ public class EsmMetaDataToCsv {
 						}
 						recordDataList.add(recordData);
 
+						// here we attempt to rename double used cub records to allow them to be analyzed corectly	
+						// note in order so the befores are already swapped
+						List<Subrecord> subs = record.getSubrecords();
+						for (int i = 0; i < subs.size(); i++) {
+							Subrecord sub = subs.get(i);
+
+							String subTypeBefore = null;
+							if (i > 0) {
+								subTypeBefore = subs.get(i - 1).getSubrecordType();
+							}
+
+							// hack about a bit to find encoding, not e these MUST be in order of discovery
+							// my befoer and after sub type are not the new ones, do analyzin
+							String type = swapTypes(esmFileName, record.getRecordType(), sub.getSubrecordType(),
+									subTypeBefore);
+							sub.setSubrecordType(type);
+
+						}
+						/// stats for md builder
+						int currentSubOrderNum = 0;
+						for (int i = 0; i < subs.size(); i++) {
+							Subrecord sub = subs.get(i);
+
+							String subTypeBefore = null;
+							String subTypeAfter = null;
+							if (i > 0) {
+								subTypeBefore = subs.get(i - 1).getSubrecordType();
+							}
+							if (i < subs.size() - 1) {
+								subTypeAfter = subs.get(i + 1).getSubrecordType();
+							}
+							String couldBeFormID = couldBeFormID(sub.getSubrecordData());
+							String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(),
+									sub.getSubrecordData());
+
+							int versionId = -1;
+
+							SubrecordData srs = new SubrecordData(sub, record.getRecordType(), versionId,
+									currentSubOrderNum, subTypeBefore, subTypeAfter, couldBeFormID, couldBeString);
+
+							recordData.subrecordStatsList.add(srs);
+
+						}
+
 						if (WRITE_CSV) {
 							// to ease the file size slightly skip some trivial ones, negate this to get them decoded
 							if (!skipitForCSV(record.getRecordType())) {
@@ -239,20 +292,20 @@ public class EsmMetaDataToCsv {
 								csvOut.append(",");
 								csvOut.append("");
 								csvOut.append(",");
-								csvOut.append("");
-								csvOut.append(",");
 								csvOut.append("v-" + formatVerison);
 								csvOut.append(",");
-								csvOut.append("");
+								csvOut.append("" + unknownShort);// just for info 
+								csvOut.append(",");
+								csvOut.append("" + recordFlags1);
+								csvOut.append(",");
+								csvOut.append("" + record.getMasterID());
 								csvOut.newLine();
 								csvOut.flush();
 
-								int currentSubOrderNum = 0;
-								List<Subrecord> subs = record.getSubrecords();
+								currentSubOrderNum = 0;
 								for (int i = 0; i < subs.size(); i++) {
 									Subrecord sub = subs.get(i);
 
-									//RECO header info, repeated everytime
 									csvOut.append("" + currentRowOrderNum++);
 									csvOut.append(",");
 									csvOut.append(record.getRecordType());
@@ -264,6 +317,8 @@ public class EsmMetaDataToCsv {
 									csvOut.append("" + currentSubOrderNum++);
 									csvOut.append(",");
 									csvOut.append("" + sub.getSubrecordData().length);
+									csvOut.append(",");
+									csvOut.append("v-" + formatVerison);
 									csvOut.append(",");
 									String couldBeFormID = couldBeFormID(sub.getSubrecordData());
 									csvOut.append(couldBeFormID == null ? "" : couldBeFormID);
@@ -283,25 +338,6 @@ public class EsmMetaDataToCsv {
 							}
 						}
 
-						/// stats for md builder
-						int currentSubOrderNum = 0;
-						List<Subrecord> subs = record.getSubrecords();
-						for (int i = 0; i < subs.size(); i++) {
-							Subrecord sub = subs.get(i);
-							String subTypeBefore = null;
-							String subTypeAfter = null;
-							if (i > 0)
-								subTypeBefore = subs.get(i - 1).getSubrecordType();
-							if (i < subs.size() - 1)
-								subTypeAfter = subs.get(i + 1).getSubrecordType();
-							String couldBeFormID = couldBeFormID(sub.getSubrecordData());
-							String couldBeString = couldBeString(record.getRecordType(), sub.getSubrecordType(),
-									sub.getSubrecordData());
-							SubrecordData srs = new SubrecordData(sub, record.getRecordType(), currentSubOrderNum,
-									subTypeBefore, subTypeAfter, couldBeFormID, couldBeString);
-							recordData.subrecordStatsList.add(srs);
-
-						}
 					}
 				}
 			}
@@ -312,12 +348,26 @@ public class EsmMetaDataToCsv {
 
 	private static boolean skipitForCSV(String recType) {
 		if (!WRITE_BIG_TYPES) {
+			//TODO: look into more of these
 			if (//esmFileName.equals("Skyrim.esm") && 
 
 			(recType.equals("GMST") || recType.equals("KYWD") || recType.equals("LCRT") || recType.equals("GLOB")
 				|| recType.equals("TXST") || recType.equals("STAT") || recType.equals("PACK") || recType.equals("DIAL")
 				|| recType.equals("QUST") || recType.equals("SCOL")))
 				return true;
+		}
+
+		if (SKIP_HIGH_COUNT) {
+			if (recType.equals("REFR") || recType.equals("LAND") || recType.equals("INFO"))
+				return true;
+
+			if (esmFileName.equals("Skyrim.esm")	|| esmFileName.equals("Fallout4.esm")
+				|| esmFileName.equals("SeventySix.esm") || esmFileName.equals("Starfield.esm")) {
+
+				if ((recType.equals("NPC_")))
+					return true;
+			}
+
 		}
 
 		return false;
@@ -560,6 +610,7 @@ public class EsmMetaDataToCsv {
 				System.out.println("Instance " + rds.get(0).type);
 		}
 		// now finish with a list of recos that were too complex for my sorter
+		System.out.println("Note > means \"should be behind\" so it is pulled out and put behind the second tuplehead");
 		for (String t : complexSortRecords) {
 			System.out.println("Complex RECO " + t);
 		}
@@ -689,12 +740,74 @@ public class EsmMetaDataToCsv {
 			}
 		}
 
+		//If we think it's a conplex one run it more times and grab the name of the dirty moving recos
 		if (loopCount1 > 8) {
-			complexSortRecords.add(recType);
+
+			String complexReco = recType;
+
+			int movedCount = 0;
+			for (int i = 0; i < sortedTuples.size() && movedCount < 10; i++) {
+
+				SubRecTuple tup = sortedTuples.get(i);
+				//starting at the back up to the current point?
+				for (int j = sortedTuples.size() - 1; j > i; j--) {
+					//compare if it's supposed to be behind
+					SubRecTuple tup2 = sortedTuples.get(j);
+					if (tup.compare(tup2) == 1) {
+						// we should be behind, so pluck from current and place here
+						sortedTuples.remove(i);// note moves all indexes down
+						sortedTuples.add(j, tup);// so j is equivalent to j+1
+
+						movedCount++;
+						complexReco = complexReco	+ " " + movedCount + " " + tup.getHeadStat().subrecordType + ">"
+										+ tup2.getHeadStat().subrecordType;
+						// now the i value needs to move back down 1 to account for the moved item.
+						i--;
+						break;//from the j loop
+					}
+				}
+
+			}
+
+			//notes on how to explain to the user what's a good candidate for splitting
+			//ALCH has a EDID always followed by a FULL only, but full can be after EDID and SCIT
+			// if the FULL after SCIT was out it works, so if SCIT is behind EDID that's the rule
+			// FULL can appear twice, (1-2)
+
+			//FOR obliv ACRE XRGD is sometimes after XESP, but also sometimes followed by, 
+			//but each is 0-1 so we are not talking looping here! notice no internalVersion always v=0
+			// XESP has the same pattern, but is after less often than before
+			//formID 227946 = XRGD then XESP, 663327 = XESP then XRGD so apparently NO order!  
+			// so perhaps there is a concept of 0-1 recos that just are and have no order particularly
+			
+			
+			//Oblic CELL is complex, however all tupels are 0-1 so it can't matter much
+			
+			
+			//Obliv CREA, more interesting, several are many
+			// before starting I notice NAM1 should be 13-4opt but is 14-opt so not attached correctly
+			
+			
+			
+
+			complexSortRecords.add(complexReco);
 			//System.out.println("!!!!!Complex Reco many loops required " + recType);
 		}
 
 		return sortedTuples;
+	}
+
+	private static String swapTypes(String esmFileName, String recordType, String subType, String subBeforeType) {
+		if (esmFileName.equals("Oblivion.esm")) {
+			/*	if (recordType.equals("ALCH") && subType.equals("FULL") && subBeforeType.equals("SCIT"))
+					return "FULL-2";
+				if (recordType.equals("ACRE") && subType.equals("XRGD") && subBeforeType.equals("XESP"))
+					return "XRGD-2";
+				if (recordType.equals("CELL") && subType.equals("XCLL") && subBeforeType.equals("XCMT"))
+					return "XCLL-2";*/
+
+		}
+		return subType;
 	}
 
 	private static void organiseHeads(ArrayList<SubRecTuple> tuples) {
@@ -821,7 +934,7 @@ public class EsmMetaDataToCsv {
 
 		/**
 		 * Close to the normal sort, but I can't support transitive compares so have to do something like iterate until
-		 * no further changes -1 if a in front(before) of b, 0 if the same tuple and -1 if a behind(after) b
+		 * no further changes -1 if a in front(before) of b, 0 if the same tuple and 1 if a behind(after) b
 		 * @param tup1
 		 * @param tup1
 		 * @return
@@ -988,10 +1101,7 @@ public class EsmMetaDataToCsv {
 		javaBW.append(
 				"public class " + betterJavaName + " extends " + (instanceType ? "InstForm" : "TypeForm") + " { \n");
 		javaBW.newLine();
-		
-		
-		
-		
+
 		//variable declarations here
 		for (int t = 0; t < tuples.size(); t++) {
 			SubRecTuple tup = tuples.get(t);
@@ -999,8 +1109,6 @@ public class EsmMetaDataToCsv {
 				SubrecordStats subrecordStats = tup.items.get(i).stat;
 				if (!subrecordStats.subrecordType.equals("EDID")) {
 					boolean tupleOptional = tup.items.get(i).optional;
-
-				
 
 					String sr = "//"	+ subrecordStats.C + " " + subrecordStats.subrecordType + " "
 								+ subrecordStats.dataType + " opt " + tupleOptional + " " + subrecordStats.desc + " "

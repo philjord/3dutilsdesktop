@@ -6,7 +6,11 @@ import esfilemanager.common.data.record.Subrecord;
 import tools.io.ESMByteConvert;
 
 public class SubrecordData {
+	//This might be swapped in case of double ups!!
 	public String					subrecordType;
+
+	// if multiple version in esm used to analyze separately
+	public int						versionId		= 0;
 
 	public int						count			= 0;
 
@@ -30,9 +34,10 @@ public class SubrecordData {
 	public int						countOfVec3		= 0;
 	public int						countOfVec4		= 0;
 
-	public SubrecordData(	Subrecord sub, String inRec, int orderNo, String subTypeBefore, String subTypeAfter,
-							String couldBeFormID, String couldBeString) {
+	public SubrecordData(	Subrecord sub, String inRec, int versionId, int orderNo, String subTypeBefore,
+							String subTypeAfter, String couldBeFormID, String couldBeString) {
 		subrecordType = sub.getSubrecordType();
+		this.versionId = versionId;
 		hasOrderOf = orderNo;
 		subTypesBefore = subTypeBefore;
 		subTypesAfter = subTypeAfter;
