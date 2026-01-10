@@ -47,7 +47,7 @@ public class LoadTask extends Thread {
 			if (archiveNode != null) {
 				HashMap<String, FolderNode> foldersByName = new HashMap<String, FolderNode>();
 
-				archiveFile.load(true);
+				archiveFile.load();
 				List<ArchiveEntry> entries = archiveFile.getEntries();
 				DefaultMutableTreeNode parentNode;
 
@@ -131,7 +131,7 @@ public class LoadTask extends Thread {
 				}
 
 			} else {
-				archiveFile.load(true);
+				archiveFile.load();
 			}
 
 			completed = true;

@@ -171,7 +171,7 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 		}
 		System.out.println(""	+ (System.currentTimeMillis() - tstart) + "ms to compress " + file.getPath() );
 
-		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(new FileInputStream(file).getChannel(),
+		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(),
 				file.getName());
 
 		ArchiveNode archiveNode = new ArchiveNode(archiveFile2);

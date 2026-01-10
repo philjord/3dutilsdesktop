@@ -200,7 +200,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			return;
 		}
 
-		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(new FileInputStream(file).getChannel(),
+		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(),
 				file.getName());
 
 		ArchiveNode archiveNode = new ArchiveNode(archiveFile2);
@@ -238,7 +238,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		if (chooser.showOpenDialog(this) == 0) {
 			File file = chooser.getSelectedFile();
 			Main.properties.setProperty("current.directory", file.getParent());
-			ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(new FileInputStream(file).getChannel(),
+			ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(),
 					file.getName());
 			ArchiveNode archiveNode = new ArchiveNode(archiveFile2);
 			StatusDialog statusDialog = new StatusDialog(this, "Loading " + archiveFile2.getName());

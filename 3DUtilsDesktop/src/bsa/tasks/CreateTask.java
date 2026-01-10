@@ -278,7 +278,7 @@ public class CreateTask extends Thread {
 
 			for (int i = 0; i < folder.getFileCount(); i++) {
 				ArchiveEntry entry = entries.get(fileIndex++);
-				setLong(entry.getFileHashCode().getHash(), buffer, 0);
+				setLong(entry.getFileHashCode(), buffer, 0);
 				setInteger(0, buffer, 8);
 				setInteger(0, buffer, 12);
 				out.write(buffer, 0, 16);

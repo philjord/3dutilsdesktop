@@ -64,20 +64,20 @@ import tools.swing.TitledJFileChooser;
  * probably the same)
  */
 public class EsmMetaDataToCsv {
-	private static String										OUTPUT_FILE_KEY		= "outputFile";
+	private static String										OUTPUT_FILE_KEY			= "outputFile";
 
-	private static boolean										ANALYZE_CELLS		= true;
+	private static boolean										ANALYZE_CELLS			= true;
 
-	private static boolean										WRITE_BIG_TYPES		= false;
+	private static boolean										WRITE_BIG_TYPES			= false;
 
 	//REFR,LAND,INFO
-	private static boolean										SKIP_HIGH_COUNT		= true;
+	private static boolean										SKIP_HIGH_COUNT			= true;
 
-	private static boolean										WRITE_CSV			= true;
+	private static boolean										WRITE_CSV				= true;
 
-	private static boolean										WRITE_MD			= true;
+	private static boolean										WRITE_MD				= true;
 
-	private static boolean										WRITE_JAVA			= false;
+	private static boolean										WRITE_JAVA				= false;
 
 	private static File											outputFolder;
 
@@ -87,15 +87,16 @@ public class EsmMetaDataToCsv {
 
 	private static Preferences									prefs;
 
-	private static int											currentRowOrderNum	= 0;
+	private static int											currentRowOrderNum		= 0;
 
-	private static String										esmFileName			= "unknown";
+	private static String										esmFileName				= "unknown";
 
 	// just the meta data of records and subs to be turned into overall stats after full collection
-	private static LinkedHashMap<String, ArrayList<RecordData>>	recordDataLists		= new LinkedHashMap<String, ArrayList<RecordData>>();
+	private static LinkedHashMap<String, ArrayList<RecordData>>	recordDataLists			= new LinkedHashMap<String, ArrayList<RecordData>>();
 
 	// for noting at the end of sorting
-	private static ArrayList<String>							complexSortRecords	= new ArrayList<String>();
+	private static ArrayList<String>							complexSortRecords		= new ArrayList<String>();
+	private static ArrayList<String>							complexSortRecordsDesc	= new ArrayList<String>();
 
 	public static void main(String args[]) {
 		String generalEsmFile = EsmFileLocations.getGeneralEsmFile();
@@ -510,19 +511,6 @@ public class EsmMetaDataToCsv {
 
 		for (ArrayList<RecordData> rds : sortedRecsMap.values()) {
 			String recType = rds.get(0).type;
-			boolean instance = rds.get(0).instance;
-			String desc = PluginGroup.typeMap.get(recType);
-			if (WRITE_MD) {
-				String h2 = "<p><b>"	+ recType + "</b> " + desc + " count=" + rds.size()
-							+ (instance ? " instance " : "") + "</p> \n\n"
-							+ "<table class=\"wikitable\" width=\"100%\"> \n\n" + "<tbody><tr> \n\n"
-							+ "<th width=\"5%\">C________</th> \n\n" + "<th width=\"5%\">Subrecord</th> \n\n"
-							+ "<th width=\"10%\"><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:File_Format_Conventions\" title=\"Oblivion Mod:File Format Conventions\">Type______</a></th> \n\n"
-							+ "<th>Info</th> \n\n" + "</tr> \n\n" + "";
-				mdOut.append(h2);
-
-				//System.out.println("Writing RECO to md file : " + rds.get(0).type);
-			}
 
 			//I have all records and their list of subs now
 			/// so I need to build a list of subreco type and for each one work out the cardinality, type and likely data (formid pointer or string style)
@@ -573,8 +561,23 @@ public class EsmMetaDataToCsv {
 			//  but that might just be a real system, in which case at the stats gathering stage I have to do something weird! super weird.
 
 			ArrayList<SubRecTuple> tuples = getSortedSubRecTuples(recType, allSubTypesData);
-
+			
+			String desc = PluginGroup.typeMap.get(recType);
 			if (WRITE_MD) {
+
+				boolean instance = rds.get(0).instance;
+				boolean complex = complexSortRecords.contains(recType);
+
+				String h2 = "<p><b>"	+ recType + "</b> " + desc + " count=" + rds.size() + (complex ? " -complex" : "")
+							+ (instance ? " -instance " : "") + "</p> \n\n"
+							+ "<table class=\"wikitable\" width=\"100%\"> \n\n" + "<tbody><tr> \n\n"
+							+ "<th width=\"5%\">C________</th> \n\n" + "<th width=\"5%\">Subrecord</th> \n\n"
+							+ "<th width=\"10%\"><a href=\"https://en.uesp.net/wiki/Oblivion_Mod:File_Format_Conventions\" title=\"Oblivion Mod:File Format Conventions\">Type______</a></th> \n\n"
+							+ "<th>Info</th> \n\n" + "</tr> \n\n" + "";
+				mdOut.append(h2);
+
+				//System.out.println("Writing RECO to md file : " + rds.get(0).type);
+
 				// for each one build a table
 				for (int t = 0; t < tuples.size(); t++) {
 					SubRecTuple tup = tuples.get(t);
@@ -599,7 +602,7 @@ public class EsmMetaDataToCsv {
 
 			//////////NOW to build java classes of the same!!!
 			if (WRITE_JAVA) {
-				createJavaClass(rds.get(0), desc, tuples);
+				JavaClassWriter.createJavaRECOClass(outputFolder, esmFileName, rds.get(0), desc, tuples);
 			}
 
 		}
@@ -611,7 +614,7 @@ public class EsmMetaDataToCsv {
 		}
 		// now finish with a list of recos that were too complex for my sorter
 		System.out.println("Note > means \"should be behind\" so it is pulled out and put behind the second tuplehead");
-		for (String t : complexSortRecords) {
+		for (String t : complexSortRecordsDesc) {
 			System.out.println("Complex RECO " + t);
 		}
 
@@ -743,7 +746,7 @@ public class EsmMetaDataToCsv {
 		//If we think it's a conplex one run it more times and grab the name of the dirty moving recos
 		if (loopCount1 > 8) {
 
-			String complexReco = recType;
+			String complexRecoDesc = recType;
 
 			int movedCount = 0;
 			for (int i = 0; i < sortedTuples.size() && movedCount < 10; i++) {
@@ -759,8 +762,8 @@ public class EsmMetaDataToCsv {
 						sortedTuples.add(j, tup);// so j is equivalent to j+1
 
 						movedCount++;
-						complexReco = complexReco	+ " " + movedCount + " " + tup.getHeadStat().subrecordType + ">"
-										+ tup2.getHeadStat().subrecordType;
+						complexRecoDesc = complexRecoDesc	+ " " + movedCount + " " + tup.getHeadStat().subrecordType
+											+ ">" + tup2.getHeadStat().subrecordType;
 						// now the i value needs to move back down 1 to account for the moved item.
 						i--;
 						break;//from the j loop
@@ -779,18 +782,14 @@ public class EsmMetaDataToCsv {
 			// XESP has the same pattern, but is after less often than before
 			//formID 227946 = XRGD then XESP, 663327 = XESP then XRGD so apparently NO order!  
 			// so perhaps there is a concept of 0-1 recos that just are and have no order particularly
-			
-			
+
 			//Oblic CELL is complex, however all tupels are 0-1 so it can't matter much
-			
-			
+
 			//Obliv CREA, more interesting, several are many
 			// before starting I notice NAM1 should be 13-4opt but is 14-opt so not attached correctly
-			
-			
-			
 
-			complexSortRecords.add(complexReco);
+			complexSortRecordsDesc.add(complexRecoDesc);
+			complexSortRecords.add(recType);
 			//System.out.println("!!!!!Complex Reco many loops required " + recType);
 		}
 
@@ -891,7 +890,7 @@ public class EsmMetaDataToCsv {
 		}
 	}
 
-	private static class SubRecTuple {
+	public static class SubRecTuple {
 		public static class Item {
 			public SubrecordStats	stat		= null;
 			public boolean			optional	= false;
@@ -1034,117 +1033,6 @@ public class EsmMetaDataToCsv {
 			}
 			return s;
 		}
-
-	}
-
-	private static void createJavaClass(RecordData recordData, String desc, ArrayList<SubRecTuple> tuples)
-			throws IOException {
-
-		String betterJavaName = PluginGroup.typeMap.get(recordData.type);
-
-		if (betterJavaName == null)
-			System.out.println("Not recordData.type " + recordData.type);
-
-		// did we have no lookup, or a questionable lookup
-		if (betterJavaName == null || betterJavaName.indexOf("?") != -1) {
-			betterJavaName = recordData.type;
-		} else {
-			int bracketOpen = betterJavaName.indexOf("(");
-			if (bracketOpen != -1)
-				betterJavaName = betterJavaName.substring(0, bracketOpen);
-			betterJavaName = betterJavaName.replaceAll(" ", "");
-		}
-
-		String esmClean = esmFileName.substring(0, esmFileName.lastIndexOf("."));
-
-		String srcFolder = "src" + File.separator + esmClean.toLowerCase();
-
-		File javaRECOFolder = new File(outputFolder, srcFolder);
-		javaRECOFolder.mkdirs();
-
-		File javaClassOut = new File(javaRECOFolder, betterJavaName + ".java");
-
-		System.out.println("Making Java class now for " + esmClean + " " + javaClassOut);
-
-		if (!javaClassOut.exists())
-			javaClassOut.createNewFile();
-
-		BufferedWriter javaBW = new BufferedWriter(new FileWriter(javaClassOut));
-
-		/**
-		 * Concept Create a compilable java class, that I can open a project with and load an esm of the appropriate
-		 * version each game version will have a package space in this test project load the esm into java classes with
-		 * members and zero errors, then fire every esm at it.
-		 * 
-		 * after all esm incl 76 are working perfectly, then integration with current code can happen (member names
-		 * getting modded etc)
-		 * 
-		 * Possibly I could make a custom editor for each version to make the editor a bit sexier to make them all
-		 * build?
-		 * 
-		 * 
-		 */
-
-		boolean instanceType = PluginGroup.instTypes.contains(recordData.type);
-
-		int tIdx = 0;
-		int sIdx = 0;
-
-		javaBW.append("package " + esmClean.toLowerCase() + "; \n");
-		javaBW.newLine();
-		javaBW.append("import esfilemanager.common.data.record.Record;\n");
-		javaBW.append("import esfilemanager.common.data.record.Subrecord;\n");
-		javaBW.append("import forms.baseforms.SubRecoHandler;\n");
-		javaBW.append("import forms.baseforms." + (instanceType ? "InstForm" : "TypeForm") + ";\n");
-
-		javaBW.newLine();
-		javaBW.append(
-				"public class " + betterJavaName + " extends " + (instanceType ? "InstForm" : "TypeForm") + " { \n");
-		javaBW.newLine();
-
-		//variable declarations here
-		for (int t = 0; t < tuples.size(); t++) {
-			SubRecTuple tup = tuples.get(t);
-			for (int i = 0; i < tup.items.size(); i++) {
-				SubrecordStats subrecordStats = tup.items.get(i).stat;
-				if (!subrecordStats.subrecordType.equals("EDID")) {
-					boolean tupleOptional = tup.items.get(i).optional;
-
-					String sr = "//"	+ subrecordStats.C + " " + subrecordStats.subrecordType + " "
-								+ subrecordStats.dataType + " opt " + tupleOptional + " " + subrecordStats.desc + " "
-								+ "\n";
-
-					javaBW.append(sr);
-				}
-			}
-		}
-
-		javaBW.newLine();
-		javaBW.append("\tpublic " + betterJavaName + "(Record recordData) { \n");
-		javaBW.append("\t\tsuper(recordData);\n");
-		javaBW.append("\t\tSubRecoHandler srh = new SubRecoHandler(recordData);\n");
-
-		//everything might have an EDID
-		javaBW.append("\t\tsetEDID(srh.ifNext(\"EDID\"));\n");
-
-		//TO DEBUG just chuck them out in order  a comments at the bottom
-		for (int t = 0; t < tuples.size(); t++) {
-			SubRecTuple tup = tuples.get(t);
-			for (int i = 0; i < tup.items.size(); i++) {
-				SubrecordStats subrecordStats = tup.items.get(i).stat;
-				boolean tupleOptional = tup.items.get(i).optional;
-
-				String sr = "//"	+ subrecordStats.C + " " + subrecordStats.subrecordType + " " + subrecordStats.dataType
-							+ " opt " + tupleOptional + " " + subrecordStats.desc + " " + "\n";
-
-				javaBW.append(sr);
-			}
-		}
-
-		javaBW.append("\t} \n");
-		javaBW.append("} \n");
-		javaBW.flush();
-		javaBW.close();
 
 	}
 

@@ -105,7 +105,7 @@ public class BSAFileSetWithStatus extends ArrayList<ArchiveFile>
 
 		try
 		{
-			ArchiveFile archiveFile = ArchiveFile.createArchiveFile(new FileInputStream(file).getChannel(), file.getName());
+			ArchiveFile archiveFile = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(), file.getName());
 
 			try
 			{
