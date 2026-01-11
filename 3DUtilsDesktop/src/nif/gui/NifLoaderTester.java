@@ -8,11 +8,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
-import nif.BgsmSource;
 import nif.NifFile;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import tools.swing.DetailsFileChooser;
+import utils.source.BgsmSource;
 import utils.source.DummyTextureSource;
 import utils.source.file.FileMeshSource;
 

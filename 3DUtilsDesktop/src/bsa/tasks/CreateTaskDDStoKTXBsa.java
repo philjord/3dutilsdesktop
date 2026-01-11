@@ -16,6 +16,9 @@ public class CreateTaskDDStoKTXBsa extends Thread {
 	private DDSToKTXBsaConverter ddsToKTXBsaConverter;
 
 	public CreateTaskDDStoKTXBsa(java.io.File outputArchiveFile, ArchiveFile inputArchive, StatusDialog statusDialog) {
+		if(!outputArchiveFile.getName().endsWith("_ktx.bsa")) {
+			System.out.println("outputArchiveFile " + outputArchiveFile.getName() + " REALLY shold end with \"_ktx.bsa\" ");
+		}
 		this.statusDialog = statusDialog;
 		try {
 			@SuppressWarnings("resource") // not closed until run finished
