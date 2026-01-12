@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class ConvertTask extends WorkerTask
 {
 	private File inFile;
@@ -117,11 +119,11 @@ public class ConvertTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -129,7 +131,7 @@ public class ConvertTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while converting file", exc);
+			ESMToolMain.logException("Exception while converting file", exc);
 		}
 		finally
 		{
@@ -163,7 +165,7 @@ public class ConvertTask extends WorkerTask
 			}
 			catch (IOException exc)
 			{
-				Main.logException("I/O Error", exc);
+				ESMToolMain.logException("I/O Error", exc);
 			}
 
 		}

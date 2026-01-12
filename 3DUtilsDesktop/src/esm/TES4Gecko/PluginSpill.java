@@ -6,6 +6,8 @@ import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 
+import esm.ESMToolMain;
+
 public class PluginSpill {
 	private File				spillFile;
 
@@ -31,7 +33,7 @@ public class PluginSpill {
 
 		this.cacheMap = new HashMap<Long, byte[]>(1000);
 
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 			System.out.println("Spill cache size is " + cacheSize / 1048576L + "MB");
 	}
 
@@ -54,7 +56,7 @@ public class PluginSpill {
 		}
 
 		if (this.nextWrite - this.currentPosition >= this.cacheSize) {
-			if (Main.debugMode) {
+			if (ESMToolMain.debugMode) {
 				System.out.println("Writing cached data to spill file");
 			}
 			this.spill.seek(this.currentPosition);

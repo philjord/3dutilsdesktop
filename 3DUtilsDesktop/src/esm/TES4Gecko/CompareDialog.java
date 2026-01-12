@@ -34,6 +34,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import esm.ESMToolMain;
+
 public class CompareDialog extends DisplayPlugin implements ActionListener, TreeExpansionListener
 {
 	private File pluginFileA;
@@ -147,7 +149,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		this.pluginFormAdjustB = new FormAdjust(masterMap, clipboardMasterList.size());
 		pluginNodeB.setFormAdjust(this.pluginFormAdjustB);
 
-		this.clipboardFile = new File(pluginFileA.getParent() + Main.fileSeparator + "Gecko Clipboard.esp");
+		this.clipboardFile = new File(pluginFileA.getParent() + ESMToolMain.fileSeparator + "Gecko Clipboard.esp");
 		this.clipboard = new Plugin(this.clipboardFile, this.pluginA.getCreator(), this.pluginA.getSummary(), clipboardMasterList);
 		this.clipboard.setVersion(Math.max(this.pluginA.getVersion(), this.pluginB.getVersion()));
 		this.clipboard.createInitialGroups();
@@ -167,7 +169,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		this.clipboardTree.addTreeExpansionListener(this);
 
 		JPanel labelPane = new JPanel();
-		labelPane.setBackground(Main.backgroundColor);
+		labelPane.setBackground(ESMToolMain.backgroundColor);
 		labelPane.add(new JLabel(pluginFileA.getName()));
 
 		this.scrollPaneA = new JScrollPane(this.pluginTreeA);
@@ -176,7 +178,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		this.scrollPaneA.setPreferredSize(new Dimension(250, 500));
 
 		JPanel buttonPane = new JPanel(new GridLayout(3, 2, 5, 5));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		this.expandButtonA = new JButton("Expand Distinct Nodes");
 		this.expandButtonA.setActionCommand("expand distinct A");
@@ -210,7 +212,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel filePaneA = new JPanel();
 		filePaneA.setLayout(new BoxLayout(filePaneA, 1));
-		filePaneA.setBackground(Main.backgroundColor);
+		filePaneA.setBackground(ESMToolMain.backgroundColor);
 		filePaneA.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		filePaneA.add(labelPane);
 		filePaneA.add(this.scrollPaneA);
@@ -218,7 +220,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		filePaneA.add(buttonPane);
 
 		labelPane = new JPanel();
-		labelPane.setBackground(Main.backgroundColor);
+		labelPane.setBackground(ESMToolMain.backgroundColor);
 		labelPane.add(new JLabel(pluginFileB.getName()));
 
 		this.scrollPaneB = new JScrollPane(this.pluginTreeB);
@@ -227,7 +229,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		this.scrollPaneB.setPreferredSize(new Dimension(250, 500));
 
 		buttonPane = new JPanel(new GridLayout(3, 2, 5, 5));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		this.expandButtonB = new JButton("Expand Distinct Nodes");
 		this.expandButtonB.setActionCommand("expand distinct B");
@@ -261,7 +263,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel filePaneB = new JPanel();
 		filePaneB.setLayout(new BoxLayout(filePaneB, 1));
-		filePaneB.setBackground(Main.backgroundColor);
+		filePaneB.setBackground(ESMToolMain.backgroundColor);
 		filePaneB.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		filePaneB.add(labelPane);
 		filePaneB.add(this.scrollPaneB);
@@ -269,7 +271,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		filePaneB.add(buttonPane);
 
 		labelPane = new JPanel();
-		labelPane.setBackground(Main.backgroundColor);
+		labelPane.setBackground(ESMToolMain.backgroundColor);
 		labelPane.add(new JLabel(this.clipboardFile.getName()));
 
 		this.clipboardScrollPane = new JScrollPane(this.clipboardTree);
@@ -278,7 +280,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		this.clipboardScrollPane.setPreferredSize(new Dimension(250, 500));
 
 		buttonPane = new JPanel(new GridLayout(3, 2, 5, 5));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		button = new JButton("Save Clipboard");
 		button.setActionCommand("save clipboard");
@@ -292,7 +294,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel clipboardPane = new JPanel();
 		clipboardPane.setLayout(new BoxLayout(clipboardPane, 1));
-		clipboardPane.setBackground(Main.backgroundColor);
+		clipboardPane.setBackground(ESMToolMain.backgroundColor);
 		clipboardPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		clipboardPane.add(labelPane);
 		clipboardPane.add(this.clipboardScrollPane);
@@ -301,7 +303,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel topPane = new JPanel();
 		topPane.setLayout(new BoxLayout(topPane, 0));
-		topPane.setBackground(Main.backgroundColor);
+		topPane.setBackground(ESMToolMain.backgroundColor);
 		topPane.add(filePaneA);
 		topPane.add(Box.createHorizontalStrut(15));
 		topPane.add(filePaneB);
@@ -309,10 +311,10 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		topPane.add(clipboardPane);
 
 		JPanel bottomPane = new JPanel();
-		bottomPane.setBackground(Main.backgroundColor);
+		bottomPane.setBackground(ESMToolMain.backgroundColor);
 
 		JCheckBox checkBox = new JCheckBox("Synchronized Expansion", this.synchronizedExpansion);
-		checkBox.setBackground(Main.backgroundColor);
+		checkBox.setBackground(ESMToolMain.backgroundColor);
 		checkBox.setActionCommand("toggle synchronized expansion");
 		checkBox.addActionListener(this);
 		bottomPane.add(checkBox);
@@ -324,7 +326,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel contentPane = new JPanel(new BorderLayout());
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		contentPane.add(topPane, "Center");
 		contentPane.add(bottomPane, "South");
@@ -452,7 +454,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
@@ -477,7 +479,7 @@ public class CompareDialog extends DisplayPlugin implements ActionListener, Tree
 				}
 				catch (Throwable exc)
 				{
-					Main.logException("Exception while creating subrecords", exc);
+					ESMToolMain.logException("Exception while creating subrecords", exc);
 				}
 
 			}

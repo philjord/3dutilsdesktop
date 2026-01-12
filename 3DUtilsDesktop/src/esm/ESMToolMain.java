@@ -1,4 +1,4 @@
-package esm.TES4Gecko;
+package esm;
 
 import java.awt.Color;
 import java.io.File;
@@ -13,7 +13,11 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-public class Main
+import esm.TES4Gecko.MainWindow;
+import esm.TES4Gecko.PluginSpill;
+import esm.TES4Gecko.StreamReader;
+
+public class ESMToolMain
 {
 	public static Color backgroundColor = new Color(240, 240, 240);
 
@@ -159,7 +163,7 @@ public class Main
 			{
 				public void run()
 				{
-					Main.createAndShowGUI();
+					ESMToolMain.createAndShowGUI();
 				}
 			});
 		}
@@ -239,9 +243,9 @@ public class Main
 				{
 					public void run()
 					{
-						Main.logException(Main.deferredText, Main.deferredException);
-						Main.deferredException = null;
-						Main.deferredText = null;
+						ESMToolMain.logException(ESMToolMain.deferredText, ESMToolMain.deferredException);
+						ESMToolMain.deferredException = null;
+						ESMToolMain.deferredText = null;
 					}
 				});
 			}

@@ -17,6 +17,8 @@ import java.util.zip.DataFormatException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class GenerateTask extends WorkerTask
 {
 	private File pluginFile;
@@ -98,7 +100,7 @@ public class GenerateTask extends WorkerTask
 			if (selection != 0)
 				return;
 
-			URL fileURL = Main.class.getResource("Main.class");
+			URL fileURL = ESMToolMain.class.getResource("Main.class");
 			String geckoPath = "Gecko path: " + fileURL.getFile() + "\n";
 			if (fileURL == null)
 			{
@@ -125,7 +127,7 @@ public class GenerateTask extends WorkerTask
 			}
 			URI fileURI = new URI(uriString);
 			filePath = fileURI.getPath().substring(1);
-			File voiceFile = new File(filePath + Main.fileSeparator + "TES4Gecko-Silence.mp3");
+			File voiceFile = new File(filePath + ESMToolMain.fileSeparator + "TES4Gecko-Silence.mp3");
 			if ((!voiceFile.exists()) || (!voiceFile.isFile()))
 			{
 				throw new IOException("'" + voiceFile.getPath() + "' does not exist");
@@ -179,7 +181,7 @@ public class GenerateTask extends WorkerTask
 			int index = 0;
 			for (String masterName : masterList)
 			{
-				File masterFile = new File(this.pluginFile.getParent() + Main.fileSeparator + masterName);
+				File masterFile = new File(this.pluginFile.getParent() + ESMToolMain.fileSeparator + masterName);
 				Master master = new Master(masterFile);
 				master.load(this);
 				masters[(index++)] = master;
@@ -194,8 +196,8 @@ public class GenerateTask extends WorkerTask
 			this.topicList = new ArrayList<PluginTopic>(4096);
 			this.topicMap = new HashMap<Integer, PluginTopic>(4096);
 
-			File voiceBase = new File(this.pluginFile.getParent() + Main.fileSeparator + "Sound" + Main.fileSeparator + "Voice"
-					+ Main.fileSeparator + this.plugin.getName());
+			File voiceBase = new File(this.pluginFile.getParent() + ESMToolMain.fileSeparator + "Sound" + ESMToolMain.fileSeparator + "Voice"
+					+ ESMToolMain.fileSeparator + this.plugin.getName());
 			if (voiceBase.exists())
 			{
 				getStatusDialog().updateMessage("Deleting existing voice files");
@@ -332,7 +334,7 @@ public class GenerateTask extends WorkerTask
 							int pluginMasterIdx = masterListInCaps.indexOf(formMasterName.toUpperCase());
 							if (pluginMasterIdx == -1)
 							{
-								if (Main.debugMode)
+								if (ESMToolMain.debugMode)
 								{
 									System.out
 											.printf("GenerateTask: Form ID %08X is modified in <%s> from the original in <%s>;  but <%s> is not in the master list for plugin <%s>.\n",
@@ -437,15 +439,15 @@ public class GenerateTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -453,7 +455,7 @@ public class GenerateTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while generating responses", exc);
+			ESMToolMain.logException("Exception while generating responses", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);

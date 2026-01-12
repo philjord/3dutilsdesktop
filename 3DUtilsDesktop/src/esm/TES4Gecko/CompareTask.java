@@ -10,6 +10,8 @@ import javax.swing.JOptionPane;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import esm.ESMToolMain;
+
 public class CompareTask extends WorkerTask
 {
 	private PluginNode pluginNodeA;
@@ -112,7 +114,7 @@ public class CompareTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while comparing plugins", exc);
+			ESMToolMain.logException("Exception while comparing plugins", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);

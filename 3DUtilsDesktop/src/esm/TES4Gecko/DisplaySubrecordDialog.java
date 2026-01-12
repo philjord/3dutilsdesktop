@@ -13,6 +13,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import esm.ESMToolMain;
+
 public class DisplaySubrecordDialog extends JDialog implements ActionListener
 {
 	public DisplaySubrecordDialog(JDialog parent, PluginSubrecord subrecord)
@@ -23,13 +25,13 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, 1));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
 		JLabel displayTypeLabel = new JLabel("<html><b>Subrecord data displayed as " + subrecord.getDisplayDataTypeLabel() + "</b></html>");
 		displayTypeLabel.setAlignmentX(0.0F);
 		JPanel displayTypePane = new JPanel();
-		displayTypePane.setBackground(Main.backgroundColor);
+		displayTypePane.setBackground(ESMToolMain.backgroundColor);
 		displayTypePane.add(displayTypeLabel);
 
 		String displayData = subrecord.getDisplayData();
@@ -67,7 +69,7 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		scrollPane.setHorizontalScrollBarPolicy(30);
 
 		JPanel buttonPane = new JPanel();
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		JButton button = new JButton("Done");
 		button.setActionCommand("done");
@@ -90,14 +92,14 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, 1));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
 		JLabel displayTypeLabel = new JLabel("<html><b>Subrecord data displayed as Byte Array</b></html>");
 
 		displayTypeLabel.setAlignmentX(0.0F);
 		JPanel displayTypePane = new JPanel();
-		displayTypePane.setBackground(Main.backgroundColor);
+		displayTypePane.setBackground(ESMToolMain.backgroundColor);
 		displayTypePane.add(displayTypeLabel);
 
 		String displayData = subrecord.getDisplayDataAsBytes();
@@ -135,7 +137,7 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		scrollPane.setHorizontalScrollBarPolicy(30);
 
 		JPanel buttonPane = new JPanel();
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		JButton button = new JButton("Done");
 		button.setActionCommand("done");
@@ -187,7 +189,7 @@ public class DisplaySubrecordDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 }

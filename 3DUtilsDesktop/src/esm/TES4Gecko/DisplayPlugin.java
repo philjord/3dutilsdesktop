@@ -17,6 +17,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import esm.ESMToolMain;
+
 public abstract class DisplayPlugin extends JDialog
 {
 	protected Plugin clipboard;
@@ -704,7 +706,7 @@ public abstract class DisplayPlugin extends JDialog
 			boolean removeNode = false;
 			DefaultMutableTreeNode subNode = (DefaultMutableTreeNode) parentRecNode.getChildAt(index);
 			PluginSubrecord subrec = (PluginSubrecord) subNode.getUserObject();
-			if ((subrec == null) && (Main.debugMode))
+			if ((subrec == null) && (ESMToolMain.debugMode))
 			{
 				String errStr = "Subrec is null at index " + index + " with parent " + parentRec.getEditorID() + "("
 						+ parentRec.getFormID() + ")" + " with " + subrecs.size() + " subrecords.\n";

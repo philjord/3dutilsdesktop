@@ -18,6 +18,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class MergeTask extends WorkerTask
 {
 	private String[] pluginNames;
@@ -122,7 +124,7 @@ public class MergeTask extends WorkerTask
 			this.plugins = new Plugin[this.pluginNames.length];
 			for (int i = 0; i < this.pluginNames.length; i++)
 			{
-				File inFile = new File(Main.pluginDirectory + Main.fileSeparator + this.pluginNames[i]);
+				File inFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + this.pluginNames[i]);
 				plugin = new Plugin(inFile);
 				plugin.load(this);
 				this.plugins[i] = plugin;
@@ -153,7 +155,7 @@ public class MergeTask extends WorkerTask
 			int i = 0;
 			for (String masterName : this.mergedMasterList)
 			{
-				File masterFile = new File(Main.pluginDirectory + Main.fileSeparator + masterName);
+				File masterFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + masterName);
 				master = new Master(masterFile);
 				master.load(this);
 				this.masters[(i++)] = master;
@@ -209,7 +211,7 @@ public class MergeTask extends WorkerTask
 								}
 								else
 								{
-									if (!Main.debugMode)
+									if (!ESMToolMain.debugMode)
 										continue;
 									System.out.print("MergeTask: Plugin " + pluginName + " for region "
 											+ String.format("%08X", new Object[]
@@ -232,7 +234,7 @@ public class MergeTask extends WorkerTask
 							}
 							if (pluginRec == null)
 							{
-								if (Main.debugMode)
+								if (ESMToolMain.debugMode)
 								{
 									System.out.print("MergeTask: Region " + String.format("%08X", new Object[]
 									{ Integer.valueOf(region) }) + " not found in plugin " + pluginName + "\n");
@@ -249,7 +251,7 @@ public class MergeTask extends WorkerTask
 								}
 								catch (Exception ex)
 								{
-									if (Main.debugMode)
+									if (ESMToolMain.debugMode)
 									{
 										System.out.print("MergeTask: WNAM not found for region " + String.format("%08X", new Object[]
 										{ Integer.valueOf(region) }) + " in plugin " + pluginName + "\n");
@@ -280,7 +282,7 @@ public class MergeTask extends WorkerTask
 										}
 										else
 										{
-											if (!Main.debugMode)
+											if (!ESMToolMain.debugMode)
 												continue;
 											System.out.print("MergeTask: Plugin " + WSPluginName + " for worldspace "
 													+ String.format("%08X", new Object[]
@@ -332,7 +334,7 @@ public class MergeTask extends WorkerTask
 								{
 									worldspaceName = WSFormInfo.getEditorID();
 								}
-								else if (Main.debugMode)
+								else if (ESMToolMain.debugMode)
 								{
 									System.out.print("MergeTask: Worldspace " + String.format("%08X", new Object[]
 									{ Integer.valueOf(worldspaceID) }) + " not found in plugin " + WSPluginName + "\n");
@@ -467,14 +469,14 @@ public class MergeTask extends WorkerTask
 			if (this.masterMerge)
 			{
 				plugin = this.plugins[0];
-				mergedFile = new File(Main.pluginDirectory + Main.fileSeparator + plugin.getName());
+				mergedFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + plugin.getName());
 				this.mergedPlugin = new Plugin(mergedFile, plugin.getCreator(), plugin.getSummary(), this.mergedMasterList);
 				this.mergedPlugin.setVersion(version);
 				this.mergedPlugin.setMaster(true);
 			}
 			else
 			{
-				mergedFile = new File(Main.pluginDirectory + Main.fileSeparator + this.pluginInfo.getName());
+				mergedFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + this.pluginInfo.getName());
 				this.mergedPlugin = new Plugin(mergedFile, this.pluginInfo.getCreator(), this.pluginInfo.getSummary(),
 						this.mergedMasterList);
 				this.mergedPlugin.setVersion(version);
@@ -507,7 +509,7 @@ public class MergeTask extends WorkerTask
 
 			getStatusDialog().updateMessage("Merging voice files");
 			String mergedPath = String.format("%s%sSound%sVoice%s%s", new Object[]
-			{ mergedFile.getParent(), Main.fileSeparator, Main.fileSeparator, Main.fileSeparator, mergedFile.getName() });
+			{ mergedFile.getParent(), ESMToolMain.fileSeparator, ESMToolMain.fileSeparator, ESMToolMain.fileSeparator, mergedFile.getName() });
 			if (!this.masterMerge)
 			{
 				String mergedName = this.mergedPlugin.getName();
@@ -544,7 +546,7 @@ public class MergeTask extends WorkerTask
 				if (!this.mergedPlugin.getName().equalsIgnoreCase(plugin.getName()))
 				{
 					String voicePath = String.format("%s%sSound%sVoice%s%s", new Object[]
-					{ mergedFile.getParent(), Main.fileSeparator, Main.fileSeparator, Main.fileSeparator, plugin.getName() });
+					{ mergedFile.getParent(), ESMToolMain.fileSeparator, ESMToolMain.fileSeparator, ESMToolMain.fileSeparator, plugin.getName() });
 					File voiceDirectory = new File(voicePath);
 					if ((voiceDirectory.exists()) && (voiceDirectory.isDirectory()))
 					{
@@ -556,15 +558,15 @@ public class MergeTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -572,7 +574,7 @@ public class MergeTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while merging plugins", exc);
+			ESMToolMain.logException("Exception while merging plugins", exc);
 		}
 
 		if (this.mergedPlugin != null)
@@ -3261,7 +3263,7 @@ public class MergeTask extends WorkerTask
 		for (File file : files)
 			if (file.isDirectory())
 			{
-				String path = mergedPath + Main.fileSeparator + file.getName();
+				String path = mergedPath + ESMToolMain.fileSeparator + file.getName();
 				copyVoiceFiles(plugin, file, path);
 			}
 			else
@@ -3349,7 +3351,7 @@ public class MergeTask extends WorkerTask
 				}
 				String mergedName = String.format("%s%s%s_%s_%08X_%s",
 						new Object[]
-						{ mergedPath, Main.fileSeparator, questName, topicName, Integer.valueOf(infoForm.getMergedFormID() & 0xFFFFFF),
+						{ mergedPath, ESMToolMain.fileSeparator, questName, topicName, Integer.valueOf(infoForm.getMergedFormID() & 0xFFFFFF),
 								name.substring(infoSep + 1) });
 				File mergedFile = new File(mergedName);
 				FileInputStream in = new FileInputStream(file);

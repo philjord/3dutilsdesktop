@@ -8,6 +8,8 @@ import java.io.RandomAccessFile;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 
 public class EditTask extends WorkerTask {
 	private File		inFile;
@@ -37,7 +39,7 @@ public class EditTask extends WorkerTask {
 
 	@Override
 	public void run() {
-		File outFile = new File(this.inFile.getParent() + Main.fileSeparator + "Gecko.tmp");
+		File outFile = new File(this.inFile.getParent() + ESMToolMain.fileSeparator + "Gecko.tmp");
 		RandomAccessFile in = null;
 		FileOutputStream out = null;
 		byte[] buffer = new byte[4096];
@@ -97,13 +99,13 @@ public class EditTask extends WorkerTask {
 
 			completed = true;
 		} catch (PluginException exc) {
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		} catch (IOException exc) {
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		} catch (InterruptedException exc) {
 			WorkerDialog.showMessageDialog(getStatusDialog(), "Request canceled", "Interrupted", 0);
 		} catch (Throwable exc) {
-			Main.logException("Exception while updating plugin", exc);
+			ESMToolMain.logException("Exception while updating plugin", exc);
 		}
 
 		if (!completed) {
@@ -117,7 +119,7 @@ public class EditTask extends WorkerTask {
 				if (outFile.exists())
 					outFile.delete();
 			} catch (IOException exc) {
-				Main.logException("I/O Error", exc);
+				ESMToolMain.logException("I/O Error", exc);
 			}
 
 		}

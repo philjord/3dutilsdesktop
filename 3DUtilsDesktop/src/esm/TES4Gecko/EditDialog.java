@@ -24,6 +24,8 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.table.TableColumn;
 
+import esm.ESMToolMain;
+
 public class EditDialog extends JDialog implements ActionListener
 {
 	private PluginInfo pluginInfo;
@@ -97,7 +99,7 @@ public class EditDialog extends JDialog implements ActionListener
 		summaryPane.add(scrollPane);
 
 		JPanel buttonPane = new JPanel();
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		this.updateButton = new JButton("Update");
 		this.updateButton.setActionCommand("update");
@@ -112,7 +114,7 @@ public class EditDialog extends JDialog implements ActionListener
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, 1));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 		contentPane.add(creatorPane);
 		contentPane.add(summaryPane);
@@ -193,7 +195,7 @@ public class EditDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 

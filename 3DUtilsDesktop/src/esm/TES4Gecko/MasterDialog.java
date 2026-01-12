@@ -21,6 +21,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import esm.ESMToolMain;
+
 public class MasterDialog extends JDialog implements ActionListener
 {
 	private Plugin plugin;
@@ -42,7 +44,7 @@ public class MasterDialog extends JDialog implements ActionListener
 		JScrollPane listPane = new JScrollPane(this.list);
 
 		JPanel buttonPane = new JPanel(new GridLayout(0, 1, 0, 10));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		JButton button = new JButton("Rename");
 		button.setActionCommand("rename");
@@ -72,7 +74,7 @@ public class MasterDialog extends JDialog implements ActionListener
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, 0));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 		contentPane.add(listPane);
 		contentPane.add(Box.createHorizontalStrut(15));
@@ -123,7 +125,7 @@ public class MasterDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
@@ -137,7 +139,7 @@ public class MasterDialog extends JDialog implements ActionListener
 
 		int index = this.list.getSelectedIndex();
 
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Master File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showDialog(this, "Select") != 0)
@@ -235,7 +237,7 @@ public class MasterDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Master list update failed", exc);
+			ESMToolMain.logException("Master list update failed", exc);
 		}
 
 		if (moveValid)
@@ -419,7 +421,7 @@ public class MasterDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Master list update failed", exc);
+			ESMToolMain.logException("Master list update failed", exc);
 		}
 
 		if (removeValid)

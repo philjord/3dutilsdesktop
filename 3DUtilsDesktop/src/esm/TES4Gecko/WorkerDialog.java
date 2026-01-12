@@ -5,6 +5,8 @@ import java.awt.Component;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
+import esm.ESMToolMain;
+
 public class WorkerDialog implements Runnable
 {
 	public static final int CLOSED_OPTION = -1;
@@ -91,11 +93,11 @@ public class WorkerDialog implements Runnable
 		}
 		catch (InterruptedException exc)
 		{
-			Main.logException("Message dialog interrupted", exc);
+			ESMToolMain.logException("Message dialog interrupted", exc);
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while displaying message dialog", exc);
+			ESMToolMain.logException("Exception while displaying message dialog", exc);
 		}
 	}
 
@@ -110,11 +112,11 @@ public class WorkerDialog implements Runnable
 		}
 		catch (InterruptedException exc)
 		{
-			Main.logException("Confirmation dialog interrupted", exc);
+			ESMToolMain.logException("Confirmation dialog interrupted", exc);
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while displaying confirmation dialog", exc);
+			ESMToolMain.logException("Exception while displaying confirmation dialog", exc);
 		}
 
 		return selection;

@@ -11,6 +11,8 @@ import java.util.zip.DataFormatException;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class SplitTask extends WorkerTask
 {
 	private PluginNode pluginNode;
@@ -112,7 +114,7 @@ public class SplitTask extends WorkerTask
 			int index = 0;
 			for (String masterName : masterList)
 			{
-				File masterFile = new File(this.pluginFile.getParent() + Main.fileSeparator + masterName);
+				File masterFile = new File(this.pluginFile.getParent() + ESMToolMain.fileSeparator + masterName);
 				Master master = new Master(masterFile);
 				master.load(this);
 				this.masters[(index++)] = master;
@@ -135,7 +137,7 @@ public class SplitTask extends WorkerTask
 			for (FormInfo formInfo : this.formList)
 			{
 				PluginRecord record = (PluginRecord) formInfo.getSource();
-				if (Main.debugMode)
+				if (ESMToolMain.debugMode)
 				{
 					System.out.printf("Mapping %s record %s (%08X)\n", new Object[]
 					{ record.getRecordType(), record.getEditorID(), Integer.valueOf(record.getFormID()) });
@@ -160,7 +162,7 @@ public class SplitTask extends WorkerTask
 				formInfo.setMergedFormID(splitFormID);
 				this.pendingList.clear();
 				this.outputMap.put(new Integer(formID), new Boolean(addMaster));
-				if (Main.debugMode)
+				if (ESMToolMain.debugMode)
 				{
 					System.out.printf("%s record %s (%08X) master status set to %s\n", new Object[]
 					{ record.getRecordType(), record.getEditorID(), Integer.valueOf(record.getFormID()), Boolean.valueOf(addMaster) });
@@ -219,15 +221,15 @@ public class SplitTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -235,7 +237,7 @@ public class SplitTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while splitting plugin", exc);
+			ESMToolMain.logException("Exception while splitting plugin", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);
@@ -349,7 +351,7 @@ public class SplitTask extends WorkerTask
 			if (recursive)
 			{
 				this.outputMap.put(objFormID, new Boolean(addMaster));
-				if (Main.debugMode)
+				if (ESMToolMain.debugMode)
 					System.out.printf("%s record %s (%08X) master status set to %s\n", new Object[]
 					{ record.getRecordType(), record.getEditorID(), objFormID, Boolean.valueOf(addMaster) });
 			}
@@ -366,7 +368,7 @@ public class SplitTask extends WorkerTask
 	{
 		boolean clean = true;
 		boolean recursiveCheck = false;
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 		{
 			System.out.printf("Checking references for %s record %s (%08X)\n", new Object[]
 			{ record.getRecordType(), record.getEditorID(), Integer.valueOf(record.getFormID()) });
@@ -376,7 +378,7 @@ public class SplitTask extends WorkerTask
 		Integer objFormID = new Integer(recordFormID);
 		if (this.checkMap.get(objFormID) != null)
 		{
-			if (Main.debugMode)
+			if (ESMToolMain.debugMode)
 			{
 				System.out.printf("Recursive reference check for %s record %s (%08X)\n", new Object[]
 				{ record.getRecordType(), record.getEditorID(), Integer.valueOf(record.getFormID()) });
@@ -440,7 +442,7 @@ public class SplitTask extends WorkerTask
 
 				if (!clean)
 				{
-					if (!Main.debugMode)
+					if (!ESMToolMain.debugMode)
 						break;
 					System.out.printf("Unclean reference %08X in %s subrecord of record %08X\n", new Object[]
 					{ checkFormID, subrecord.getSubrecordType(), Integer.valueOf(recordFormID) });

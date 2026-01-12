@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import esm.ESMToolMain;
+
 public class PluginSubrecord extends SerializedElement
 {
 	private String recordType;
@@ -215,13 +217,13 @@ public class PluginSubrecord extends SerializedElement
 		{
 			if (this.spillMode)
 			{
-				this.subrecordData = Main.pluginSpill.read(this.subrecordPosition, this.subrecordLength);
+				this.subrecordData = ESMToolMain.pluginSpill.read(this.subrecordPosition, this.subrecordLength);
 				this.subrecordPosition = -1L;
 				this.subrecordLength = 0;
 			}
 			else if (this.subrecordData != null)
 			{
-				this.subrecordPosition = Main.pluginSpill.write(this.subrecordData);
+				this.subrecordPosition = ESMToolMain.pluginSpill.write(this.subrecordData);
 				this.subrecordLength = this.subrecordData.length;
 				this.subrecordData = null;
 			}
@@ -244,7 +246,7 @@ public class PluginSubrecord extends SerializedElement
 	{
 		if (this.spillMode)
 		{
-			return Main.pluginSpill.read(this.subrecordPosition, this.subrecordLength);
+			return ESMToolMain.pluginSpill.read(this.subrecordPosition, this.subrecordLength);
 		}
 		return this.subrecordData;
 	}
@@ -253,7 +255,7 @@ public class PluginSubrecord extends SerializedElement
 	{
 		if (this.spillMode)
 		{
-			this.subrecordPosition = Main.pluginSpill.write(subrecordData);
+			this.subrecordPosition = ESMToolMain.pluginSpill.write(subrecordData);
 			this.subrecordLength = subrecordData.length;
 		}
 		else
@@ -462,7 +464,7 @@ public class PluginSubrecord extends SerializedElement
 		}
 		catch (IOException exc)
 		{
-			Main.logException("Exception while getting subrecord data", exc);
+			ESMToolMain.logException("Exception while getting subrecord data", exc);
 			subrecordData = new byte[0];
 			dataType = 0;
 		}
@@ -569,7 +571,7 @@ public class PluginSubrecord extends SerializedElement
 		}
 		catch (IOException exc)
 		{
-			Main.logException("Exception while getting subrecord data", exc);
+			ESMToolMain.logException("Exception while getting subrecord data", exc);
 			subrecordData = new byte[0];
 		}
 		retStr = getDisplayDataByteArray(subrecordData);

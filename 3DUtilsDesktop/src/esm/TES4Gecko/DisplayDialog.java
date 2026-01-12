@@ -60,6 +60,8 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import esm.ESMToolMain;
+
 public class DisplayDialog extends DisplayPlugin implements ActionListener, TreeExpansionListener
 {
 	private Plugin plugin;
@@ -139,7 +141,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 			clipboardMasterList.add(pluginName);
 		}
 
-		this.clipboardFile = new File(pluginFile.getParent() + Main.fileSeparator + "Gecko Clipboard.esp");
+		this.clipboardFile = new File(pluginFile.getParent() + ESMToolMain.fileSeparator + "Gecko Clipboard.esp");
 		this.clipboard = new Plugin(this.clipboardFile, this.plugin.getCreator(), this.plugin.getSummary(), clipboardMasterList);
 		this.clipboard.setVersion(this.plugin.getVersion());
 		this.clipboard.createInitialGroups();
@@ -161,7 +163,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 				+ String.format("%X", new Object[]
 				{ Integer.valueOf(formCount) }) + " hex]" + "<br>Plugin high form ID (hex): " + highFormID + "</html>");
 		JPanel countPane = new JPanel();
-		countPane.setBackground(Main.backgroundColor);
+		countPane.setBackground(ESMToolMain.backgroundColor);
 		countPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		countPane.add(countLabel);
 		countPane.setPreferredSize(new Dimension(200, 30));
@@ -189,7 +191,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		masterTable.setDefaultRenderer(Object.class, new PluginColorTableRenderer());
 
 		JScrollPane masterScrollPane = new JScrollPane(masterTable);
-		masterScrollPane.getViewport().setBackground(Main.backgroundColor);
+		masterScrollPane.getViewport().setBackground(ESMToolMain.backgroundColor);
 
 		JLabel searchLabel = new JLabel("General Search");
 		searchLabel.setHorizontalAlignment(0);
@@ -200,7 +202,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		this.searchField.addActionListener(this);
 
 		JPanel buttonPane = new JPanel();
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 		buttonPane.add(Box.createGlue());
 
 		this.findBtn = new JButton("Find");
@@ -242,16 +244,16 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		JRadioButton scriptTextBtn = new JRadioButton("Script Text", false);
 		JRadioButton questRefBtn = new JRadioButton("Quest Ref ID", false);
 		JRadioButton landTexBtn = new JRadioButton("Land Tex ID", false);
-		formIDBtn.setBackground(Main.backgroundColor);
-		editIDBtn.setBackground(Main.backgroundColor);
-		nameIDBtn.setBackground(Main.backgroundColor);
-		XYCoordBtn.setBackground(Main.backgroundColor);
-		ownerBtn.setBackground(Main.backgroundColor);
-		refBaseBtn.setBackground(Main.backgroundColor);
-		responseTextBtn.setBackground(Main.backgroundColor);
-		scriptTextBtn.setBackground(Main.backgroundColor);
-		questRefBtn.setBackground(Main.backgroundColor);
-		landTexBtn.setBackground(Main.backgroundColor);
+		formIDBtn.setBackground(ESMToolMain.backgroundColor);
+		editIDBtn.setBackground(ESMToolMain.backgroundColor);
+		nameIDBtn.setBackground(ESMToolMain.backgroundColor);
+		XYCoordBtn.setBackground(ESMToolMain.backgroundColor);
+		ownerBtn.setBackground(ESMToolMain.backgroundColor);
+		refBaseBtn.setBackground(ESMToolMain.backgroundColor);
+		responseTextBtn.setBackground(ESMToolMain.backgroundColor);
+		scriptTextBtn.setBackground(ESMToolMain.backgroundColor);
+		questRefBtn.setBackground(ESMToolMain.backgroundColor);
+		landTexBtn.setBackground(ESMToolMain.backgroundColor);
 		ButtonGroup bgroup = new ButtonGroup();
 		editIDBtn.setActionCommand("set editor id search");
 		editIDBtn.addActionListener(this);
@@ -285,7 +287,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		bgroup.add(landTexBtn);
 
 		JPanel searchChoicePane = new JPanel(new GridLayout(5, 2));
-		searchChoicePane.setBackground(Main.backgroundColor);
+		searchChoicePane.setBackground(ESMToolMain.backgroundColor);
 		searchChoicePane.add(editIDBtn);
 		searchChoicePane.add(formIDBtn);
 		searchChoicePane.add(nameIDBtn);
@@ -299,14 +301,14 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel searchFieldPane = new JPanel();
 		searchFieldPane.setLayout(new BoxLayout(searchFieldPane, 0));
-		searchFieldPane.setBackground(Main.backgroundColor);
+		searchFieldPane.setBackground(ESMToolMain.backgroundColor);
 		searchFieldPane.add(Box.createHorizontalStrut(7));
 		searchFieldPane.add(this.searchField);
 		searchFieldPane.add(Box.createHorizontalStrut(7));
 
 		JPanel searchPane = new JPanel();
 		searchPane.setLayout(new BoxLayout(searchPane, 1));
-		searchPane.setBackground(Main.backgroundColor);
+		searchPane.setBackground(ESMToolMain.backgroundColor);
 		searchPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		searchPane.add(searchLabel);
 		searchPane.add(searchChoicePane);
@@ -315,16 +317,16 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		searchPane.setMaximumSize(new Dimension(200, 80));
 
 		this.copyReferencesField = new JCheckBox("Copy referenced items", this.copyReferences);
-		this.copyReferencesField.setBackground(Main.backgroundColor);
+		this.copyReferencesField.setBackground(ESMToolMain.backgroundColor);
 		this.copyReferencesField.setActionCommand("copy references");
 		this.copyReferencesField.addActionListener(this);
 		JPanel copyReferencesPanel = new JPanel(new GridLayout(2, 1));
-		copyReferencesPanel.setBackground(Main.backgroundColor);
+		copyReferencesPanel.setBackground(ESMToolMain.backgroundColor);
 		copyReferencesPanel.add(this.copyReferencesField);
 
 		JPanel sidePane = new JPanel();
 		sidePane.setLayout(new BoxLayout(sidePane, 1));
-		sidePane.setBackground(Main.backgroundColor);
+		sidePane.setBackground(ESMToolMain.backgroundColor);
 		sidePane.add(Box.createGlue());
 		sidePane.add(countPane);
 		sidePane.add(Box.createVerticalStrut(25));
@@ -350,11 +352,11 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		pluginScrollPane.setPreferredSize(new Dimension(300, 500));
 
 		JPanel labelPane = new JPanel();
-		labelPane.setBackground(Main.backgroundColor);
+		labelPane.setBackground(ESMToolMain.backgroundColor);
 		labelPane.add(new JLabel(pluginFile.getName()));
 
 		buttonPane = new JPanel(new GridLayout(3, 2, 5, 5));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		JButton button = new JButton("Toggle Ignore");
 		button.setActionCommand("toggle ignore");
@@ -388,7 +390,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel pluginPane = new JPanel();
 		pluginPane.setLayout(new BoxLayout(pluginPane, 1));
-		pluginPane.setBackground(Main.backgroundColor);
+		pluginPane.setBackground(ESMToolMain.backgroundColor);
 		pluginPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		pluginPane.add(labelPane);
 		pluginPane.add(pluginScrollPane);
@@ -417,12 +419,12 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		clipboardScrollPane.setPreferredSize(new Dimension(300, 500));
 
 		labelPane = new JPanel();
-		labelPane.setBackground(Main.backgroundColor);
+		labelPane.setBackground(ESMToolMain.backgroundColor);
 		this.clipboardFileLabel = new JLabel(this.clipboardFile.getName());
 		labelPane.add(this.clipboardFileLabel);
 
 		buttonPane = new JPanel(new GridLayout(3, 2, 5, 5));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		this.saveClipboardBtn = new JButton("Save Clipboard To Default");
 		this.saveClipboardBtn.setActionCommand("save clipboard to default");
@@ -442,7 +444,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel clipboardPane = new JPanel();
 		clipboardPane.setLayout(new BoxLayout(clipboardPane, 1));
-		clipboardPane.setBackground(Main.backgroundColor);
+		clipboardPane.setBackground(ESMToolMain.backgroundColor);
 		clipboardPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		clipboardPane.add(labelPane);
 		clipboardPane.add(clipboardScrollPane);
@@ -454,7 +456,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 
 		JPanel treePane = new JPanel();
 		treePane.setLayout(new BoxLayout(treePane, 0));
-		treePane.setBackground(Main.backgroundColor);
+		treePane.setBackground(ESMToolMain.backgroundColor);
 		treePane.add(sidePane);
 		treePane.add(Box.createHorizontalStrut(15));
 		treePane.add(pluginPane);
@@ -462,7 +464,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		treePane.add(clipboardPane);
 
 		buttonPane = new JPanel();
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		button = new JButton("Done");
 		button.setActionCommand("done");
@@ -472,7 +474,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, 1));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		contentPane.add(treePane);
 		contentPane.add(Box.createVerticalStrut(15));
@@ -909,7 +911,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		};
 		this.pluginTree.addMouseListener(this.mlPlugin);
 
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 		{
 			System.out.printf(pluginFile.getName() + ": Version " + this.plugin.getVersion() + " loaded with highest FormID used = "
 					+ String.format("%08X", new Object[]
@@ -1240,7 +1242,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
@@ -2170,7 +2172,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 				}
 				catch (Throwable exc)
 				{
-					Main.logException("Exception while creating subrecords", exc);
+					ESMToolMain.logException("Exception while creating subrecords", exc);
 				}
 		}
 	}
@@ -2923,7 +2925,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 			int index = 0;
 			for (String masterName : masterListInCaps)
 			{
-				File masterFile = new File(this.pluginFile.getParent() + Main.fileSeparator + masterName);
+				File masterFile = new File(this.pluginFile.getParent() + ESMToolMain.fileSeparator + masterName);
 				Master master = new Master(masterFile);
 				master.load(null);
 				masters[(index++)] = master;
@@ -2960,7 +2962,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 						int pluginMasterIdx = masterListInCaps.indexOf(formMasterName.toUpperCase());
 						if (pluginMasterIdx == -1)
 						{
-							if (Main.debugMode)
+							if (ESMToolMain.debugMode)
 							{
 								System.out
 										.printf("GenerateTask: Form ID %08X is modified in <%s> from the original in <%s>;  but <%s> is not in the master list for plugin <%s>.\n",
@@ -2988,7 +2990,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while generating race map", exc);
+			ESMToolMain.logException("Exception while generating race map", exc);
 		}
 		return raceList;
 	}
@@ -3029,7 +3031,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 			int index = 0;
 			for (String masterName : masterListInCaps)
 			{
-				File masterFile = new File(this.pluginFile.getParent() + Main.fileSeparator + masterName);
+				File masterFile = new File(this.pluginFile.getParent() + ESMToolMain.fileSeparator + masterName);
 				Master master = new Master(masterFile);
 				master.load(null);
 				masters[(index++)] = master;
@@ -3066,7 +3068,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 						int pluginMasterIdx = masterListInCaps.indexOf(formMasterName.toUpperCase());
 						if (pluginMasterIdx == -1)
 						{
-							if (Main.debugMode)
+							if (ESMToolMain.debugMode)
 							{
 								System.out
 										.printf("GenerateTask: Form ID %08X is modified in <%s> from the original in <%s>;  but <%s> is not in the master list for plugin <%s>.\n",
@@ -3100,7 +3102,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while generating NPC list", exc);
+			ESMToolMain.logException("Exception while generating NPC list", exc);
 		}
 		return retRecList;
 	}
@@ -3576,7 +3578,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 				PluginGroup topicGroup = findTopicGroup(pl, oldDialID);
 				if (topicGroup == null)
 				{
-					if (!Main.debugMode)
+					if (!ESMToolMain.debugMode)
 						continue;
 					System.out.printf("changeQuestTopics: No INFO group found for DIAL record [%08X]\n", new Object[]
 					{ Integer.valueOf(oldDialID) });
@@ -3603,7 +3605,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 					{
 						ex.printStackTrace(System.out);
 					}
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 					{
 						System.out.printf("Dialogue Form ID Change: Changed DIAL record with form ID %08X and name " + oldName
 								+ " to ID %08X and name %s \n", new Object[]
@@ -3611,13 +3613,13 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 					}
 					int oldGroupID = topicGroup.getGroupParentID();
 					topicGroup.setGroupParentID(lastFormIDUsed);
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 					{
 						System.out.printf("INFO Group Parent Change: Changed parent form ID %08X to parent form ID %08X \n", new Object[]
 						{ Integer.valueOf(oldGroupID), Integer.valueOf(topicGroup.getGroupParentID()) });
 					}
 					boolean changed = pluginRec.changeSubrecord("QSTI", new Integer(oldQID), new Integer(newQID));
-					if ((changed) && (Main.debugMode))
+					if ((changed) && (ESMToolMain.debugMode))
 					{
 						System.out.printf(
 								"changeQuestTopics: Changed QSTI Subrecord with value %08X to value %08X in DIAL record [%08X]\n",
@@ -3630,7 +3632,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 			else
 			{
 				boolean changed = pluginRec.addAdditionalSubrecord("QSTI", new Integer(newQID));
-				if ((!changed) || (!Main.debugMode))
+				if ((!changed) || (!ESMToolMain.debugMode))
 					continue;
 				System.out.printf("changeQuestTopics: Added QSTI Subrecord with value %08X to DIAL record " + pluginRec.getEditorID()
 						+ " [%08X]\n", new Object[]
@@ -3655,7 +3657,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 			pl.getFormMap().remove(Integer.valueOf(oldFormID));
 			pl.getFormMap().put(new Integer(lastFormIDUsed), form);
 			boolean changed = pluginRec.changeSubrecord("QSTI", new Integer(oldQID), new Integer(newQID));
-			if ((changed) && (Main.debugMode))
+			if ((changed) && (ESMToolMain.debugMode))
 			{
 				System.out.printf("changeQuestTopics: Changed QSTI Subrecord with value %08X to value %08X in INFO record [%08X]\n",
 						new Object[]
@@ -3674,7 +3676,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 			for (int i = 0; i < infoFormIDsUsed; i++)
 			{
 				boolean changed = pluginRec.changeSubrecord("PNAM", oldForms.get(i), newForms.get(i));
-				if ((changed) && (Main.debugMode))
+				if ((changed) && (ESMToolMain.debugMode))
 				{
 					System.out.printf("changeQuestTopics: Changed PNAM Subrecord with value %08X to value %08X in INFO record [%08X]\n",
 							new Object[]
@@ -3798,7 +3800,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		{
 			ex.printStackTrace(System.out);
 		}
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 		{
 			System.out.printf("Worldspace Form ID Change: Changed WRLD record with form ID %08X and name " + oldName
 					+ " to ID %08X and name %s \n", new Object[]
@@ -3820,7 +3822,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 				formIDsChanged.put(Integer.valueOf(oldRegionID), Integer.valueOf(tmpHighFormID));
 				regionIDsChanged.put(Integer.valueOf(oldRegionID), Integer.valueOf(tmpHighFormID++));
 				numNewFormIDs++;
-				if (!Main.debugMode)
+				if (!ESMToolMain.debugMode)
 					continue;
 				System.out.printf("Region Form ID Change: Changed REGN record with form ID %08X and name " + oldRegionName
 						+ " to ID %08X and name %s \n", new Object[]
@@ -3960,7 +3962,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 				{ oldID });
 				if (changedFormInfo == null)
 				{
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 					{
 						System.out.printf("No form info for former ID " + oldIDstr + "\n", new Object[0]);
 					}
@@ -3968,7 +3970,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 				PluginRecord changedRec = (PluginRecord) changedFormInfo.getSource();
 				if (changedRec == null)
 				{
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 					{
 						System.out.printf("No source record for former ID " + oldIDstr, new Object[0]);
 					}
@@ -4083,7 +4085,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		{
 			ex.printStackTrace(System.out);
 		}
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 		{
 			System.out.printf("Quest Form ID Change: Changed QUST record with form ID %08X and name " + oldName
 					+ " to ID %08X and name %s \n", new Object[]
@@ -4375,7 +4377,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		File file = getNewFormIDFile(pl.getName());
 		if (file == null)
 			return;
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 			System.out.printf("File <" + file.getAbsolutePath() + "> selected for form ID report", new Object[0]);
 		String headerLine = "TES4GECKO FORM ID REPORT" + " for plugin <" + pl.getName() + ">\n";
 		List<String> newList = getNewList(pl);
@@ -4838,7 +4840,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 				"Possible Content Overwrite", 2, 2);
 		if (dontLeave != 0)
 			return 0;
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 			System.out.printf("File <" + file.getAbsolutePath() + "> selected", new Object[0]);
 		BufferedReader inputStream = null;
 		try
@@ -4878,7 +4880,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 					}
 					catch (Exception ex)
 					{
-						if (!Main.debugMode)
+						if (!ESMToolMain.debugMode)
 							break;
 
 						System.out.printf("One of the numerical components in line <" + inLine + "> is not a number.", new Object[0]);
@@ -4890,7 +4892,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 						continue;
 					if (!changeResponseInINFO(info, emoType, emoLevel, respNum, dialogueLine, dialogueNotes))
 					{
-						if (!Main.debugMode)
+						if (!ESMToolMain.debugMode)
 							break;
 						System.out.printf("Error in changing response in line <" + inLine + ">.", new Object[0]);
 						break;
@@ -4997,7 +4999,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 	{
 		FileOutputStream outFile = null;
 		FileInputStream inFile = null;
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setFileSelectionMode(2);
 		String recName = "";
 		if (recType.equals("NPC_"))
@@ -5068,7 +5070,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 	{
 		FileOutputStream outFile = null;
 		FileInputStream inFile = null;
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setFileSelectionMode(2);
 		String recName = "";
 		chooser.setDialogTitle("Select Master Alteration Report");
@@ -5135,7 +5137,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 
 	private File getNewFormIDFile(String pluginName)
 	{
-		String formIDFileName = Main.pluginDirectory + Main.fileSeparator + pluginName + ".IDList";
+		String formIDFileName = ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + pluginName + ".IDList";
 		File file = new File(formIDFileName);
 		if ((file.exists()) && ((file.isDirectory()) || (!file.canWrite())))
 		{
@@ -5167,7 +5169,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 	private File getDialogueReadFile()
 	{
 		FileInputStream inFile = null;
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setFileSelectionMode(2);
 		chooser.setDialogTitle("Select File to Read Dialogue");
 		chooser.setFileFilter(new TextFileFilter());
@@ -5223,7 +5225,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 	private File getClipboardSaveFile()
 	{
 		FileOutputStream outFile = null;
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setFileSelectionMode(2);
 		chooser.setDialogTitle("Select Clipboard Save Destination");
 		chooser.setFileFilter(new ESPFileFilter());
@@ -6069,7 +6071,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 		}
 
 		long medTime = System.currentTimeMillis();
-		if (Main.debugMode)
+		if (ESMToolMain.debugMode)
 		{
 			System.out.printf("Part 1 of selectRefsBaseIDPlugin() completed in %.2f seconds.\n", new Object[]
 			{ Float.valueOf((medTime - startTime) / 1000.0F) });
@@ -6650,7 +6652,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 					boolean selected = argList[5].equals("Select");
 					long startTime = System.currentTimeMillis();
 					selectQuestInfos(pl, pluginRec, plTree, formInfo, selected);
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 					{
 						System.out.printf(
 								"Quest %s %s completed in %.2f seconds.\n",
@@ -6764,7 +6766,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 					boolean selected = argList[5].equals("Select");
 					long startTime = System.currentTimeMillis();
 					selectWRLDData(pl, pluginRec, plTree, formInfo, selected, regions);
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 					{
 						System.out.printf(
 								"WRLD %s %s completed in %.2f seconds.\n",
@@ -6782,7 +6784,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 					int worldID = Integer.parseInt(argList[6], 16);
 					long startTime = System.currentTimeMillis();
 					selectPersistentRefs(pl, pluginRec, plTree, formInfo, selected, worldID);
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 					{
 						System.out.printf(
 								"Persistent refs for CELL %s %s completed in %.2f seconds.\n",
@@ -7271,7 +7273,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 						PluginRecord plRec = (PluginRecord) recFormInfo.getSource();
 						if (plRec == null)
 						{
-							if (Main.debugMode)
+							if (ESMToolMain.debugMode)
 								System.out.printf("FormInfo %08X has no record\n", new Object[]
 								{ Integer.valueOf(recFormInfo.getFormID()) });
 						}
@@ -7280,7 +7282,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 							String recordType = plRec.getRecordType();
 							if (recordType == null)
 							{
-								if (Main.debugMode)
+								if (ESMToolMain.debugMode)
 									System.out.printf("Record %08X has no record type\n", new Object[]
 									{ Integer.valueOf(plRec.getFormID()) });
 							}
@@ -7290,7 +7292,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 							{
 								if (!plRec.hasSubrecordOfType("XCLL"))
 									continue;
-								if (Main.debugMode)
+								if (ESMToolMain.debugMode)
 								{
 									if (plRec.hasSubrecordOfType("XCLC"))
 										System.out.printf("Record %08X has both XCLL & XCLC subrecords\n", new Object[]
@@ -7301,7 +7303,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 									continue;
 								if (!setXCLLFogNear(plRec, 1.0E-004F))
 									continue;
-								if (Main.debugMode)
+								if (ESMToolMain.debugMode)
 								{
 									System.out.printf("Cell ID %08X with name %s had fog fix applied.\n", new Object[]
 									{ Integer.valueOf(plRec.getFormID()), plRec.getEditorID() });
@@ -7355,7 +7357,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 						PluginRecord plRec = (PluginRecord) recFormInfo.getSource();
 						if (plRec == null)
 						{
-							if (Main.debugMode)
+							if (ESMToolMain.debugMode)
 								System.out.printf("FormInfo %08X has no record\n", new Object[]
 								{ Integer.valueOf(recFormInfo.getFormID()) });
 						}
@@ -7364,7 +7366,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 							String recordType = plRec.getRecordType();
 							if (recordType == null)
 							{
-								if (Main.debugMode)
+								if (ESMToolMain.debugMode)
 									System.out.printf("Record %08X has no record type\n", new Object[]
 									{ Integer.valueOf(plRec.getFormID()) });
 							}
@@ -7374,7 +7376,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 							{
 								if (!plRec.hasSubrecordOfType("XCLC"))
 									continue;
-								if (Main.debugMode)
+								if (ESMToolMain.debugMode)
 								{
 									if (plRec.hasSubrecordOfType("XCLL"))
 										System.out.printf("Record %08X has both XCLL & XCLC subrecords\n", new Object[]
@@ -7385,7 +7387,7 @@ public class DisplayDialog extends DisplayPlugin implements ActionListener, Tree
 								{
 									if (!plRec.removeSubrecords("XCMT"))
 										continue;
-									if (Main.debugMode)
+									if (ESMToolMain.debugMode)
 									{
 										System.out.printf("Cell ID %08X had XCMT removed.\n", new Object[]
 										{ Integer.valueOf(plRec.getFormID()) });

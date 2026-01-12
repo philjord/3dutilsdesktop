@@ -7,6 +7,8 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
+import esm.ESMToolMain;
+
 public class PluginHeader extends SerializedElement {
 	private File			pluginFile;
 
@@ -123,12 +125,12 @@ public class PluginHeader extends SerializedElement {
 				}
 				int pluginIntVersion = getInteger(buffer, 0);
 				this.pluginVersion = Float.intBitsToFloat(pluginIntVersion);
-				if (Main.debugMode) {
+				if (ESMToolMain.debugMode) {
 					System.out.printf("%s: Version %f\n",
 							new Object[] {this.pluginFile.getName(), Float.valueOf(this.pluginVersion)});
 				}
 				this.recordCount = getInteger(buffer, 4);
-				if (Main.debugMode)
+				if (ESMToolMain.debugMode)
 					System.out.printf("%s: %d records\n",
 							new Object[] {this.pluginFile.getName(), Integer.valueOf(this.recordCount)});
 			} else if (type.equals("CNAM")) {

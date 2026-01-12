@@ -9,6 +9,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class SaveTask extends WorkerTask
 {
 	private File pluginFile;
@@ -59,11 +61,11 @@ public class SaveTask extends WorkerTask
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -71,7 +73,7 @@ public class SaveTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while saving plugin", exc);
+			ESMToolMain.logException("Exception while saving plugin", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);

@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
+import esm.ESMToolMain;
+
 public class Plugin extends SerializedElement {
 	private File						pluginFile;
 
@@ -297,7 +299,7 @@ public class Plugin extends SerializedElement {
 					else {
 						recordList.add(pluginGroup);
 					}
-					if (Main.debugMode) {
+					if (ESMToolMain.debugMode) {
 						System.out.printf("%s: Created type %d parent group %08X\n", new Object[] {
 							this.pluginFile.getName(), Integer.valueOf(groupType), Integer.valueOf(groupParentID)});
 					}
@@ -393,7 +395,7 @@ public class Plugin extends SerializedElement {
 		formInfo.setParentFormID(pluginGroup.getGroupParentID());
 		this.formList.add(formInfo);
 		this.formMap.put(new Integer(formID), formInfo);
-		if (Main.debugMode) {
+		if (ESMToolMain.debugMode) {
 			System.out.printf("%s: Added %s record %s (%08X)\n",
 					new Object[] {this.pluginFile.getName(), recordType, editorID, Integer.valueOf(formID)});
 		}
@@ -410,7 +412,7 @@ public class Plugin extends SerializedElement {
 			if (subgroup != null) {
 				subgroup.setParent(pluginGroup);
 				groupRecordList.add(subgroup);
-				if (Main.debugMode)
+				if (ESMToolMain.debugMode)
 					System.out.printf("%s: Added type %d group %08X\n", new Object[] {this.pluginFile.getName(),
 						Integer.valueOf(subgroup.getGroupType()), Integer.valueOf(formID)});
 			}
@@ -680,7 +682,7 @@ public class Plugin extends SerializedElement {
 									XYLoc = cell.getSubrecord("XCLC");
 									region = cell.getSubrecord("XCLR");
 								} catch (Exception ex) {
-									if ((Main.debugMode) && (XYLoc != null)) {
+									if ((ESMToolMain.debugMode) && (XYLoc != null)) {
 										System.out.printf(
 												"ignoreAllExteriorCellsExcept: Cell (%s) does not have an assigned region\n",
 												new Object[] {XYLoc.getDisplayData()});
@@ -706,7 +708,7 @@ public class Plugin extends SerializedElement {
 									}
 
 								} else {
-									if ((Main.debugMode) && (XYLoc != null)) {
+									if ((ESMToolMain.debugMode) && (XYLoc != null)) {
 										System.out.printf(
 												"ignoreAllExteriorCellsExcept: Cell (%s) does not have an assigned region\n",
 												new Object[] {XYLoc.getDisplayData()});
@@ -771,7 +773,7 @@ public class Plugin extends SerializedElement {
 									XYLoc = cell.getSubrecord("XCLC");
 									region = cell.getSubrecord("XCLR");
 								} catch (Exception ex) {
-									if ((Main.debugMode) && (XYLoc != null)) {
+									if ((ESMToolMain.debugMode) && (XYLoc != null)) {
 										System.out.printf(
 												"ignoreAllExteriorCells: Cell (%s) does not have an assigned region\n",
 												new Object[] {XYLoc.getDisplayData()});
@@ -797,7 +799,7 @@ public class Plugin extends SerializedElement {
 									}
 
 								} else {
-									if ((Main.debugMode) && (XYLoc != null)) {
+									if ((ESMToolMain.debugMode) && (XYLoc != null)) {
 										System.out.printf(
 												"ignoreAllExteriorCells: Cell (%s) does not have an assigned region\n",
 												new Object[] {XYLoc.getDisplayData()});
@@ -873,7 +875,7 @@ public class Plugin extends SerializedElement {
 				length -= 20;
 
 				PluginGroup group = new PluginGroup(prefix);
-				if (Main.debugMode) {
+				if (ESMToolMain.debugMode) {
 					System.out.printf("%s: Loading group %s\n",
 							new Object[] {this.pluginFile.getName(), group.getGroupRecordType()});
 				}
@@ -952,7 +954,7 @@ public class Plugin extends SerializedElement {
 		}
 		this.pluginHeader.setRecordCount(recordCount);
 		try {
-			outFile = new File(this.pluginFile.getParent() + Main.fileSeparator + "Gecko.tmp");
+			outFile = new File(this.pluginFile.getParent() + ESMToolMain.fileSeparator + "Gecko.tmp");
 			if (outFile.exists()) {
 				outFile.delete();
 			}

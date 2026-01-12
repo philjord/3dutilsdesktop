@@ -15,6 +15,8 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
+import esm.ESMToolMain;
+
 public class StatusDialog extends JDialog implements ActionListener
 {
 	private Component parent;
@@ -89,7 +91,7 @@ public class StatusDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 

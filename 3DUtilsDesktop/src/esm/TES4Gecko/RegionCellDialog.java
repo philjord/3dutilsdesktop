@@ -25,6 +25,8 @@ import javax.swing.ListCellRenderer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import esm.ESMToolMain;
+
 public class RegionCellDialog extends JDialog implements ActionListener
 {
 	private JList regionList;
@@ -103,11 +105,11 @@ public class RegionCellDialog extends JDialog implements ActionListener
 		JRadioButton cancelMergeButton = new JRadioButton("Cancel entire merge", false);
 		JRadioButton selectButton = new JRadioButton("Select regions with exterior cells to be merged:", false);
 		JRadioButton exceptButton = new JRadioButton("Select regions with exterior cells NOT to be merged:", false);
-		allButton.setBackground(Main.backgroundColor);
-		noneButton.setBackground(Main.backgroundColor);
-		cancelMergeButton.setBackground(Main.backgroundColor);
-		selectButton.setBackground(Main.backgroundColor);
-		exceptButton.setBackground(Main.backgroundColor);
+		allButton.setBackground(ESMToolMain.backgroundColor);
+		noneButton.setBackground(ESMToolMain.backgroundColor);
+		cancelMergeButton.setBackground(ESMToolMain.backgroundColor);
+		selectButton.setBackground(ESMToolMain.backgroundColor);
+		exceptButton.setBackground(ESMToolMain.backgroundColor);
 		ButtonGroup bgroup = new ButtonGroup();
 		allButton.setActionCommand("merge all");
 		allButton.addActionListener(this);
@@ -132,7 +134,7 @@ public class RegionCellDialog extends JDialog implements ActionListener
 		}
 
 		JPanel radioPane = new JPanel(new GridLayout(5, 1));
-		radioPane.setBackground(Main.backgroundColor);
+		radioPane.setBackground(ESMToolMain.backgroundColor);
 		radioPane.add(allButton);
 		radioPane.add(noneButton);
 		radioPane.add(cancelMergeButton);
@@ -147,7 +149,7 @@ public class RegionCellDialog extends JDialog implements ActionListener
 
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new BoxLayout(buttonPane, 0));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		this.doneButton = new JButton("Done");
 		this.doneButton.setActionCommand("done");
@@ -163,7 +165,7 @@ public class RegionCellDialog extends JDialog implements ActionListener
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, 1));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		JLabel headerLabel = new JLabel(
 				"<html>There are exterior cells in the plugin to be merged. Please select whether to merge all<br>such cells, none of those cells, or select the regions where the cells to be merged are located.<br> Please note the following:<br><br>&#8226 Persistent references are unaffected.<br>&#8226 New regions and worldspaces are still merged; this only affects exterior cells.<br>&#8226 If this window is closed by any method except the <i>Done</i> button, all exterior cells are merged.<br></html>",
@@ -273,7 +275,7 @@ public class RegionCellDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event " + action, exc);
+			ESMToolMain.logException("Exception while processing action event " + action, exc);
 		}
 	}
 

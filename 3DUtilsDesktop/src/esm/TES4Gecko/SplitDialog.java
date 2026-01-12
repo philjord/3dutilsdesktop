@@ -28,6 +28,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import esm.ESMToolMain;
+
 public class SplitDialog extends JDialog implements ActionListener, TreeExpansionListener
 {
 	private File pluginFile;
@@ -82,7 +84,7 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 			baseName = baseName.substring(0, index);
 		}
 
-		this.outputMasterFile = new File(parentDirectory + Main.fileSeparator + "OUTPUT_" + baseName + ".esm");
+		this.outputMasterFile = new File(parentDirectory + ESMToolMain.fileSeparator + "OUTPUT_" + baseName + ".esm");
 		this.outputMaster = new Plugin(this.outputMasterFile, this.plugin.getCreator(), this.plugin.getSummary(), pluginMasterList);
 		this.outputMaster.setMaster(true);
 		this.outputMaster.setVersion(this.plugin.getVersion());
@@ -105,7 +107,7 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 		}
 		outputMasterList.add(baseName + ".esm");
 
-		this.outputPluginFile = new File(parentDirectory + Main.fileSeparator + "OUTPUT_" + baseName + ".esp");
+		this.outputPluginFile = new File(parentDirectory + ESMToolMain.fileSeparator + "OUTPUT_" + baseName + ".esp");
 		this.outputPlugin = new Plugin(this.outputPluginFile, this.plugin.getCreator(), this.plugin.getSummary(), outputMasterList);
 		this.outputPlugin.setVersion(this.plugin.getVersion());
 		this.outputPluginNode = new PluginNode(this.outputPlugin);
@@ -130,11 +132,11 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 		pluginScrollPane.setPreferredSize(new Dimension(380, 380));
 
 		JLabel label = new JLabel("Source plugin: " + this.plugin.getName());
-		label.setBackground(Main.backgroundColor);
+		label.setBackground(ESMToolMain.backgroundColor);
 
 		JPanel pluginPane = new JPanel();
 		pluginPane.setLayout(new BoxLayout(pluginPane, 1));
-		pluginPane.setBackground(Main.backgroundColor);
+		pluginPane.setBackground(ESMToolMain.backgroundColor);
 		pluginPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		pluginPane.add(label);
 		pluginPane.add(pluginScrollPane);
@@ -150,11 +152,11 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 		outputMasterScrollPane.setPreferredSize(new Dimension(380, 380));
 
 		label = new JLabel("Output master: " + this.outputMaster.getName());
-		label.setBackground(Main.backgroundColor);
+		label.setBackground(ESMToolMain.backgroundColor);
 
 		JPanel outputMasterPane = new JPanel();
 		outputMasterPane.setLayout(new BoxLayout(outputMasterPane, 1));
-		outputMasterPane.setBackground(Main.backgroundColor);
+		outputMasterPane.setBackground(ESMToolMain.backgroundColor);
 		outputMasterPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		outputMasterPane.add(label);
 		outputMasterPane.add(outputMasterScrollPane);
@@ -170,18 +172,18 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 		outputPluginScrollPane.setPreferredSize(new Dimension(380, 380));
 
 		label = new JLabel("Output plugin: " + this.outputPlugin.getName());
-		label.setBackground(Main.backgroundColor);
+		label.setBackground(ESMToolMain.backgroundColor);
 
 		JPanel outputPluginPane = new JPanel();
 		outputPluginPane.setLayout(new BoxLayout(outputPluginPane, 1));
-		outputPluginPane.setBackground(Main.backgroundColor);
+		outputPluginPane.setBackground(ESMToolMain.backgroundColor);
 		outputPluginPane.setBorder(BorderFactory.createEtchedBorder(Color.WHITE, Color.BLACK));
 		outputPluginPane.add(label);
 		outputPluginPane.add(outputPluginScrollPane);
 
 		JPanel treePane = new JPanel();
 		treePane.setLayout(new BoxLayout(treePane, 0));
-		treePane.setBackground(Main.backgroundColor);
+		treePane.setBackground(ESMToolMain.backgroundColor);
 		treePane.add(pluginPane);
 		treePane.add(Box.createHorizontalStrut(10));
 		treePane.add(outputMasterPane);
@@ -189,10 +191,10 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 		treePane.add(outputPluginPane);
 
 		JPanel buttonPane = new JPanel();
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		this.independentField = new JCheckBox("Independent ESM/ESP", false);
-		this.independentField.setBackground(Main.backgroundColor);
+		this.independentField.setBackground(ESMToolMain.backgroundColor);
 		buttonPane.add(this.independentField);
 
 		buttonPane.add(Box.createHorizontalStrut(15));
@@ -211,7 +213,7 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 
 		JPanel contentPane = new JPanel(new BorderLayout());
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		contentPane.add(treePane, "Center");
 		contentPane.add(buttonPane, "South");
@@ -244,7 +246,7 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
@@ -268,7 +270,7 @@ public class SplitDialog extends JDialog implements ActionListener, TreeExpansio
 				}
 				catch (Throwable exc)
 				{
-					Main.logException("Exception while creating subrecords", exc);
+					ESMToolMain.logException("Exception while creating subrecords", exc);
 				}
 		}
 	}

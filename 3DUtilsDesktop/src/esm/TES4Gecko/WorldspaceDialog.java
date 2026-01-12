@@ -12,6 +12,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import esm.ESMToolMain;
+
 public class WorldspaceDialog extends JDialog implements ActionListener
 {
 	private int option = -1;
@@ -27,11 +29,11 @@ public class WorldspaceDialog extends JDialog implements ActionListener
 
 		JPanel buttonPane = new JPanel(new GridLayout(0, 1, 10, 10));
 		buttonPane.setOpaque(true);
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 		buttonPane.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
 		this.placeholdersField = new JCheckBox("Insert worldspace placeholders", this.insertPlaceholders);
-		this.placeholdersField.setBackground(Main.backgroundColor);
+		this.placeholdersField.setBackground(ESMToolMain.backgroundColor);
 		buttonPane.add(this.placeholdersField);
 
 		buttonPane.add(Box.createGlue());
@@ -83,7 +85,7 @@ public class WorldspaceDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 }

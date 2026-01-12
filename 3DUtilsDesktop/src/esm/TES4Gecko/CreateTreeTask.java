@@ -8,6 +8,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class CreateTreeTask extends WorkerTask
 {
 	private File pluginFile;
@@ -63,15 +65,15 @@ public class CreateTreeTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -79,7 +81,7 @@ public class CreateTreeTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while creating tree", exc);
+			ESMToolMain.logException("Exception while creating tree", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);

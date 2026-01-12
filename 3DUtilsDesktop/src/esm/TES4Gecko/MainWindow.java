@@ -23,6 +23,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import esm.ESMToolMain;
+
 
 public class MainWindow extends JFrame implements ActionListener {
 	private boolean windowMinimized = false;
@@ -31,7 +33,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		super("TES4Gecko Plugin Utility");
 		setDefaultCloseOperation(2);
 
-		String propValue = Main.properties.getProperty("window.main.position");
+		String propValue = ESMToolMain.properties.getProperty("window.main.position");
 		if (propValue != null) {
 			int frameX = 0;
 			int frameY = 0;
@@ -43,7 +45,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		JPanel contentPane = new JPanel(new GridLayout(0, 2, 20, 20));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
 		JButton button = new JButton("Merge Plugins");
@@ -171,7 +173,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent ae) {
 		try {
 			String action = ae.getActionCommand();
-			if (Main.debugMode) {
+			if (ESMToolMain.debugMode) {
 				System.out.printf("There are " + Runtime.getRuntime().freeMemory() + " bytes available\n",
 						new Object[0]);
 			}
@@ -212,14 +214,14 @@ public class MainWindow extends JFrame implements ActionListener {
 				aboutTES4Plugin();
 			}
 
-			Main.pluginSpill.reset();
+			ESMToolMain.pluginSpill.reset();
 		} catch (Throwable exc) {
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
 	private void applyPatch() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -227,7 +229,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		File pluginFile = chooser.getSelectedFile();
 
-		chooser = new JFileChooser(Main.pluginDirectory);
+		chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Patch File");
 		chooser.setFileFilter(new PluginFileFilter(false, false, true));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -239,7 +241,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void cleanPlugin() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -251,7 +253,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void comparePlugins() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select First File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -274,7 +276,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void convertToMaster() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -290,7 +292,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 
 		String outputName = String.format("%s%s%s.esm",
-				new Object[] {pluginFile.getParent(), Main.fileSeparator, inputName.substring(0, sep)});
+				new Object[] {pluginFile.getParent(), ESMToolMain.fileSeparator, inputName.substring(0, sep)});
 		File masterFile = new File(outputName);
 
 		if (masterFile.exists()) {
@@ -306,7 +308,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void convertToPlugin() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Master File");
 		chooser.setFileFilter(new PluginFileFilter(true));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -322,7 +324,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 
 		String outputName = String.format("%s%s%s.esp",
-				new Object[] {masterFile.getParent(), Main.fileSeparator, inputName.substring(0, sep)});
+				new Object[] {masterFile.getParent(), ESMToolMain.fileSeparator, inputName.substring(0, sep)});
 		File pluginFile = new File(outputName);
 
 		if (pluginFile.exists()) {
@@ -338,7 +340,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void createPatch() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Original File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -346,7 +348,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		File baseFile = chooser.getSelectedFile();
 
-		chooser = new JFileChooser(Main.pluginDirectory);
+		chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Modified File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -362,7 +364,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 
 		patchName = String.format("%s%s%s.esu",
-				new Object[] {baseFile.getParent(), Main.fileSeparator, patchName.substring(0, sep)});
+				new Object[] {baseFile.getParent(), ESMToolMain.fileSeparator, patchName.substring(0, sep)});
 		File patchFile = new File(patchName);
 
 		if (patchFile.exists()) {
@@ -378,7 +380,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void displayRecords() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter());
 		if (chooser.showOpenDialog(this) != 0) {
@@ -392,7 +394,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void editDescription() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -421,7 +423,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		} catch (IOException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "I/O Error", 0);
 		} catch (Throwable exc) {
-			Main.logException("Unable to read plugin header", exc);
+			ESMToolMain.logException("Unable to read plugin header", exc);
 		}
 		try {
 			if (in != null)
@@ -442,7 +444,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void editMasterList() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -456,7 +458,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void generateResponses() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -478,7 +480,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		String creator = null;
 		String summary = null;
 		try {
-			File pluginFile = new File(Main.pluginDirectory + Main.fileSeparator + pluginNames [0]);
+			File pluginFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + pluginNames [0]);
 			if ((!pluginFile.exists()) || (!pluginFile.isFile())) {
 				throw new IOException("'" + pluginFile.getName() + "' does not exist");
 			}
@@ -493,7 +495,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		} catch (IOException exc) {
 			JOptionPane.showMessageDialog(this, exc.getMessage(), "I/O Error", 0);
 		} catch (Throwable exc) {
-			Main.logException("Unable to read plugin header", exc);
+			ESMToolMain.logException("Unable to read plugin header", exc);
 		}
 		try {
 			if (in != null) {
@@ -513,7 +515,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			return;
 		}
 
-		File mergedFile = new File(Main.pluginDirectory + Main.fileSeparator + pluginInfo.getName());
+		File mergedFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + pluginInfo.getName());
 		if (mergedFile.exists()) {
 			int selection = JOptionPane.showConfirmDialog(this,
 					"'" + mergedFile.getName() + "' already exists.  Do you want to overwrite it?", "File exists", 0);
@@ -535,7 +537,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		testVec.add(reg2);
 		testVec.add(reg3);
 
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Master File");
 		chooser.setFileFilter(new PluginFileFilter(true));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -543,7 +545,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		File masterFile = chooser.getSelectedFile();
 
-		chooser = new JFileChooser(Main.pluginDirectory);
+		chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -555,7 +557,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void moveWorldspaces() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File");
 		chooser.setFileFilter(new PluginFileFilter(true, true, false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -569,18 +571,18 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 
 	private void setDirectory() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin Directory");
 		chooser.setFileFilter(new PluginDirectoryFilter());
 		chooser.setFileSelectionMode(1);
 		if (chooser.showDialog(this, "Select") == 0) {
-			Main.pluginDirectory = chooser.getSelectedFile().getPath();
-			Main.properties.setProperty("plugin.directory", Main.pluginDirectory);
+			ESMToolMain.pluginDirectory = chooser.getSelectedFile().getPath();
+			ESMToolMain.properties.setProperty("plugin.directory", ESMToolMain.pluginDirectory);
 		}
 	}
 
 	private void splitRecords() {
-		JFileChooser chooser = new JFileChooser(Main.pluginDirectory);
+		JFileChooser chooser = new JFileChooser(ESMToolMain.pluginDirectory);
 		chooser.setDialogTitle("Select Plugin File to Split");
 		chooser.setFileFilter(new PluginFileFilter(false));
 		if (chooser.showOpenDialog(this) != 0) {
@@ -595,17 +597,17 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	private void exitProgram() {
 		if (!this.windowMinimized) {
-			Point p = Main.mainWindow.getLocation();
-			Main.properties.setProperty("window.main.position", p.x + "," + p.y);
+			Point p = ESMToolMain.mainWindow.getLocation();
+			ESMToolMain.properties.setProperty("window.main.position", p.x + "," + p.y);
 		}
 
-		Main.saveProperties();
+		ESMToolMain.saveProperties();
 
-		if (Main.pluginSpill != null) {
+		if (ESMToolMain.pluginSpill != null) {
 			try {
-				Main.pluginSpill.close();
+				ESMToolMain.pluginSpill.close();
 			} catch (IOException exc) {
-				Main.logException("Unable to close spill file", exc);
+				ESMToolMain.logException("Unable to close spill file", exc);
 			}
 
 		}

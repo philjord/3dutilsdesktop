@@ -19,6 +19,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import esm.ESMToolMain;
+
 public class MergeDialog extends JDialog implements ActionListener
 {
 	private PluginInfo pluginInfo;
@@ -37,7 +39,7 @@ public class MergeDialog extends JDialog implements ActionListener
 	{
 		super(parent, "Merged Plugin", true);
 		setDefaultCloseOperation(2);
-		Color backgroundColor = Main.backgroundColor;
+		Color backgroundColor = ESMToolMain.backgroundColor;
 
 		Dimension labelSize = new Dimension(70, 12);
 		JPanel namePane = new JPanel();
@@ -174,7 +176,7 @@ public class MergeDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 }

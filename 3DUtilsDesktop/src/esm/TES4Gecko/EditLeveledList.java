@@ -34,6 +34,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import esm.ESMToolMain;
+
 public class EditLeveledList implements Runnable
 {
 	private JDialog parent;
@@ -66,11 +68,11 @@ public class EditLeveledList implements Runnable
 		}
 		catch (InterruptedException exc)
 		{
-			Main.logException("Edit dialog interrupted", exc);
+			ESMToolMain.logException("Edit dialog interrupted", exc);
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while displaying edit dialog", exc);
+			ESMToolMain.logException("Exception while displaying edit dialog", exc);
 		}
 	}
 
@@ -120,7 +122,7 @@ public class EditLeveledList implements Runnable
 			setDefaultCloseOperation(2);
 			try
 			{
-				Color backgroundColor = Main.backgroundColor;
+				Color backgroundColor = ESMToolMain.backgroundColor;
 				boolean allLevels = false;
 				boolean allItems = false;
 				boolean allSpells = false;
@@ -296,7 +298,7 @@ public class EditLeveledList implements Runnable
 			catch (Throwable exc)
 			{
 				//JLabel title;
-				Main.logException("Exception while constructing edit dialog", exc);
+				ESMToolMain.logException("Exception while constructing edit dialog", exc);
 			}
 		}
 
@@ -334,7 +336,7 @@ public class EditLeveledList implements Runnable
 			}
 			catch (Throwable exc)
 			{
-				Main.logException("Exception while processing action event", exc);
+				ESMToolMain.logException("Exception while processing action event", exc);
 			}
 		}
 
@@ -480,7 +482,7 @@ public class EditLeveledList implements Runnable
 				}
 				catch (IOException exc)
 				{
-					Main.logException("Exception while setting subrecord data", exc);
+					ESMToolMain.logException("Exception while setting subrecord data", exc);
 				}
 			}
 
@@ -501,7 +503,7 @@ public class EditLeveledList implements Runnable
 				}
 				catch (IOException exc)
 				{
-					Main.logException("Exception while getting subrecord data", exc);
+					ESMToolMain.logException("Exception while getting subrecord data", exc);
 				}
 			}
 		}
@@ -534,7 +536,7 @@ public class EditLeveledList implements Runnable
 					catch (IOException exc)
 					{
 
-						Main.logException("Exception while getting subrecord data", exc);
+						ESMToolMain.logException("Exception while getting subrecord data", exc);
 						subrecordData = new byte[0];
 					}
 
@@ -684,7 +686,7 @@ public class EditLeveledList implements Runnable
 								}
 								catch (IOException exc)
 								{
-									Main.logException("Exception while getting subrecord data", exc);
+									ESMToolMain.logException("Exception while getting subrecord data", exc);
 								}
 							}
 
@@ -727,7 +729,7 @@ public class EditLeveledList implements Runnable
 				catch (IOException exc)
 				{
 
-					Main.logException("Exception while getting subrecord data", exc);
+					ESMToolMain.logException("Exception while getting subrecord data", exc);
 					subrecordData = new byte[0];
 				}
 
@@ -804,7 +806,7 @@ public class EditLeveledList implements Runnable
 						}
 						catch (IOException exc)
 						{
-							Main.logException("Exception while getting subrecord data", exc);
+							ESMToolMain.logException("Exception while getting subrecord data", exc);
 						}
 					}
 

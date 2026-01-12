@@ -9,6 +9,8 @@ import java.util.zip.DataFormatException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class ApplyPatchTask extends WorkerTask
 {
 	private File pluginFile;
@@ -107,7 +109,7 @@ public class ApplyPatchTask extends WorkerTask
 				if (pluginInfo == null)
 				{
 					this.plugin.copyRecord(patchRecord, this.patchFormAdjust);
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 						System.out.printf("Added %s record %s (%08X)\n", new Object[]
 						{ patchRecord.getRecordType(), patchRecord.getEditorID(), Integer.valueOf(formID) });
 				}
@@ -123,7 +125,7 @@ public class ApplyPatchTask extends WorkerTask
 						if (patchRecord.isDeleted())
 						{
 							this.plugin.removeRecord(pluginRecord);
-							if (Main.debugMode)
+							if (ESMToolMain.debugMode)
 							{
 								System.out.printf("Deleted %s record %s (%08X)\n", new Object[]
 								{ recordType, pluginRecord.getEditorID(), Integer.valueOf(formID) });
@@ -136,7 +138,7 @@ public class ApplyPatchTask extends WorkerTask
 							pluginRecord.setParent(parentGroup);
 							recordList.set(index, pluginRecord);
 							pluginInfo.setSource(pluginRecord);
-							if (Main.debugMode)
+							if (ESMToolMain.debugMode)
 							{
 								System.out.printf("Updated %s record %s (%08X)\n", new Object[]
 								{ recordType, pluginRecord.getEditorID(), Integer.valueOf(formID) });
@@ -162,15 +164,15 @@ public class ApplyPatchTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -178,7 +180,7 @@ public class ApplyPatchTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while applying patch", exc);
+			ESMToolMain.logException("Exception while applying patch", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);

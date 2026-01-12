@@ -9,6 +9,8 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class LoadTask extends WorkerTask
 {
 	private File pluginFile;
@@ -58,15 +60,15 @@ public class LoadTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -74,7 +76,7 @@ public class LoadTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while loading plugin", exc);
+			ESMToolMain.logException("Exception while loading plugin", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);

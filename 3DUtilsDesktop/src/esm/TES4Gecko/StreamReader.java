@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 
+import esm.ESMToolMain;
+
 public class StreamReader extends Thread
 {
 	private InputStreamReader reader;
@@ -35,7 +37,7 @@ public class StreamReader extends Thread
 		}
 		catch (IOException exc)
 		{
-			Main.logException("Unable to read from input stream", exc);
+			ESMToolMain.logException("Unable to read from input stream", exc);
 		}
 	}
 
@@ -58,7 +60,7 @@ public class StreamReader extends Thread
 		int length = this.buffer.length();
 		if (this.index < length)
 		{
-			int sep = this.buffer.indexOf(Main.lineSeparator, this.index);
+			int sep = this.buffer.indexOf(ESMToolMain.lineSeparator, this.index);
 			if (sep < 0)
 			{
 				line = this.buffer.substring(this.index);
@@ -67,7 +69,7 @@ public class StreamReader extends Thread
 			else
 			{
 				line = this.buffer.substring(this.index, sep);
-				this.index = (sep + Main.lineSeparator.length());
+				this.index = (sep + ESMToolMain.lineSeparator.length());
 			}
 		}
 

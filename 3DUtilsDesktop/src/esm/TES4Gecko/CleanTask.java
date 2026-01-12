@@ -9,6 +9,8 @@ import java.util.zip.DataFormatException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class CleanTask extends WorkerTask
 {
 	private File pluginFile;
@@ -66,7 +68,7 @@ public class CleanTask extends WorkerTask
 			{
 				String masterName = this.pluginMasterList.get(this.masterIndex);
 
-				File masterFile = new File(Main.pluginDirectory + Main.fileSeparator + masterName);
+				File masterFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + masterName);
 				this.master = new Plugin(masterFile);
 				this.master.load(this);
 				this.masterFormMap = this.master.getFormMap();
@@ -99,15 +101,15 @@ public class CleanTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -115,7 +117,7 @@ public class CleanTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while cleaning plugin", exc);
+			ESMToolMain.logException("Exception while cleaning plugin", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);
@@ -153,7 +155,7 @@ public class CleanTask extends WorkerTask
 				FormInfo masterFormInfo = this.masterFormMap.get(formIndex);
 				if (masterFormInfo == null)
 				{
-					if (Main.debugMode)
+					if (ESMToolMain.debugMode)
 						System.out.printf("%s: Record %08X not found\n", new Object[]
 						{ this.master.getName(), Integer.valueOf(masterFormID) });
 				}
@@ -179,7 +181,7 @@ public class CleanTask extends WorkerTask
 										if (!cmpGroup.isEmpty())
 										{
 											ignoreRecord = false;
-											if (Main.debugMode)
+											if (ESMToolMain.debugMode)
 											{
 												System.out.printf("Keeping %s record %s (%08X)\n", new Object[]
 												{ recordType, pluginRecord.getEditorID(), Integer.valueOf(pluginRecord.getFormID()) });
@@ -196,7 +198,7 @@ public class CleanTask extends WorkerTask
 						{
 							pluginRecord.setIgnore(true);
 							this.pluginModified = true;
-							if (Main.debugMode)
+							if (ESMToolMain.debugMode)
 								System.out.printf("Ignoring %s record %s (%08X)\n", new Object[]
 								{ recordType, pluginRecord.getEditorID(), Integer.valueOf(pluginRecord.getFormID()) });
 						}

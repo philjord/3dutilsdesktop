@@ -9,6 +9,8 @@ import java.util.zip.DataFormatException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class CreatePatchTask extends WorkerTask
 {
 	private File baseFile;
@@ -146,7 +148,7 @@ public class CreatePatchTask extends WorkerTask
 						deletedFormInfo.setParentFormID(patchGroup.getGroupParentID());
 						this.patchPlugin.getFormList().add(deletedFormInfo);
 						this.patchPlugin.getFormMap().put(new Integer(deletedFormID), deletedFormInfo);
-						if (Main.debugMode)
+						if (ESMToolMain.debugMode)
 						{
 							System.out.printf("%s: Deleted %s record %s (%08X)\n", new Object[]
 							{ this.patchFile.getName(), editorID, recordType, Integer.valueOf(deletedFormID) });
@@ -169,15 +171,15 @@ public class CreatePatchTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -185,7 +187,7 @@ public class CreatePatchTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while creating patch", exc);
+			ESMToolMain.logException("Exception while creating patch", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);

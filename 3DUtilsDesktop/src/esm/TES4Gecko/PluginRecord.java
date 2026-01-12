@@ -13,6 +13,8 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import esm.ESMToolMain;
+
 public class PluginRecord extends SerializedElement implements Cloneable {
 	private static final String	dummyEditorID	= new String();
 
@@ -147,7 +149,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 			return new byte[0];
 		}
 
-		byte[] recordData = Main.pluginSpill.read(this.recordPosition, this.recordLength);
+		byte[] recordData = ESMToolMain.pluginSpill.read(this.recordPosition, this.recordLength);
 
 		if (!isCompressed()) {
 			return recordData;
@@ -193,7 +195,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 			recordData = buffer;
 		}
 
-		this.recordPosition = Main.pluginSpill.write(recordData);
+		this.recordPosition = ESMToolMain.pluginSpill.write(recordData);
 		this.recordLength = recordData.length;
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -651,7 +653,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 					}
 
 					if (!areIdentical) {
-						if (!Main.debugMode)
+						if (!ESMToolMain.debugMode)
 							break;
 						System.out.printf("Miscompare on %s subrecord [%s vs %s] of %s record %s (%08X)\n",
 								new Object[] {subrecord.getSubrecordType(), subrecord.getDisplayData(), cmpDisplayValue,
@@ -665,7 +667,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 					areIdentical = false;
 			} catch (Throwable exc) {
 				areIdentical = false;
-				Main.logException("Unable to compare record data", exc);
+				ESMToolMain.logException("Unable to compare record data", exc);
 			}
 		}
 
@@ -717,7 +719,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 		if (count != recordLength) {
 			throw new PluginException(file.getName() + ": " + this.recordType + " record is incomplete");
 		}
-		this.recordPosition = Main.pluginSpill.write(recordData);
+		this.recordPosition = ESMToolMain.pluginSpill.write(recordData);
 		this.recordLength = recordData.length;
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -770,7 +772,7 @@ public class PluginRecord extends SerializedElement implements Cloneable {
 		out.write(prefix);
 
 		if (this.recordLength != 0) {
-			byte[] recordData = Main.pluginSpill.read(this.recordPosition, this.recordLength);
+			byte[] recordData = ESMToolMain.pluginSpill.read(this.recordPosition, this.recordLength);
 			out.write(recordData);
 		}
 	}

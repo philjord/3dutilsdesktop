@@ -13,6 +13,8 @@ import java.util.zip.DataFormatException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import esm.ESMToolMain;
+
 public class Master extends SerializedElement {
 	private static final int		INDEX_VERSION	= 5;
 
@@ -135,7 +137,7 @@ public class Master extends SerializedElement {
 		else {
 			indexName = "Gecko-" + masterName + ".index";
 		}
-		File indexFile = new File(this.masterFile.getParent() + Main.fileSeparator + indexName);
+		File indexFile = new File(this.masterFile.getParent() + ESMToolMain.fileSeparator + indexName);
 
 		if (!indexFile.exists())
 			buildIndexFile(task, indexFile);

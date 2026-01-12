@@ -17,6 +17,8 @@ import java.util.zip.DataFormatException;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import esm.ESMToolMain;
+
 public class WorldspaceTask extends WorkerTask
 {
 	private boolean insertPlaceholders = false;
@@ -85,7 +87,7 @@ public class WorldspaceTask extends WorkerTask
 				for (int i = 0; i < this.pluginIndex; i++)
 				{
 					String masterName = (String) masterList.get(i);
-					File masterFile = new File(Main.pluginDirectory + Main.fileSeparator + masterName);
+					File masterFile = new File(ESMToolMain.pluginDirectory + ESMToolMain.fileSeparator + masterName);
 					this.masters[i] = new Master(masterFile);
 					this.masters[i].load(this);
 				}
@@ -94,7 +96,7 @@ public class WorldspaceTask extends WorkerTask
 
 			Date date = new Date();
 			this.baseFormID = ((int) (date.getTime() / 1000L - 1176047100L) % 14680064 + 2097152);
-			if (Main.debugMode)
+			if (ESMToolMain.debugMode)
 			{
 				System.out.printf("Base worldspace form ID is %08X\n", new Object[]
 				{ Integer.valueOf(this.baseFormID) });
@@ -107,7 +109,7 @@ public class WorldspaceTask extends WorkerTask
 				mapWorldspaces();
 
 				String lodPath = String.format("%s%sDistantLOD", new Object[]
-				{ Main.pluginDirectory, Main.fileSeparator });
+				{ ESMToolMain.pluginDirectory, ESMToolMain.fileSeparator });
 				File lodDir = new File(lodPath);
 				if ((lodDir.exists()) && (lodDir.isDirectory()))
 				{
@@ -129,7 +131,7 @@ public class WorldspaceTask extends WorkerTask
 				}
 
 				String dirPath = String.format("%s%sMeshes%sLandscape%sLOD", new Object[]
-				{ Main.pluginDirectory, Main.fileSeparator, Main.fileSeparator, Main.fileSeparator });
+				{ ESMToolMain.pluginDirectory, ESMToolMain.fileSeparator, ESMToolMain.fileSeparator, ESMToolMain.fileSeparator });
 				File dirFile = new File(dirPath);
 				if ((dirFile.exists()) && (dirFile.isDirectory()))
 				{
@@ -137,7 +139,7 @@ public class WorldspaceTask extends WorkerTask
 				}
 
 				dirPath = String.format("%s%sTextures%sLandscapeLOD%sGenerated", new Object[]
-				{ Main.pluginDirectory, Main.fileSeparator, Main.fileSeparator, Main.fileSeparator });
+				{ ESMToolMain.pluginDirectory, ESMToolMain.fileSeparator, ESMToolMain.fileSeparator, ESMToolMain.fileSeparator });
 				dirFile = new File(dirPath);
 				if ((dirFile.exists()) && (dirFile.isDirectory()))
 				{
@@ -154,15 +156,15 @@ public class WorldspaceTask extends WorkerTask
 		}
 		catch (PluginException exc)
 		{
-			Main.logException("Plugin Error", exc);
+			ESMToolMain.logException("Plugin Error", exc);
 		}
 		catch (DataFormatException exc)
 		{
-			Main.logException("Compression Error", exc);
+			ESMToolMain.logException("Compression Error", exc);
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O Error", exc);
+			ESMToolMain.logException("I/O Error", exc);
 		}
 		catch (InterruptedException exc)
 		{
@@ -170,7 +172,7 @@ public class WorldspaceTask extends WorkerTask
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while moving worldspaces", exc);
+			ESMToolMain.logException("Exception while moving worldspaces", exc);
 		}
 
 		getStatusDialog().closeDialog(completed);
@@ -270,7 +272,7 @@ public class WorldspaceTask extends WorkerTask
 									if (!this.worldspaceList.contains(relocFormInfo))
 									{
 										this.worldspaceList.add(relocFormInfo);
-										if (Main.debugMode)
+										if (ESMToolMain.debugMode)
 											System.out.printf(
 													"Relocation required for reference %08X to %s base item %s (%08X)\n",
 													new Object[]
@@ -284,7 +286,7 @@ public class WorldspaceTask extends WorkerTask
 					else if (((recordFlags & 0x8000) != 0) && (!this.worldspaceList.contains(baseFormInfo)))
 					{
 						this.worldspaceList.add(baseFormInfo);
-						if (Main.debugMode)
+						if (ESMToolMain.debugMode)
 							System.out.printf("Relocation required for reference %08X to %s base item %s (%08X)\n",
 									new Object[]
 									{ Integer.valueOf(formInfo.getFormID()), baseFormInfo.getRecordType(), baseFormInfo.getEditorID(),
@@ -304,7 +306,7 @@ public class WorldspaceTask extends WorkerTask
 								if ((editorID.length() == 17) && (editorID.substring(0, 9).equals("TES4Gecko")))
 								{
 									this.worldspaceList.add(baseFormInfo);
-									if (Main.debugMode)
+									if (ESMToolMain.debugMode)
 										System.out.printf(
 												"Relocation required for reference %08X to %s base item %s (%08X)\n",
 												new Object[]
@@ -390,7 +392,7 @@ public class WorldspaceTask extends WorkerTask
 						if (this.worldspaceList.contains(formInfo))
 							break;
 						this.worldspaceList.add(formInfo);
-						if (!Main.debugMode)
+						if (!ESMToolMain.debugMode)
 							break;
 						System.out.printf("DistantLOD entry maps to %s record %s (%08X)\n", new Object[]
 						{ formInfo.getRecordType(), formInfo.getEditorID(), Integer.valueOf(formID) });
@@ -452,7 +454,7 @@ public class WorldspaceTask extends WorkerTask
 			}
 
 			this.worldspaceMap.put(new Integer(oldFormID), new Integer(formID));
-			if (Main.debugMode)
+			if (ESMToolMain.debugMode)
 				System.out.printf("Relocating %s record %s from %08X to %08X\n", new Object[]
 				{ formInfo.getRecordType(), formInfo.getEditorID(), Integer.valueOf(oldFormID), Integer.valueOf(formID) });
 		}
@@ -730,7 +732,7 @@ public class WorldspaceTask extends WorkerTask
 			{ Integer.valueOf(newFormID) }));
 			groupList.add(record);
 			this.pluginModified = true;
-			if (Main.debugMode)
+			if (ESMToolMain.debugMode)
 				System.out.printf("Added %s record %s (%08X)\n", new Object[]
 				{ record.getRecordType(), record.getEditorID(), Integer.valueOf(record.getFormID()) });
 		}
@@ -757,11 +759,11 @@ public class WorldspaceTask extends WorkerTask
 							if (mappedID != null)
 							{
 								String mappedFileName = mappedID.toString() + fileName.substring(sep);
-								File mappedFile = new File(dirFile.getPath() + Main.fileSeparator + mappedFileName);
+								File mappedFile = new File(dirFile.getPath() + ESMToolMain.fileSeparator + mappedFileName);
 								if (!mappedFile.exists())
 								{
 									file.renameTo(mappedFile);
-									if (Main.debugMode)
+									if (ESMToolMain.debugMode)
 										System.out.printf("Renamed %s to %s\n", new Object[]
 										{ file.getPath(), mappedFile.getPath() });
 								}

@@ -22,6 +22,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
+import esm.ESMToolMain;
+
 public class PluginDialog extends JDialog implements ActionListener
 {
 	private String[] pluginNames;
@@ -43,7 +45,7 @@ public class PluginDialog extends JDialog implements ActionListener
 		super(parent, "Select Plugins", true);
 		setDefaultCloseOperation(2);
 
-		String pluginDirectory = Main.properties.getProperty("plugin.directory");
+		String pluginDirectory = ESMToolMain.properties.getProperty("plugin.directory");
 		this.tableModel = new PluginTableModel(pluginDirectory);
 		this.table = new JTable(this.tableModel);
 		this.table.setCellSelectionEnabled(true);
@@ -62,12 +64,12 @@ public class PluginDialog extends JDialog implements ActionListener
 		TableCellRenderer renderer = columnModel.getColumn(1).getCellRenderer();
 		if (renderer == null)
 			renderer = this.table.getDefaultRenderer(this.columnClasses[1]);
-		((DefaultTableCellRenderer) renderer).setBackground(Main.backgroundColor);
+		((DefaultTableCellRenderer) renderer).setBackground(ESMToolMain.backgroundColor);
 
 		this.scrollPane = new JScrollPane(this.table);
 
 		JPanel buttonPane = new JPanel();
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		JButton button = new JButton("OK");
 		button.setActionCommand("done");
@@ -81,7 +83,7 @@ public class PluginDialog extends JDialog implements ActionListener
 
 		JPanel contentPane = new JPanel(new BorderLayout());
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 		contentPane
 				.add(new JLabel(
@@ -171,7 +173,7 @@ public class PluginDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			ESMToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 

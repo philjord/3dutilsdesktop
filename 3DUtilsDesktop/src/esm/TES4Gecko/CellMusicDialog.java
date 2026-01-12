@@ -15,6 +15,8 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import esm.ESMToolMain;
+
 public class CellMusicDialog extends JDialog implements ActionListener
 {
 	private JButton doneButton;
@@ -39,9 +41,9 @@ public class CellMusicDialog extends JDialog implements ActionListener
 		JRadioButton defaultButton = new JRadioButton("Default", true);
 		JRadioButton publicButton = new JRadioButton("Public", false);
 		JRadioButton dungeonButton = new JRadioButton("Dungeon", false);
-		defaultButton.setBackground(Main.backgroundColor);
-		publicButton.setBackground(Main.backgroundColor);
-		dungeonButton.setBackground(Main.backgroundColor);
+		defaultButton.setBackground(ESMToolMain.backgroundColor);
+		publicButton.setBackground(ESMToolMain.backgroundColor);
+		dungeonButton.setBackground(ESMToolMain.backgroundColor);
 		ButtonGroup bgroup = new ButtonGroup();
 		defaultButton.setActionCommand("set default music");
 		defaultButton.addActionListener(this);
@@ -53,14 +55,14 @@ public class CellMusicDialog extends JDialog implements ActionListener
 		dungeonButton.addActionListener(this);
 		bgroup.add(dungeonButton);
 		JPanel radioPane = new JPanel(new GridLayout(3, 1));
-		radioPane.setBackground(Main.backgroundColor);
+		radioPane.setBackground(ESMToolMain.backgroundColor);
 		radioPane.add(defaultButton);
 		radioPane.add(publicButton);
 		radioPane.add(dungeonButton);
 
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new BoxLayout(buttonPane, 0));
-		buttonPane.setBackground(Main.backgroundColor);
+		buttonPane.setBackground(ESMToolMain.backgroundColor);
 
 		this.doneButton = new JButton("Done");
 		this.doneButton.setActionCommand("done");
@@ -76,7 +78,7 @@ public class CellMusicDialog extends JDialog implements ActionListener
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BoxLayout(contentPane, 1));
 		contentPane.setOpaque(true);
-		contentPane.setBackground(Main.backgroundColor);
+		contentPane.setBackground(ESMToolMain.backgroundColor);
 		contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		contentPane.add(Box.createVerticalStrut(15));
 		contentPane.add(radioPane);
@@ -136,7 +138,7 @@ public class CellMusicDialog extends JDialog implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event " + action, exc);
+			ESMToolMain.logException("Exception while processing action event " + action, exc);
 		}
 	}
 }
