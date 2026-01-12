@@ -8,9 +8,9 @@ import java.util.Properties;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import bsa.tasks.Main;
+import bsa.gui.BSAContentDisplay;
 
-public class BSADisplayMain extends Main
+public class BSADisplayMain extends BSAToolMain
 {
 	public static void main(String args[])
 	{
@@ -61,13 +61,13 @@ public class BSADisplayMain extends Main
 	{
 		try
 		{
-			mainWindow = new BSAContentDisplayTest();
+			mainWindow = new BSAContentDisplay();
 			mainWindow.pack();
 			mainWindow.setLocationRelativeTo(null);
 			mainWindow.setVisible(true);
 			
 			//might as well open an archive, not much will happen otherwise
-			((BSAContentDisplayTest)mainWindow).actionPerformed(new ActionEvent(mainWindow, -1, "open"));
+			((BSAContentDisplay)mainWindow).actionPerformed(new ActionEvent(mainWindow, -1, "open"));
 		}
 		catch (Throwable exc)
 		{

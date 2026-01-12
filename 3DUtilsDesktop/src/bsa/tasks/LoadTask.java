@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
+import bsa.BSAToolMain;
 import bsa.gui.ArchiveNode;
 import bsa.gui.FileNode;
 import bsa.gui.FolderNode;
@@ -136,11 +137,11 @@ public class LoadTask extends Thread {
 
 			completed = true;
 		} catch (DBException exc) {
-			Main.logException("Unable to load archive file", exc);
+			BSAToolMain.logException("Unable to load archive file", exc);
 		} catch (IOException exc) {
-			Main.logException("Unable to read archive file", exc);
+			BSAToolMain.logException("Unable to read archive file", exc);
 		} catch (Throwable exc) {
-			Main.logException("Exception while loading archive", exc);
+			BSAToolMain.logException("Exception while loading archive", exc);
 		}
 
 		if (statusDialog != null) {

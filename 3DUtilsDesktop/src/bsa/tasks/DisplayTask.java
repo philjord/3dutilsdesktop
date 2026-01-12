@@ -1,4 +1,4 @@
-package bsa;
+package bsa.tasks;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,11 +9,11 @@ import javax.swing.SwingUtilities;
 import org.jogamp.java3d.Texture;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
+import bsa.BSAToolMain;
 import bsa.gui.BSAFileSetWithStatus;
 import bsa.gui.StatusDialog;
 import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
-import bsa.tasks.Main;
 import bsaio.ArchiveEntry;
 import bsaio.displayables.Displayable;
 import nif.NifJ3dVisRoot;
@@ -92,10 +92,6 @@ public class DisplayTask extends Thread {
 
 							CompressedTextureLoader.clearCache();
 						} else {
-							//FIXME: why do I have 2 types of load system for a Texture, does it matter
-
-							//Texture2DDisplay.showImageInShape(fileName, new BsaTextureSource(bsaFileSet).getInputStream(fileName));
-
 							Texture2DDisplay.showImageInShape(fileName,
 									new BsaTextureSource(bsaFileSet).getTexture(fileName));
 						}
@@ -186,12 +182,12 @@ public class DisplayTask extends Thread {
 					currentProgress = newProgress;
 				}
 			} catch (IOException exc) {
-				Main.logException("I/O error while extracting files", exc);
+				BSAToolMain.logException("I/O error while extracting files", exc);
 			} catch (Throwable exc) {
 				if (verifyOnly) {
 					exc.printStackTrace();
 				} else {
-					Main.logException("Exception while extracting files", exc);
+					BSAToolMain.logException("Exception while extracting files", exc);
 				}
 			}
 		}

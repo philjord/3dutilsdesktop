@@ -1,4 +1,4 @@
-package bsa;
+package bsa.gui;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -30,16 +30,12 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import bsa.gui.ArchiveNode;
-import bsa.gui.BSAFileSetWithStatus;
-import bsa.gui.FileNode;
-import bsa.gui.FolderNode;
-import bsa.gui.StatusDialog;
+import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
-import bsa.tasks.Main;
+import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
 
-public class BSAContentDisplayTest extends JFrame implements ActionListener
+public class BSAContentDisplay extends JFrame implements ActionListener
 {
 	public static boolean LOAD_ALL = true;
 
@@ -55,12 +51,12 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 
 	private JCheckBoxMenuItem sopErrMenuItem = new JCheckBoxMenuItem("SOP errors only");
 
-	public BSAContentDisplayTest()
+	public BSAContentDisplay()
 	{
 		super("BSA test display");
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
-		String propValue = Main.properties.getProperty("window.main.position");
+		String propValue = BSAToolMain.properties.getProperty("window.main.position");
 		if (propValue != null)
 		{
 			int sep = propValue.indexOf(',');
@@ -70,7 +66,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		}
 		int frameWidth = 800;
 		int frameHeight = 640;
-		propValue = Main.properties.getProperty("window.main.size");
+		propValue = BSAToolMain.properties.getProperty("window.main.size");
 		if (propValue != null)
 		{
 			int sep = propValue.indexOf(',');
@@ -82,7 +78,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		menuBar.setOpaque(true);
 		JMenu menu = new JMenu("File");
 		menu.setMnemonic(70);
-		boolean loadAll = Boolean.parseBoolean(Main.properties.getProperty("load.all"));
+		boolean loadAll = Boolean.parseBoolean(BSAToolMain.properties.getProperty("load.all"));
 		cbMenuItem.setSelected(loadAll);
 		menu.add(cbMenuItem);
 		menu.add(sopErrMenuItem);
@@ -149,7 +145,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 					}
 					catch (Throwable exc)
 					{
-						Main.logException("Exception while processing action event", exc);
+						BSAToolMain.logException("Exception while processing action event", exc);
 					}
 				}
 			}
@@ -181,14 +177,14 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
 	private void openFile() throws IOException
 	{
 		closeFile();
-		String currentDirectory = Main.properties.getProperty("current.directory");
+		String currentDirectory = BSAToolMain.properties.getProperty("current.directory");
 		JFileChooser chooser;
 		if (currentDirectory != null)
 		{
@@ -202,15 +198,15 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 		{
 			chooser = new JFileChooser();
 		}
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("Select Archive File");
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0)
 		{
 			File file = chooser.getSelectedFile();
-			Main.properties.setProperty("current.directory", file.getParent());
+			BSAToolMain.properties.setProperty("current.directory", file.getParent());
 
-			Main.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
+			BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
 
 			if (cbMenuItem.isSelected())
 			{
@@ -315,12 +311,12 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 	{
 		if (!windowMinimized)
 		{
-			Point p = Main.mainWindow.getLocation();
-			Dimension d = Main.mainWindow.getSize();
-			Main.properties.setProperty("window.main.position", "" + p.x + "," + p.y);
-			Main.properties.setProperty("window.main.size", "" + d.width + "," + d.height);
+			Point p = BSAToolMain.mainWindow.getLocation();
+			Dimension d = BSAToolMain.mainWindow.getSize();
+			BSAToolMain.properties.setProperty("window.main.position", "" + p.x + "," + p.y);
+			BSAToolMain.properties.setProperty("window.main.size", "" + d.width + "," + d.height);
 		}
-		Main.saveProperties();
+		BSAToolMain.saveProperties();
 		System.exit(0);
 	}
 
@@ -378,7 +374,7 @@ public class BSAContentDisplayTest extends JFrame implements ActionListener
 			}
 			catch (Exception exc)
 			{
-				Main.logException("Exception while closing application window", exc);
+				BSAToolMain.logException("Exception while closing application window", exc);
 			}
 		}
 

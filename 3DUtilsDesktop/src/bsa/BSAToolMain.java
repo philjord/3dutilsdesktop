@@ -1,4 +1,4 @@
-package bsa.tasks;
+package bsa;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,9 +10,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import bsa.gui.MainWindow;
+import bsa.gui.BSAToolMainWindow;
 
-public class Main
+public class BSAToolMain
 {
 	public static JFrame mainWindow;
 
@@ -32,7 +32,7 @@ public class Main
 
 	private static Throwable deferredException;
 
-	public Main()
+	public BSAToolMain()
 	{
 	}
 
@@ -71,7 +71,7 @@ public class Main
 			{
 				public void run()
 				{
-					Main.createAndShowGUI();
+					BSAToolMain.createAndShowGUI();
 				}
 			});
 		}
@@ -85,7 +85,7 @@ public class Main
 	{
 		try
 		{
-			mainWindow = new MainWindow();
+			mainWindow = new BSAToolMainWindow();
 			mainWindow.pack();
 			mainWindow.setVisible(true);
 		}
@@ -144,9 +144,9 @@ public class Main
 				{
 					public void run()
 					{
-						Main.logException(Main.deferredText, Main.deferredException);
-						Main.deferredException = null;
-						Main.deferredText = null;
+						BSAToolMain.logException(BSAToolMain.deferredText, BSAToolMain.deferredException);
+						BSAToolMain.deferredException = null;
+						BSAToolMain.deferredText = null;
 					}
 
 				});

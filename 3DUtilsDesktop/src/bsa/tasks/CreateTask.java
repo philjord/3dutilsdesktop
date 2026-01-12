@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.Deflater;
 
+import bsa.BSAToolMain;
 import bsa.gui.StatusDialog;
 import bsaio.ArchiveEntry;
 import bsaio.DBException;
@@ -80,11 +81,11 @@ public class CreateTask extends Thread {
 			}
 			completed = true;
 		} catch (DBException exc) {
-			Main.logException("Format error while creating archive", exc);
+			BSAToolMain.logException("Format error while creating archive", exc);
 		} catch (IOException exc) {
-			Main.logException("I/O error while creating archive", exc);
+			BSAToolMain.logException("I/O error while creating archive", exc);
 		} catch (Throwable exc) {
-			Main.logException("Exception while creating archive", exc);
+			BSAToolMain.logException("Exception while creating archive", exc);
 		}
 
 		if (!completed && out != null) {
@@ -94,7 +95,7 @@ public class CreateTask extends Thread {
 				if (archiveFile.exists())
 					archiveFile.delete();
 			} catch (IOException exc) {
-				Main.logException("I/O error while cleaning up", exc);
+				BSAToolMain.logException("I/O error while cleaning up", exc);
 			}
 		}
 		statusDialog.closeDialog(completed);

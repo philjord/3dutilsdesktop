@@ -26,16 +26,16 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.CreateTask;
 import bsa.tasks.ExtractTask;
 import bsa.tasks.LoadTask;
-import bsa.tasks.Main;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.DBException;
 
-public class MainWindow extends JFrame implements ActionListener {
+public class BSAToolMainWindow extends JFrame implements ActionListener {
 
 	private boolean				windowMinimized;
 
@@ -45,11 +45,11 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	private ArchiveFile			archiveFile;
 
-	public MainWindow() {
+	public BSAToolMainWindow() {
 		super("Fallout 3 Archive Utility");
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
-		String propValue = Main.properties.getProperty("window.main.position");
+		String propValue = BSAToolMain.properties.getProperty("window.main.position");
 		if (propValue != null) {
 			int sep = propValue.indexOf(',');
 			int frameX = Integer.parseInt(propValue.substring(0, sep));
@@ -58,7 +58,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		int frameWidth = 800;
 		int frameHeight = 640;
-		propValue = Main.properties.getProperty("window.main.size");
+		propValue = BSAToolMain.properties.getProperty("window.main.size");
 		if (propValue != null) {
 			int sep = propValue.indexOf(',');
 			frameWidth = Integer.parseInt(propValue.substring(0, sep));
@@ -134,13 +134,13 @@ public class MainWindow extends JFrame implements ActionListener {
 			else if (action.equals("extract all"))
 				extractFiles(true);
 		} catch (Throwable exc) {
-			Main.logException("Exception while processing action event", exc);
+			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
 	private void newFile() throws InterruptedException, IOException, DBException {
 		closeFile();
-		String currentDirectory = Main.properties.getProperty("current.directory");
+		String currentDirectory = BSAToolMain.properties.getProperty("current.directory");
 		JFileChooser chooser;
 		if (currentDirectory != null) {
 			File dirFile = new File(currentDirectory);
@@ -151,14 +151,14 @@ public class MainWindow extends JFrame implements ActionListener {
 		} else {
 			chooser = new JFileChooser();
 		}
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("New Archive File");
 		chooser.setApproveButtonText("Create");
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) != 0)
 			return;
 		File file = chooser.getSelectedFile();
-		Main.properties.setProperty("current.directory", file.getParent());
+		BSAToolMain.properties.setProperty("current.directory", file.getParent());
 		if (file.exists()) {
 			int option = JOptionPane.showConfirmDialog(this,
 					file.getPath() + " already exists.  Do you want to overwrite it?", "File already exists", 0);
@@ -169,7 +169,7 @@ public class MainWindow extends JFrame implements ActionListener {
 				return;
 			}
 		}
-		String extractDirectory = Main.properties.getProperty("extract.directory");
+		String extractDirectory = BSAToolMain.properties.getProperty("extract.directory");
 		File dirFile;
 		if (extractDirectory != null) {
 			dirFile = new File(extractDirectory);
@@ -180,14 +180,14 @@ public class MainWindow extends JFrame implements ActionListener {
 		} else {
 			chooser = new JFileChooser();
 		}
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("Select Source Directory");
 		chooser.setApproveButtonText("Select");
 		chooser.setFileSelectionMode(1);
 		if (chooser.showOpenDialog(this) != 0)
 			return;
 		dirFile = chooser.getSelectedFile();
-		Main.properties.setProperty("extract.directory", dirFile.getPath());
+		BSAToolMain.properties.setProperty("extract.directory", dirFile.getPath());
 		StatusDialog statusDialog = new StatusDialog(this, "Creating " + file.getPath());
 		CreateTask createTask = new CreateTask(file, dirFile, statusDialog);
 		createTask.start();
@@ -221,7 +221,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	private void openFile() throws InterruptedException, IOException, DBException {
 		closeFile();
-		String currentDirectory = Main.properties.getProperty("current.directory");
+		String currentDirectory = BSAToolMain.properties.getProperty("current.directory");
 		JFileChooser chooser;
 		if (currentDirectory != null) {
 			File dirFile = new File(currentDirectory);
@@ -232,12 +232,12 @@ public class MainWindow extends JFrame implements ActionListener {
 		} else {
 			chooser = new JFileChooser();
 		}
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("Select Archive File");
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0) {
 			File file = chooser.getSelectedFile();
-			Main.properties.setProperty("current.directory", file.getParent());
+			BSAToolMain.properties.setProperty("current.directory", file.getParent());
 			ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(),
 					file.getName());
 			ArchiveNode archiveNode = new ArchiveNode(archiveFile2);
@@ -296,7 +296,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			}
 
 		}
-		String extractDirectory = Main.properties.getProperty("extract.directory");
+		String extractDirectory = BSAToolMain.properties.getProperty("extract.directory");
 		JFileChooser chooser;
 		if (extractDirectory != null) {
 			File dirFile = new File(extractDirectory);
@@ -307,13 +307,13 @@ public class MainWindow extends JFrame implements ActionListener {
 		} else {
 			chooser = new JFileChooser();
 		}
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("Select Destination Directory");
 		chooser.setApproveButtonText("Select");
 		chooser.setFileSelectionMode(1);
 		if (chooser.showOpenDialog(this) == 0) {
 			File dirFile = chooser.getSelectedFile();
-			Main.properties.setProperty("extract.directory", dirFile.getPath());
+			BSAToolMain.properties.setProperty("extract.directory", dirFile.getPath());
 			StatusDialog statusDialog = new StatusDialog(this, "Extracting files from " + archiveFile.getName());
 			ExtractTask extractTask = new ExtractTask(dirFile, archiveFile, entries, statusDialog);
 			extractTask.start();
@@ -341,12 +341,12 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	private void exitProgram() {
 		if (!windowMinimized) {
-			Point p = Main.mainWindow.getLocation();
-			Dimension d = Main.mainWindow.getSize();
-			Main.properties.setProperty("window.main.position", "" + p.x + "," + p.y);
-			Main.properties.setProperty("window.main.size", "" + d.width + "," + d.height);
+			Point p = BSAToolMain.mainWindow.getLocation();
+			Dimension d = BSAToolMain.mainWindow.getSize();
+			BSAToolMain.properties.setProperty("window.main.position", "" + p.x + "," + p.y);
+			BSAToolMain.properties.setProperty("window.main.size", "" + d.width + "," + d.height);
 		}
-		Main.saveProperties();
+		BSAToolMain.saveProperties();
 		System.exit(0);
 	}
 
@@ -392,7 +392,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			try {
 				exitProgram();
 			} catch (Exception exc) {
-				Main.logException("Exception while closing application window", exc);
+				BSAToolMain.logException("Exception while closing application window", exc);
 			}
 		}
 

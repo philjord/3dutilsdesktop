@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import bsa.BSAToolMain;
 import bsa.gui.StatusDialog;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
@@ -87,11 +88,11 @@ public class ExtractTask extends Thread
 		}
 		catch (IOException exc)
 		{
-			Main.logException("I/O error while extracting files", exc);
+			BSAToolMain.logException("I/O error while extracting files", exc);
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while extracting files", exc);
+			BSAToolMain.logException("Exception while extracting files", exc);
 		}
 		statusDialog.closeDialog(completed);
 	}

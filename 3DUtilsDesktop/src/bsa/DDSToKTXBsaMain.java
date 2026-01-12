@@ -28,7 +28,6 @@ import bsa.gui.StatusDialog;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.CreateTaskDDStoKTXBsa;
 import bsa.tasks.LoadTask;
-import bsa.tasks.Main;
 import bsaio.ArchiveFile;
 import bsaio.DBException;
 
@@ -79,7 +78,7 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 			//might as well open an archive, not much will happen otherwise
 			openFile();
 		} catch (Throwable exc) {
-			Main.logException("Exception while processing action event", exc);
+			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 		 
 	}
@@ -98,7 +97,7 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 		}
 		catch (Throwable exc)
 		{
-			Main.logException("Exception while processing action event", exc);
+			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
@@ -107,7 +106,7 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 		String baseDir = prefs.get("DDSToKTXBsaMain", System.getProperty("user.dir"));
 		JFileChooser  chooser = new JFileChooser(baseDir);
  
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("Select Archive File");
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0)
@@ -137,7 +136,7 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 		String baseDir = prefs.get("DDSToKTXBsaMain", System.getProperty("user.dir"));
 		JFileChooser  chooser = new JFileChooser(baseDir);
  
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(Main.useShellFolder));
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("New Archive File");
 		chooser.setApproveButtonText("Create");
 		chooser.setFileFilter(new ArchiveFileFilter());
