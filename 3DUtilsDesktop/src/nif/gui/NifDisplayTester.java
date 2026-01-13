@@ -62,7 +62,7 @@ import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.SpinTransform;
 import utils.PerFrameUpdateBehavior;
 import utils.PerFrameUpdateBehavior.CallBack;
-import utils.source.BgsmSource;
+import utils.source.MaterialsSource;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
@@ -155,7 +155,7 @@ public class NifDisplayTester
 		materialsSource = new BsaMaterialsSource(bsaFileSet);
 		
 		//TODO: clean up this stupid
-		BgsmSource.setBgsmSource(materialsSource);
+		MaterialsSource.setBgsmSource(materialsSource);
 		
 		//TODO: this entire nif display system needs to simply allow browsing a bsa and use the 
 		// sibling bsa and folders for textures, like the game does, basically one data file location that's searched properly

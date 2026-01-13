@@ -12,7 +12,7 @@ import nif.NifFile;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import tools.swing.DetailsFileChooser;
-import utils.source.BgsmSource;
+import utils.source.MaterialsSource;
 import utils.source.DummyTextureSource;
 import utils.source.file.FileMeshSource;
 
@@ -197,7 +197,7 @@ public class NifLoaderTester
 			{
 				FileMeshSource fileMeshSource = new FileMeshSource();
 				//TODO: this has probably broekn
-				BgsmSource.setBgsmSource(null);
+				MaterialsSource.setBgsmSource(null);
 
 				if (NO_J3D)
 				{
