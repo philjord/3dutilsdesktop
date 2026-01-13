@@ -24,6 +24,8 @@ import esfilemanager.common.data.plugin.PluginRecord;
 import esfilemanager.common.data.record.Record;
 import esfilemanager.common.data.record.Subrecord;
 import esm.EsmFileLocations;
+import esmj3d.data.shared.subrecords.MODL;
+import esmj3d.data.shared.subrecords.OBND;
 import tools.io.ESMByteConvert;
 import tools.swing.TitledJFileChooser;
 
@@ -73,9 +75,10 @@ public class EsmMetaDataToCsv {
 	//REFR,LAND,INFO
 	private static boolean										SKIP_HIGH_COUNT			= true;
 
-	private static boolean										WRITE_CSV				= true;
+	private static boolean										WRITE_CSV				= false;
 
 	private static boolean										WRITE_MD				= true;
+	private static boolean										WRITE_MD_LITTLE_JAVA	= true;
 
 	private static boolean										WRITE_JAVA				= false;
 
@@ -561,7 +564,7 @@ public class EsmMetaDataToCsv {
 			//  but that might just be a real system, in which case at the stats gathering stage I have to do something weird! super weird.
 
 			ArrayList<SubRecTuple> tuples = getSortedSubRecTuples(recType, allSubTypesData);
-			
+
 			String desc = PluginGroup.typeMap.get(recType);
 			if (WRITE_MD) {
 
@@ -595,6 +598,47 @@ public class EsmMetaDataToCsv {
 				}
 
 				mdOut.append("</table></tbody>");
+
+				if (WRITE_MD_LITTLE_JAVA) {
+					mdOut.append("\n\n");
+					//now just for funs create teh exact java code for inside the file to helps a wee cut and pasty operations
+					for (int t = 0; t < tuples.size(); t++) {
+						SubRecTuple tup = tuples.get(t);
+						for (int i = 0; i < tup.items.size(); i++) {
+							SubrecordStats subrecordStats = tup.items.get(i).stat;
+
+							boolean tupleOptional = tup.items.get(i).optional;
+							String tupleDesc = t	+ "-" + (tup.items.size() == 1 ? "" : i)
+												+ (tupleOptional ? "opt" : "");
+							String sr = "C="	+ subrecordStats.C + " sub=" + subrecordStats.subrecordType + " type="
+										+ subrecordStats.dataType + " info=" + tupleDesc + ". "
+										+ subrecordStats.locationDesc + ". " + subrecordStats.desc + "\n";
+
+							
+							String jstr = "// " + sr;
+
+							if (subrecordStats.subrecordType.equals("EDID")) {
+								jstr += "if (sr.getSubrecordType().equals(\""	+ subrecordStats.subrecordType
+										+ "\")){setEDID(bs);}\n\n";
+							} else if (subrecordStats.subrecordType.equals("OBND")) {
+								jstr += "else if (sr.getSubrecordType().equals(\"OBND\")){OBND = new OBND(bs);}\n\n";
+							} else if (subrecordStats.subrecordType.equals("MODL")) {
+								jstr += "else if (sr.getSubrecordType().equals(\"MODL\")){MODL = new MODL(bs);}\n\n";
+							} else if (subrecordStats.subrecordType.equals("MODT")) {
+								jstr += "else if (sr.getSubrecordType().equals(\"MODT\")){MODL.addMODTSub(bs);}\n\n";
+							} else if (subrecordStats.subrecordType.equals("MODS")) {
+								jstr += "else if (sr.getSubrecordType().equals(\"MODS\")){MODL.addMODSSub(bs);}\n\n";
+							} else {
+								jstr += "else if (sr.getSubrecordType().equals(\""	+ subrecordStats.subrecordType
+										+ "\")){}\n\n";
+							}
+							
+							mdOut.append(jstr);
+						}						
+					}
+					mdOut.append("\n\nelse{System.out.println(\"unhandled : \" + sr.getSubrecordType() + \" in record \" + recordData + \" in \" + this);}");
+					
+				}
 
 				//System.out.println("End writing RECO to md file : " + rds.get(0).type);
 				mdOut.flush();
