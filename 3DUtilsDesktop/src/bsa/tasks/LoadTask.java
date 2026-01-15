@@ -21,7 +21,7 @@ import bsaio.displayables.Displayable;
 public class LoadTask extends Thread {
 	private ArchiveFile		archiveFile;
 
-	private ArchiveNode		archiveNode	= null;
+	private ArchiveNode		archiveNode		= null;
 
 	private StatusDialog	statusDialog;
 
@@ -52,84 +52,102 @@ public class LoadTask extends Thread {
 				List<ArchiveEntry> entries = archiveFile.getEntries();
 				DefaultMutableTreeNode parentNode;
 
+				int totalToProcess = entries.size();
+				int i = 0;
 				for (ArchiveEntry entry : entries) {
+					i++;
 					parentNode = archiveNode;
+
 					String path = ((Displayable)entry).getFolderName();
-					if (foldersByName.get(path) != null) {
-						parentNode = foldersByName.get(path);
-					} else {
 
-						int length = path.length();
+					
 
-						int pos = 0;
-						int index1;
-						while (pos < length) {
-							String name;
-							int sep = path.indexOf('\\', pos);
-							if (sep < 0) {
-								name = path.substring(pos);
-								pos = length;
-							} else {
-								name = path.substring(pos, sep);
-								pos = sep + 1;
-							}
+						if (foldersByName.get(path) != null) {
+							parentNode = foldersByName.get(path);
+						} else {
 
-							if (foldersByName.get(name) != null) {
-								parentNode = foldersByName.get(name);
-								break;
-							}
+							int length = path.length();
 
-							int count = parentNode.getChildCount();
-							boolean insert = true;
-							index1 = 0;
-							while (index1 < count) {
-								TreeNode compare = parentNode.getChildAt(index1);
-								if (!(compare instanceof FolderNode))
-									break;
-								FolderNode folderNode = (FolderNode)compare;
-								int diff = name.compareTo(folderNode.getName());
-								if (diff <= 0) {
-									if (diff == 0) {
-										insert = false;
-										parentNode = folderNode;
-									}
+							int pos = 0;
+							int index1;
+							while (pos < length) {
+								String name;
+								int sep = path.indexOf('\\', pos);
+								if (sep < 0) {
+									name = path.substring(pos);
+									pos = length;
+								} else {
+									name = path.substring(pos, sep);
+									pos = sep + 1;
+								}
+
+								if (foldersByName.get(name) != null) {
+									parentNode = foldersByName.get(name);
 									break;
 								}
-								index1++;
+								
+								
+								int count = parentNode.getChildCount();
+								boolean insert = true;
+								index1 = 0;
+								//special crazy case for starfield, always insert never index
+								if (!((Displayable)entry).getFileName().endsWith(".mesh") ||
+										name.equals("geometries")) {
+
+									while (index1 < count) {
+										TreeNode compare = parentNode.getChildAt(index1);
+										if (!(compare instanceof FolderNode))
+											break;
+										FolderNode folderNode = (FolderNode)compare;
+										int diff = name.compareTo(folderNode.getName());
+										if (diff <= 0) {
+											if (diff == 0) {
+												insert = false;
+												parentNode = folderNode;
+											}
+											break;
+										}
+										index1++;
+									}
+
+								}
+								if (insert) {
+									FolderNode folderNode = new FolderNode(name);
+									parentNode.insert(folderNode, index1);
+									parentNode = folderNode;
+									foldersByName.put(path, folderNode);
+								}
+
 							}
 
-							if (insert) {
-								FolderNode folderNode = new FolderNode(name);
-								parentNode.insert(folderNode, index1);
-								parentNode = folderNode;
-								foldersByName.put(path, folderNode);
-							}
 						}
 
-					}
-					
-					
-					FileNode fileNode = new FileNode(entry);
-					
-					//parentNode.add(fileNode);
-					
-					// TODO: this is slow should I do this sort at the end or something?
-					int count = parentNode.getChildCount();
-					String name = ((Displayable)entry).getFileName();
-					int index2;
-					for (index2 = 0; index2 < count; index2++) {
-						TreeNode compare = parentNode.getChildAt(index2);
-						if (!(compare instanceof FileNode))
-							continue;
-						FileNode fileNode2 = (FileNode)compare;
-						if (name.compareTo(((Displayable)fileNode2.getEntry()).getFileName()) < 0)
-							break;
-					}
+						FileNode fileNode = new FileNode(entry);
 
-					
-					parentNode.insert(fileNode, index2);
-					
-				}
+						//special crazy case for starfield, always insert never index
+						if (!((Displayable)entry).getFileName().endsWith(".mesh")) {
+							// TODO: this is slow should I do this sort at the end or something?
+							int count = parentNode.getChildCount();
+							String name = ((Displayable)entry).getFileName();
+							int index2 = 0;
+							for (index2 = 0; index2 < count; index2++) {
+								TreeNode compare = parentNode.getChildAt(index2);
+								if (!(compare instanceof FileNode))
+									continue;
+								FileNode fileNode2 = (FileNode)compare;
+								if (name.compareTo(((Displayable)fileNode2.getEntry()).getFileName()) < 0)
+									break;
+							}
+							parentNode.insert(fileNode, index2);
+						} else {
+							parentNode.add(fileNode);
+
+							if (i % 1000 == 0) {
+								System.out.println("done " + i + " of " + totalToProcess);
+							}
+						}
+					}
+				 
 
 			} else {
 				archiveFile.load();
