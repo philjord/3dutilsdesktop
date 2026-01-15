@@ -156,6 +156,8 @@ public class NifDisplayTester
 		
 		//TODO: clean up this stupid
 		MaterialsSource.setBgsmSource(materialsSource);
+		MeshSource.setMeshSource(meshSource);
+
 		
 		//TODO: this entire nif display system needs to simply allow browsing a bsa and use the 
 		// sibling bsa and folders for textures, like the game does, basically one data file location that's searched properly

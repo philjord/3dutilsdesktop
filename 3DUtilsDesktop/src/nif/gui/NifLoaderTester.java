@@ -13,6 +13,7 @@ import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import tools.swing.DetailsFileChooser;
 import utils.source.MaterialsSource;
+import utils.source.MeshSource;
 import utils.source.DummyTextureSource;
 import utils.source.file.FileMeshSource;
 
@@ -198,6 +199,7 @@ public class NifLoaderTester
 				FileMeshSource fileMeshSource = new FileMeshSource();
 				//TODO: this has probably broekn
 				MaterialsSource.setBgsmSource(null);
+				MeshSource.setMeshSource(fileMeshSource);
 
 				if (NO_J3D)
 				{
