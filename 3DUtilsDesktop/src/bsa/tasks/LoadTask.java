@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 
@@ -16,6 +15,7 @@ import bsa.gui.StatusDialog;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.DBException;
+import bsaio.HashCode;
 import bsaio.displayables.Displayable;
 
 public class LoadTask extends Thread {
@@ -60,8 +60,6 @@ public class LoadTask extends Thread {
 
 					String path = ((Displayable)entry).getFolderName();
 
-					
-
 						if (foldersByName.get(path) != null) {
 							parentNode = foldersByName.get(path);
 						} else {
@@ -85,8 +83,7 @@ public class LoadTask extends Thread {
 									parentNode = foldersByName.get(name);
 									break;
 								}
-								
-								
+		
 								int count = parentNode.getChildCount();
 								boolean insert = true;
 								index1 = 0;
@@ -123,7 +120,7 @@ public class LoadTask extends Thread {
 						}
 
 						FileNode fileNode = new FileNode(entry);
-
+						
 						//special crazy case for starfield, always insert never index
 						if (!((Displayable)entry).getFileName().endsWith(".mesh")) {
 							// TODO: this is slow should I do this sort at the end or something?
@@ -142,7 +139,7 @@ public class LoadTask extends Thread {
 						} else {
 							parentNode.add(fileNode);
 
-							if (i % 1000 == 0) {
+							if (i % 10000 == 0) {
 								System.out.println("done " + i + " of " + totalToProcess);
 							}
 						}
