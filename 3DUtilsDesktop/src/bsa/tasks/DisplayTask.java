@@ -1,7 +1,5 @@
 package bsa.tasks;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
@@ -56,7 +54,7 @@ public class DisplayTask extends Thread {
 		float currentProgress = 0;
 		for (ArchiveEntry entry : entries) {
 			try {
-				InputStream in = ((Displayable)entry).getArchiveFile().getInputStream(entry);
+				//InputStream in = ((Displayable)entry).getArchiveFile().getInputStream(entry);
 
 				String fileName = ((Displayable)entry).getName();
 
@@ -171,7 +169,7 @@ public class DisplayTask extends Thread {
 					}
 				}
 
-				in.close();
+				//in.close();
 
 				filesProcessCount++;
 				float newProgress = filesProcessCount / (float)fileCount;
@@ -181,8 +179,8 @@ public class DisplayTask extends Thread {
 					statusDialog.updateProgress((filesProcessCount * 100) / fileCount);
 					currentProgress = newProgress;
 				}
-			} catch (IOException exc) {
-				BSAToolMain.logException("I/O error while extracting files", exc);
+			//} catch (IOException exc) {
+			//	BSAToolMain.logException("I/O error while extracting files", exc);
 			} catch (Throwable exc) {
 				if (verifyOnly) {
 					exc.printStackTrace();
