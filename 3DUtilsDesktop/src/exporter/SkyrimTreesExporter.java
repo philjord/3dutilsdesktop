@@ -6,7 +6,6 @@ import java.util.prefs.Preferences;
 
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
-import awt.tools3d.resolution.QueryProperties;
 import bsa.gui.BSAFileSetWithStatus;
 import bsaio.ArchiveEntry;
 import bsaio.displayables.Displayable;
@@ -16,6 +15,7 @@ import esfilemanager.utils.source.EsmSoundKeyToName;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import scrollsexplorer.PropertyLoader;
+import tools.QueryProperties;
 import tools.io.ConfigLoader;
 import utils.source.MediaSources;
 

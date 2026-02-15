@@ -28,7 +28,6 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
-import awt.tools3d.resolution.QueryProperties;
 import bsa.gui.BSAFileSetWithStatus;
 import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
@@ -42,6 +41,7 @@ import esmj3d.j3d.cell.J3dICellFactory;
 import scrollsexplorer.GameConfig;
 import scrollsexplorer.PropertyLoader;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
+import tools.QueryProperties;
 import tools.io.ConfigLoader;
 import tools.io.FileCopy;
 import tools.swing.TitledJFileChooser;

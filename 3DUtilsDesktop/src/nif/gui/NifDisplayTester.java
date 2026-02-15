@@ -42,7 +42,6 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
-import awt.tools3d.resolution.QueryProperties;
 import bsa.source.BsaMaterialsSource;
 import bsa.source.BsaTextureSource;
 import bsaio.BSArchiveSetFile;
@@ -56,6 +55,7 @@ import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiGeomMorpherController;
 import nif.j3d.particles.tes3.J3dNiParticles;
 import nif.shader.NiGeometryAppearanceShader;
+import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.Utils3D;

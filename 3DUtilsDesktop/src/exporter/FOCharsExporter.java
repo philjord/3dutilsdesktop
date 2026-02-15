@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.prefs.Preferences;
 
-import awt.tools3d.resolution.QueryProperties;
 import bsa.gui.BSAFileSetWithStatus;
 import bsaio.ArchiveEntry;
 import bsaio.displayables.Displayable;
@@ -13,6 +12,7 @@ import esfilemanager.loader.IESMManager;
 import esfilemanager.utils.source.EsmSoundKeyToName;
 import nif.NifToJ3d;
 import scrollsexplorer.PropertyLoader;
+import tools.QueryProperties;
 import tools.io.ConfigLoader;
 import utils.source.MediaSources;
 

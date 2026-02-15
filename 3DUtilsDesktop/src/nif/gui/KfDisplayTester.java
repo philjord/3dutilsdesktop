@@ -38,7 +38,6 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
-import awt.tools3d.resolution.QueryProperties;
 import bsa.source.BsaTextureSource;
 import bsaio.BSArchiveSetFile;
 import nif.NifToJ3d;
@@ -50,6 +49,7 @@ import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.tes3.J3dNiSequenceStreamHelper;
 import nif.j3d.particles.tes3.J3dNiParticles;
+import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
