@@ -41,9 +41,9 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;
 
+import bsa.gui.BSAFileSetWithStatus;
 import bsa.source.BsaMaterialsSource;
 import bsa.source.BsaTextureSource;
-import bsaio.BSArchiveSetFile;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
@@ -66,43 +66,42 @@ import utils.source.MeshSource;
 import utils.source.TextureSource;
 import utils.source.file.FileMeshSource;
 
-public class NifDisplayTester
-{
-	private SimpleCameraHandler simpleCameraHandler;
+public class NifDisplayTester {
+	private SimpleCameraHandler	simpleCameraHandler;
 
-	private TransformGroup spinTransformGroup = new TransformGroup();
+	private TransformGroup		spinTransformGroup		= new TransformGroup();
 
-	private TransformGroup rotateTransformGroup = new TransformGroup();
+	private TransformGroup		rotateTransformGroup	= new TransformGroup();
 
-	private BranchGroup modelGroup = new BranchGroup();
+	private BranchGroup			modelGroup				= new BranchGroup();
 
-	private SpinTransform spinTransform;
+	private SpinTransform		spinTransform;
 
-	private FileManageBehavior fileManageBehavior = new FileManageBehavior();
+	private FileManageBehavior	fileManageBehavior		= new FileManageBehavior();
 
-	private boolean cycle = true;
+	private boolean				cycle					= true;
 
-	private boolean showHavok = true;
+	private boolean				showHavok				= true;
 
-	private boolean showVisual = true;
+	private boolean				showVisual				= true;
 
-	private boolean animateModel = true;
+	private boolean				animateModel			= true;
 
-	private boolean spin = false;
+	private boolean				spin					= false;
 
-	private long currentFileLoadTime = 0;
+	private long				currentFileLoadTime		= 0;
 
-	private File currentFileTreeRoot;
+	private File				currentFileTreeRoot;
 
-	private File nextFileTreeRoot;
+	private File				nextFileTreeRoot;
 
-	private File currentFileDisplayed;
+	private File				currentFileDisplayed;
 
-	private File nextFileToDisplay;
+	private File				nextFileToDisplay;
 
-	private JSplitPane splitterV = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+	private JSplitPane			splitterV				= new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
-	private JSplitPane splitterH = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+	private JSplitPane			splitterH				= new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
 	//	private NiObjectDisplayTable niObjectDisplayTable = new NiObjectDisplayTable();
 
@@ -110,36 +109,35 @@ public class NifDisplayTester
 
 	//	private NifFileDisplayTree nifFileDisplayTree = new NifFileDisplayTree(niObjectDisplayTable);
 
-	private SimpleUniverse simpleUniverse;
+	private SimpleUniverse		simpleUniverse;
 
-	private Background background = new Background();
+	private Background			background				= new Background();
 
 	//private JFrame win = new JFrame("Nif model");
 
-	private MeshSource meshSource = null;
-	private TextureSource textureSource = null;
-	private BsaMaterialsSource materialsSource = null;
+	private MeshSource			meshSource				= null;
+	private TextureSource		textureSource			= null;
+	private BsaMaterialsSource	materialsSource			= null;
 
-	public NifDisplayTester()
-	{
+	public NifDisplayTester(BSAFileSetWithStatus parentBsaFileSet) {
 
 		//DDS requires no installed java3D
-		if (QueryProperties.checkForInstalledJ3d())
-		{
+		if (QueryProperties.checkForInstalledJ3d()) {
 			System.exit(0);
 		}
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
-		 
+
 		BsaTextureSource.allowedTextureFormats = BsaTextureSource.AllowedTextureFormats.KTX;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 
 		meshSource = new FileMeshSource();
 		//textureSource = new FileTextureSource();
-
-		//Test for android
-		//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
-		BSArchiveSetFile bsaFileSet = new BSArchiveSetFile(new String[] { //
+		BSAFileSetWithStatus bsaFileSet;
+		if (parentBsaFileSet == null) {
+			//Test for android
+			//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
+			bsaFileSet = new BSAFileSetWithStatus(new String[] { //
 				"D:\\game_media\\Morrowind", //use the newer one with a few bits extra in it
 				"D:\\game_media\\Oblivion", //
 				"D:\\game_media\\Fallout3", //
@@ -147,23 +145,21 @@ public class NifDisplayTester
 				"D:\\game_media\\Skyrim", //
 				"D:\\game_media\\Fallout4", //
 				"D:\\game_media\\Fallout76", //
-		}, true);
+			}, true, false);
+		} else {
+			// must create a new set that includes the sibling texture bsas
+			bsaFileSet = new BSAFileSetWithStatus(new String[] {parentBsaFileSet.getName()}, true, false);
+		}
+
 		textureSource = new BsaTextureSource(bsaFileSet);
 		materialsSource = new BsaMaterialsSource(bsaFileSet);
-		
+
 		//TODO: clean up this stupid
 		MaterialsSource.setBgsmSource(materialsSource);
 		MeshSource.setMeshSource(meshSource);
 
-		
-		//TODO: this entire nif display system needs to simply allow browsing a bsa and use the 
-		// sibling bsa and folders for textures, like the game does, basically one data file location that's searched properly
-		// In fact! I need a new texture source and mesh source called a DataFilesSource
-		
-		
 		// for gotye where the texture only appear in the textures folder not in a bsa use this one
 		//textureSource = new FileTextureSource();
-		
 
 		NiGeometryAppearanceShader.OUTPUT_BINDINGS = true;
 
@@ -174,19 +170,15 @@ public class NifDisplayTester
 		final Canvas3D canvas3D = new Canvas3D();
 		canvas3D.getGLWindow().addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyPressed(KeyEvent e)
-			{
-				if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-				{
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 					System.exit(0);
-				}
-				else if(e.getKeyCode() == KeyEvent.VK_SPACE)
-				{
+				} else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 					//to quickly bring up a file to debug put it here!
 					// note you should comment out the light cubes to make it easier to debug the shaders etc
 
-					
-					nifDisplay.nextFileToDisplay = new File("D:\\game_media\\Oblivion\\meshes\\effects\\se01gateway01.nif");
+					nifDisplay.nextFileToDisplay = new File(
+							"D:\\game_media\\Oblivion\\meshes\\effects\\se01gateway01.nif");
 					//nifDisplay.nextFileToDisplay = new File("D:\\game_media\\Morrowind\\Meshes\\e\\magic_area_alt.nif");
 				}
 			}
@@ -194,8 +186,7 @@ public class NifDisplayTester
 
 		canvas3D.getGLWindow().addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowResized(final WindowEvent e)
-			{
+			public void windowResized(final WindowEvent e) {
 				J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
 			}
 		});
@@ -210,9 +201,9 @@ public class NifDisplayTester
 			*/
 		//TODO: these must come form a new one of those ^
 		canvas3D.getGLWindow().setSize(800, 600);
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); 
-		canvas3D.getGLWindow().setPosition((screenSize.width/2)-(canvas3D.getGLWindow().getWidth()/2), 
-				(screenSize.height/2)-(canvas3D.getGLWindow().getHeight()/2));
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		canvas3D.getGLWindow().setPosition((screenSize.width / 2) - (canvas3D.getGLWindow().getWidth() / 2),
+				(screenSize.height / 2) - (canvas3D.getGLWindow().getHeight() / 2));
 		CompressedTextureLoader.setAnisotropicFilterDegree(8);
 
 		//win.setVisible(true);
@@ -235,8 +226,8 @@ public class NifDisplayTester
 
 		spinTransformGroup.addChild(rotateTransformGroup);
 		rotateTransformGroup.addChild(modelGroup);
-		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(), modelGroup,
-				rotateTransformGroup, false);
+		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
+				modelGroup, rotateTransformGroup, false);
 
 		splitterV.setDividerLocation(0.5d);
 		splitterH.setDividerLocation(0.5d);
@@ -299,13 +290,14 @@ public class NifDisplayTester
 		caL1.setColor(lColor1);
 		appL1.setColoringAttributes(caL1);
 		l1Trans.addChild(new Sphere(0.02f, appL1));//oddly refuse to show anything?*/
-//		l1Trans.addChild(new Cube(0.01f));
+		//		l1Trans.addChild(new Cube(0.01f));
 
 		bg.addChild(l1RotTrans);
 
 		Transform3D yAxis = new Transform3D();
 		Alpha rotor1Alpha = new Alpha(-1, Alpha.INCREASING_ENABLE, 0, 0, 4000, 0, 0, 0, 0, 0);
-		RotationInterpolator rotator1 = new RotationInterpolator(rotor1Alpha, l1RotTrans, yAxis, 0.0f, (float) Math.PI * 2.0f);
+		RotationInterpolator rotator1 = new RotationInterpolator(rotor1Alpha, l1RotTrans, yAxis, 0.0f,
+				(float)Math.PI * 2.0f);
 		rotator1.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l1RotTrans.addChild(rotator1);
 
@@ -320,20 +312,21 @@ public class NifDisplayTester
 
 		Color3f lColor2 = new Color3f(0.6f, 0.9f, 0.6f);
 		//NOte default_ffp shader doesn't do spot lights yet
-		SpotLight pLight2 = new SpotLight(true, lColor2, new Point3f(0f, 0f, 0f), new Point3f(3f, 0f, 0f), new Vector3f(0f, -1f, 0f), (float) (Math.PI/8f),
-				48);
+		SpotLight pLight2 = new SpotLight(true, lColor2, new Point3f(0f, 0f, 0f), new Point3f(3f, 0f, 0f),
+				new Vector3f(0f, -1f, 0f), (float)(Math.PI / 8f), 48);
 		pLight2.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
 		pLight2.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l2Trans.addChild(pLight2);
 
-//		l2Trans.addChild(new Cube(0.01f));
+		//		l2Trans.addChild(new Cube(0.01f));
 
 		bg.addChild(l2RotTrans);
 
 		Transform3D yAxis2 = new Transform3D();
 		yAxis2.rotZ(Math.PI / 2f);
 		Alpha rotor2Alpha = new Alpha(-1, Alpha.INCREASING_ENABLE, 0, 0, 6250, 0, 0, 0, 0, 0);
-		RotationInterpolator rotator2 = new RotationInterpolator(rotor2Alpha, l2RotTrans, yAxis2, 0.0f, (float) Math.PI * 2.0f);
+		RotationInterpolator rotator2 = new RotationInterpolator(rotor2Alpha, l2RotTrans, yAxis2, 0.0f,
+				(float)Math.PI * 2.0f);
 		rotator2.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l2RotTrans.addChild(rotator2);
 
@@ -352,7 +345,7 @@ public class NifDisplayTester
 		background.setCapability(Background.ALLOW_APPLICATION_BOUNDS_READ);
 		bg.addChild(background);
 
-//		bg.addChild(new Cube(0.01f));
+		//		bg.addChild(new Cube(0.01f));
 
 		simpleUniverse.addBranchGraph(bg);
 
@@ -383,58 +376,41 @@ public class NifDisplayTester
 
 		//win.setJMenuBar(menuBar);
 		//win.setVisible(true);
-		
-		
-		
+
 	}
 
-	public void setNextFileTreeRoot(File nextFileTreeRoot)
-	{
+	public void setNextFileTreeRoot(File nextFileTreeRoot) {
 		this.nextFileToDisplay = null;
 		this.nextFileTreeRoot = nextFileTreeRoot;
 	}
 
-	public void setNextFileToDisplay(File nextFileToDisplay)
-	{
+	public void setNextFileToDisplay(File nextFileToDisplay) {
 		this.nextFileTreeRoot = null;
 		this.nextFileToDisplay = nextFileToDisplay;
 	}
 
-	private void manage()
-	{
-		 	
-		if (nextFileTreeRoot != null)
-		{
-			if (!nextFileTreeRoot.equals(currentFileTreeRoot))
-			{
+	private void manage() {
+
+		if (nextFileTreeRoot != null) {
+			if (!nextFileTreeRoot.equals(currentFileTreeRoot)) {
 				currentFileTreeRoot = nextFileTreeRoot;
 				currentFileDisplayed = null;
 				currentFileLoadTime = Long.MAX_VALUE;
 			}
-		}
-		else if (currentFileTreeRoot != null)
-		{
-			if (cycle)
-			{
+		} else if (currentFileTreeRoot != null) {
+			if (cycle) {
 				File[] files = currentFileTreeRoot.listFiles(new NifKfFileFilter());
-				if (files.length > 0)
-				{
-					if (currentFileDisplayed == null)
-					{
+				if (files.length > 0) {
+					if (currentFileDisplayed == null) {
 						currentFileDisplayed = files[0];
 						displayNif(currentFileDisplayed);
-					}
-					else if (System.currentTimeMillis() - currentFileLoadTime > 3000)
-					{
+					} else if (System.currentTimeMillis() - currentFileLoadTime > 3000) {
 
 					}
 				}
 			}
-		}
-		else if (nextFileToDisplay != null)
-		{
-			if (!nextFileToDisplay.equals(currentFileDisplayed))
-			{
+		} else if (nextFileToDisplay != null) {
+			if (!nextFileToDisplay.equals(currentFileDisplayed)) {
 				currentFileDisplayed = nextFileToDisplay;
 				displayNif(currentFileDisplayed);
 				nextFileToDisplay = null;
@@ -442,48 +418,38 @@ public class NifDisplayTester
 		}
 	}
 
-	private void toggleSpin()
-	{
+	private void toggleSpin() {
 		spin = !spin;
-		if (spinTransform != null)
-		{
+		if (spinTransform != null) {
 			spinTransform.setEnable(spin);
 		}
 	}
 
-	private void toggleAnimateModel()
-	{
+	private void toggleAnimateModel() {
 		animateModel = !animateModel;
 		update();
 	}
 
-	private void toggleHavok()
-	{
+	private void toggleHavok() {
 		showHavok = !showHavok;
 		update();
 	}
 
-	private void toggleVisual()
-	{
+	private void toggleVisual() {
 		showVisual = !showVisual;
 		update();
 	}
 
-	private void toggleBackground()
-	{
-		if (background.getApplicationBounds() == null)
-		{
+	private void toggleBackground() {
+		if (background.getApplicationBounds() == null) {
 			background.setApplicationBounds(Utils3D.defaultBounds);
-		}
-		else
-		{
+		} else {
 			background.setApplicationBounds(null);
 		}
 
 	}
 
-	private void toggleCycling()
-	{
+	private void toggleCycling() {
 		cycle = !cycle;
 		/*if (cycle)
 		{
@@ -495,18 +461,14 @@ public class NifDisplayTester
 		}*/
 	}
 
-	public void displayNif(File f)
-	{
+	public void displayNif(File f) {
 		System.out.println("Selected file: " + f);
 
-		if (f.isDirectory())
-		{
+		if (f.isDirectory()) {
 			//spinTransform.setEnable(true);
 			//processDir(f);
 			System.out.println("Bad news dir sent into display nif");
-		}
-		else if (f.isFile())
-		{
+		} else if (f.isFile()) {
 			showNif(f.getAbsolutePath(), meshSource, textureSource);
 		}
 
@@ -514,51 +476,55 @@ public class NifDisplayTester
 
 	}
 
-	public void showNif(String filename, MeshSource meshSource, TextureSource textureSource)
-	{
+	public void showNif(String filename, MeshSource meshSource) {
 
 		try {
 			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
-	private BranchGroup hbg;
+	private void showNif(String filename, MeshSource meshSource, TextureSource textureSource) {
 
-	private BranchGroup vbg;
+		try {
+			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-	private void update()
-	{
+	}
+
+	private BranchGroup	hbg;
+
+	private BranchGroup	vbg;
+
+	private void update() {
 		modelGroup.removeAllChildren();
-		if (showHavok)
-		{
+		if (showHavok) {
 			modelGroup.addChild(hbg);
 		}
-		if (showVisual)
-		{
+		if (showVisual) {
 			modelGroup.addChild(vbg);
 		}
 	}
 
-	private ArrayList<J3dNiSkinInstance> allSkins;
-	private NifJ3dSkeletonRoot inputSkeleton;
+	private ArrayList<J3dNiSkinInstance>	allSkins;
+	private NifJ3dSkeletonRoot				inputSkeleton;
 
-	private void display(NifJ3dVisPhysRoot nif)
-	{
+	private void display(NifJ3dVisPhysRoot nif) {
 
-		if (nif != null)
-		{
+		if (nif != null) {
 
 			J3dNiAVObject havok = nif.getHavokRoot();
 
 			// set up an animation thread
-			if (nif.getVisualRoot().getJ3dNiControllerManager() != null && animateModel)
-			{
+			if (nif.getVisualRoot().getJ3dNiControllerManager() != null && animateModel) {
 				//note self cleaning uping
-				ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nif.getVisualRoot().getName(),
-						nif.getVisualRoot().getJ3dNiControllerManager(), havok.getJ3dNiControllerManager());
+				ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(
+						nif.getVisualRoot().getName(), nif.getVisualRoot().getJ3dNiControllerManager(),
+						havok.getJ3dNiControllerManager());
 				controllerInvokerThread.start();
 			}
 
@@ -567,8 +533,7 @@ public class NifDisplayTester
 			hbg = new BranchGroup();
 			hbg.setCapability(BranchGroup.ALLOW_DETACH);
 
-			if (showHavok && havok != null)
-			{
+			if (showHavok && havok != null) {
 				hbg.addChild(havok);
 				modelGroup.addChild(hbg);
 			}
@@ -577,31 +542,25 @@ public class NifDisplayTester
 			vbg.setCapability(BranchGroup.ALLOW_DETACH);
 			vbg.setCapability(Node.ALLOW_BOUNDS_READ);
 
-			if (showVisual)
-			{
+			if (showVisual) {
 				// check for skins!
-				if (NifJ3dSkeletonRoot.isSkeleton(nif.getNiToJ3dData()))
-				{
+				if (NifJ3dSkeletonRoot.isSkeleton(nif.getNiToJ3dData())) {
 					inputSkeleton = new NifJ3dSkeletonRoot(nif.getVisualRoot(), nif.getNiToJ3dData());
 					// create skins from the skeleton and skin nif
 					allSkins = J3dNiSkinInstance.createSkins(nif.getNiToJ3dData(), inputSkeleton);
 
-					if (allSkins.size() > 0)
-					{
+					if (allSkins.size() > 0) {
 						// add the skins to the scene
-						for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
-						{
+						for (J3dNiSkinInstance j3dNiSkinInstance : allSkins) {
 							vbg.addChild(j3dNiSkinInstance);
 						}
 
 						PerFrameUpdateBehavior pub = new PerFrameUpdateBehavior(new CallBack() {
 							@Override
-							public void update()
-							{
+							public void update() {
 								// must be called to update the accum transform
 								inputSkeleton.updateBones();
-								for (J3dNiSkinInstance j3dNiSkinInstance : allSkins)
-								{
+								for (J3dNiSkinInstance j3dNiSkinInstance : allSkins) {
 									j3dNiSkinInstance.processSkinInstance();
 								}
 							}
@@ -611,9 +570,7 @@ public class NifDisplayTester
 						vbg.addChild(pub);
 						modelGroup.addChild(vbg);
 					}
-				}
-				else
-				{
+				} else {
 					vbg.addChild(nif.getVisualRoot());
 
 					//vbg.outputTraversal();
@@ -627,34 +584,29 @@ public class NifDisplayTester
 			spinTransform.setEnable(spin);
 			BranchGroup bgc = new BranchGroup();
 			bgc.setCapability(BranchGroup.ALLOW_DETACH);
-//			bgc.addChild(new Cube(0.01f));
+			//			bgc.addChild(new Cube(0.01f));
 			modelGroup.addChild(bgc);
 
 			//Particles are aut looping for now
 			// if a j3dparticlesystem exists fire it off
 
-			for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues())
-			{
+			for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues()) {
 				if (j3dNiAVObject.getJ3dNiTimeController() != null
-						&& j3dNiAVObject.getJ3dNiTimeController() instanceof J3dNiGeomMorpherController)
-				{
-					((J3dNiGeomMorpherController) j3dNiAVObject.getJ3dNiTimeController()).fireFrameName("Frame_1", true);
+					&& j3dNiAVObject.getJ3dNiTimeController() instanceof J3dNiGeomMorpherController) {
+					((J3dNiGeomMorpherController)j3dNiAVObject.getJ3dNiTimeController()).fireFrameName("Frame_1", true);
 				}
 			}
-		}
-		else
-		{
+		} else {
 			System.out.println("why you give display a null eh?");
 		}
 
 	}
 
-	public static NifDisplayTester nifDisplay;
+	public static NifDisplayTester	nifDisplay;
 
-	private static Preferences prefs;
+	private static Preferences		prefs;
 
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		System.setProperty("sun.awt.noerasebackground", "true");
 		System.setProperty("j3d.cacheAutoComputeBounds", "true");
 		System.setProperty("j3d.defaultReadCapability", "false");
@@ -666,68 +618,56 @@ public class NifDisplayTester
 		prefs = Preferences.userNodeForPackage(NifDisplayTester.class);
 		String baseDir = prefs.get("NifDisplayTester.baseDir", System.getProperty("user.dir"));
 
-		nifDisplay = new NifDisplayTester();
+		nifDisplay = new NifDisplayTester(null);
 
-		
-		
- 		
 		DetailsFileChooser dfc = new DetailsFileChooser(baseDir, new DetailsFileChooser.Listener() {
 			@Override
-			public void directorySelected(File dir)
-			{
+			public void directorySelected(File dir) {
 				prefs.put("NifDisplayTester.baseDir", dir.getPath());
 				nifDisplay.setNextFileTreeRoot(dir);
 			}
 
 			@Override
-			public void fileSelected(File file)
-			{
+			public void fileSelected(File file) {
 				prefs.put("NifDisplayTester.baseDir", file.getPath());
 				nifDisplay.setNextFileToDisplay(file);
 			}
 		});
 
 		dfc.setFileFilter(new FileNameExtensionFilter("Nif", "nif", "btr"));
- 
+
 	}
 
-	private class FileManageBehavior extends Behavior
-	{
+	private class FileManageBehavior extends Behavior {
 
 		private WakeupCondition FPSCriterion = new WakeupOnElapsedFrames(0, false);
 
-		public FileManageBehavior()
-		{
+		public FileManageBehavior() {
 
 			setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 			setEnable(true);
 		}
 
 		@Override
-		public void initialize()
-		{
+		public void initialize() {
 			wakeupOn(FPSCriterion);
 		}
 
 		@Override
-		public void processStimulus(Iterator<WakeupCriterion> criteria)
-		{
+		public void processStimulus(Iterator<WakeupCriterion> criteria) {
 			process();
 			wakeupOn(FPSCriterion);
 		}
 
-		private void process()
-		{
+		private void process() {
 			manage();
 		}
 
 	}
 
-	private class KeyHandler extends KeyAdapter
-	{
+	private class KeyHandler extends KeyAdapter {
 
-		public KeyHandler()
-		{
+		public KeyHandler() {
 			System.out.println("H toggle havok display");
 			System.out.println("L toggle visual display");
 			System.out.println("J toggle spin");
@@ -737,31 +677,19 @@ public class NifDisplayTester
 		}
 
 		@Override
-		public void keyPressed(KeyEvent e)
-		{
+		public void keyPressed(KeyEvent e) {
 
-			if (e.getKeyCode() == KeyEvent.VK_SPACE)
-			{
+			if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 				toggleCycling();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_H)
-			{
+			} else if (e.getKeyCode() == KeyEvent.VK_H) {
 				toggleHavok();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_J)
-			{
+			} else if (e.getKeyCode() == KeyEvent.VK_J) {
 				toggleSpin();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_K)
-			{
+			} else if (e.getKeyCode() == KeyEvent.VK_K) {
 				toggleAnimateModel();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_L)
-			{
+			} else if (e.getKeyCode() == KeyEvent.VK_L) {
 				toggleVisual();
-			}
-			else if (e.getKeyCode() == KeyEvent.VK_P)
-			{
+			} else if (e.getKeyCode() == KeyEvent.VK_P) {
 				toggleBackground();
 			}
 		}

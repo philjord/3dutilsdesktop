@@ -74,8 +74,7 @@ public class DisplayTask extends Thread {
 							}
 							NifToJ3d.clearCache();
 						} else {
-							getNifDisplayer().showNif(fileName, new BsaMeshSource(bsaFileSet),
-									new BsaTextureSource(bsaFileSet));
+							getNifDisplayer().showNif(fileName, new BsaMeshSource(bsaFileSet));
 						}
 					} else if (ext.equals(".dds") || ext.equals(".ktx")) {
 						if (verifyOnly) {
@@ -202,7 +201,7 @@ public class DisplayTask extends Thread {
 
 	private NifDisplayTester getNifDisplayer() {
 		if (nifDisplay == null) {
-			nifDisplay = new NifDisplayTester();
+			nifDisplay = new NifDisplayTester(bsaFileSet);
 		}
 
 		return nifDisplay;
