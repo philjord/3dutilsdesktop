@@ -46,7 +46,7 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 	private ArchiveFile			archiveFile;
 
 	public BSAToolMainWindow() {
-		super("Fallout 3 Archive Utility");
+		super("Bethesda Softworks Archive Utility");
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
 		String propValue = BSAToolMain.properties.getProperty("window.main.position");
@@ -116,6 +116,7 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 		addWindowListener(new ApplicationWindowListener());
 	}
 
+	@Override
 	public void actionPerformed(ActionEvent ae) {
 		try {
 			String action = ae.getActionCommand();
@@ -351,7 +352,7 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 	}
 
 	private void aboutProgram() {
-		String info = "<html>Fallout 3 Archive Utility Version 1.0<br>";
+		String info = "<html>Bethesda Softworks Archive Utility Version 1.0<br>";
 		info += "<br>User name: ";
 		info += System.getProperty("user.name");
 		info += "<br>Home directory: ";
@@ -371,7 +372,7 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 		info += "<br>Java class path: ";
 		info += System.getProperty("java.class.path");
 		info += "</html>";
-		JOptionPane.showMessageDialog(this, info.toString(), "About Fallout 3 Archive Utility", 1);
+		JOptionPane.showMessageDialog(this, info.toString(), "About Bethesda Softworks Archive Utility", 1);
 	}
 
 	private class ApplicationWindowListener extends WindowAdapter {
@@ -380,14 +381,17 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 
 		}
 
+		@Override
 		public void windowIconified(WindowEvent we) {
 			windowMinimized = true;
 		}
 
+		@Override
 		public void windowDeiconified(WindowEvent we) {
 			windowMinimized = false;
 		}
 
+		@Override
 		public void windowClosing(WindowEvent we) {
 			try {
 				exitProgram();

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.prefs.Preferences;
 
-import javax.swing.JMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -69,8 +68,6 @@ import utils.source.file.FileMeshSource;
 
 public class NifDisplayTester
 {
-	public JMenuItem setGraphics = new JMenuItem("Set Graphics");
-
 	private SimpleCameraHandler simpleCameraHandler;
 
 	private TransformGroup spinTransformGroup = new TransformGroup();

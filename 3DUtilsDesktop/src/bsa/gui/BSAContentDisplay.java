@@ -34,6 +34,7 @@ import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
+import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
 public class BSAContentDisplay extends JFrame implements ActionListener
 {
@@ -50,6 +51,8 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 	private JCheckBoxMenuItem cbMenuItem = new JCheckBoxMenuItem("Load all BSA Archives");
 
 	private JCheckBoxMenuItem sopErrMenuItem = new JCheckBoxMenuItem("SOP errors only");
+	
+	public JMenuItem setFolders = new JMenuItem("Set Folders");
 
 	public BSAContentDisplay()
 	{
@@ -94,7 +97,16 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 		menuItem.setActionCommand("exit");
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
-		menuBar.add(menu);
+		menu.add(setFolders);		
+		setFolders.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				setFolders();
+			}
+		});
+		
+		menuBar.add(menu);		
 		menu = new JMenu("Action");
 		menu.setMnemonic(65);
 		menuItem = new JMenuItem("Display Selected Files");
@@ -305,6 +317,13 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 				entries.add(entry);
 		}
 
+	}
+	
+	private void setFolders()
+	{
+		SetBethFoldersDialog setBethFoldersDialog = new SetBethFoldersDialog(this);
+		setBethFoldersDialog.setSize(300, 400);
+		setBethFoldersDialog.setVisible(true);
 	}
 
 	private void exitProgram()
