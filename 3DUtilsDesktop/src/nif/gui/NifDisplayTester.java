@@ -43,6 +43,7 @@ import com.jogamp.newt.event.WindowEvent;
 
 import bsa.gui.BSAFileSetWithStatus;
 import bsa.source.BsaMaterialsSource;
+import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
@@ -64,7 +65,6 @@ import utils.PerFrameUpdateBehavior.CallBack;
 import utils.source.MaterialsSource;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
-import utils.source.file.FileMeshSource;
 
 public class NifDisplayTester {
 	private SimpleCameraHandler	simpleCameraHandler;
@@ -131,7 +131,7 @@ public class NifDisplayTester {
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 
-		meshSource = new FileMeshSource();
+		
 		//textureSource = new FileTextureSource();
 		BSAFileSetWithStatus bsaFileSet;
 		if (parentBsaFileSet == null) {
@@ -145,6 +145,7 @@ public class NifDisplayTester {
 				"D:\\game_media\\Skyrim", //
 				"D:\\game_media\\Fallout4", //
 				"D:\\game_media\\Fallout76", //
+				"D:\\game_media\\Starfield", //
 			}, true, false);
 		} else {
 			// must create a new set that includes the sibling texture bsas
@@ -153,6 +154,7 @@ public class NifDisplayTester {
 
 		textureSource = new BsaTextureSource(bsaFileSet);
 		materialsSource = new BsaMaterialsSource(bsaFileSet);
+		meshSource = new BsaMeshSource(bsaFileSet);
 
 		//TODO: clean up this stupid
 		MaterialsSource.setBgsmSource(materialsSource);
