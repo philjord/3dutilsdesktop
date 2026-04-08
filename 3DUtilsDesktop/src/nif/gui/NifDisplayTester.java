@@ -115,9 +115,9 @@ public class NifDisplayTester {
 
 	//private JFrame win = new JFrame("Nif model");
 
-	private MeshSource			meshSource				= null;
-	private TextureSource		textureSource			= null;
-	private BsaMaterialsSource	materialsSource			= null;
+	private static MeshSource			meshSource				= null;
+	private static TextureSource		textureSource			= null;
+	private static BsaMaterialsSource	materialsSource			= null;
 
 	public NifDisplayTester(BSAFileSetWithStatus parentBsaFileSet) {
 
@@ -132,33 +132,35 @@ public class NifDisplayTester {
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 
 		
-		//textureSource = new FileTextureSource();
-		BSAFileSetWithStatus bsaFileSet;
-		if (parentBsaFileSet == null) {
-			//Test for android
-			//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
-			bsaFileSet = new BSAFileSetWithStatus(new String[] { //
-				"D:\\game_media\\Morrowind", //use the newer one with a few bits extra in it
-				"D:\\game_media\\Oblivion", //
-				"D:\\game_media\\Fallout3", //
-				"D:\\game_media\\FalloutNV", //
-				"D:\\game_media\\Skyrim", //
-				"D:\\game_media\\Fallout4", //
-				"D:\\game_media\\Fallout76", //
-				"D:\\game_media\\Starfield", //
-			}, true, false);
-		} else {
-			// must create a new set that includes the sibling texture bsas
-			bsaFileSet = new BSAFileSetWithStatus(new String[] {parentBsaFileSet.getName()}, true, false);
+		// only load reasources once 
+		if(textureSource == null) {
+			BSAFileSetWithStatus bsaFileSet;
+			if (parentBsaFileSet == null) {
+				//Test for android
+				//BSArchiveSet bsaFileSet = new BSArchiveSet(new String[] { "F:\\game_media\\Oblivion" }, true, false);
+				bsaFileSet = new BSAFileSetWithStatus(new String[] { //
+					"D:\\game_media\\Morrowind", //use the newer one with a few bits extra in it
+					"D:\\game_media\\Oblivion", //
+					"D:\\game_media\\Fallout3", //
+					"D:\\game_media\\FalloutNV", //
+					"D:\\game_media\\Skyrim", //
+					"D:\\game_media\\Fallout4", //
+					"D:\\game_media\\Fallout76", //
+					"D:\\game_media\\Starfield", //
+				}, true, false);
+			} else {
+				// must create a new set that includes the sibling texture bsas
+				bsaFileSet = new BSAFileSetWithStatus(new String[] {parentBsaFileSet.getName()}, true, false);
+			}
+	
+			textureSource = new BsaTextureSource(bsaFileSet);
+			materialsSource = new BsaMaterialsSource(bsaFileSet);
+			meshSource = new BsaMeshSource(bsaFileSet);
+	
+			//TODO: clean up this stupid
+			MaterialsSource.setBgsmSource(materialsSource);
+			MeshSource.setMeshSource(meshSource);
 		}
-
-		textureSource = new BsaTextureSource(bsaFileSet);
-		materialsSource = new BsaMaterialsSource(bsaFileSet);
-		meshSource = new BsaMeshSource(bsaFileSet);
-
-		//TODO: clean up this stupid
-		MaterialsSource.setBgsmSource(materialsSource);
-		MeshSource.setMeshSource(meshSource);
 
 		// for gotye where the texture only appear in the textures folder not in a bsa use this one
 		//textureSource = new FileTextureSource();
