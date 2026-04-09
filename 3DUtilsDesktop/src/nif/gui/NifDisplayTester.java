@@ -65,6 +65,8 @@ import utils.PerFrameUpdateBehavior.CallBack;
 import utils.source.MaterialsSource;
 import utils.source.MeshSource;
 import utils.source.TextureSource;
+import utils.source.file.FileMediaRoots;
+import utils.source.file.FileMeshSource;
 
 public class NifDisplayTester {
 	private SimpleCameraHandler	simpleCameraHandler;
@@ -465,6 +467,10 @@ public class NifDisplayTester {
 		}*/
 	}
 
+	/**
+	 * Only used by non bsa mesh file display so mesh source is forcibly set to the file system root of file 
+	 * @param f
+	 */
 	public void displayNif(File f) {
 		System.out.println("Selected file: " + f);
 
@@ -473,7 +479,9 @@ public class NifDisplayTester {
 			//processDir(f);
 			System.out.println("Bad news dir sent into display nif");
 		} else if (f.isFile()) {
-			showNif(f.getAbsolutePath(), meshSource, textureSource);
+			//special single file mesh source
+			FileMediaRoots.setMediaRoots(new String[] {FileMediaRoots.splitOffMediaRoot(f.getAbsolutePath())[0]});
+			showNif(f.getAbsolutePath(), new FileMeshSource(), textureSource);
 		}
 
 		System.out.println("done");
