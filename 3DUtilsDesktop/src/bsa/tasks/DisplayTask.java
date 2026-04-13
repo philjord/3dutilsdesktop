@@ -62,6 +62,8 @@ public class DisplayTask extends Thread {
 				if (sep >= 0) {
 					String ext = fileName.substring(sep);
 					if (ext.equals(".nif")) {
+						//make life easier
+						BsaTextureSource.allowedTextureFormats	= BsaTextureSource.AllowedTextureFormats.ALL;
 						if (verifyOnly) {
 							NifJ3dVisRoot nr = NifToJ3d.loadShapes(fileName, new BsaMeshSource(bsaFileSet),
 									new DummyTextureSource());
