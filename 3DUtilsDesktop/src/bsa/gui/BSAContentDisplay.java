@@ -11,6 +11,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -34,34 +35,32 @@ import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
+import bsaio.displayables.Displayable;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
-public class BSAContentDisplay extends JFrame implements ActionListener
-{
-	public static boolean LOAD_ALL = true;
+public class BSAContentDisplay extends JFrame implements ActionListener {
+	public static boolean			LOAD_ALL		= true;
 
-	private boolean windowMinimized;
+	private boolean					windowMinimized;
 
-	private JTree tree;
+	private JTree					tree;
 
-	private DefaultTreeModel treeModel;
+	private DefaultTreeModel		treeModel;
 
-	private BSAFileSetWithStatus bsaFileSet;
+	private BSAFileSetWithStatus	bsaFileSet;
 
-	private JCheckBoxMenuItem cbMenuItem = new JCheckBoxMenuItem("Load all BSA Archives");
+	private JCheckBoxMenuItem		cbMenuItem		= new JCheckBoxMenuItem("Load all BSA Archives");
 
-	private JCheckBoxMenuItem sopErrMenuItem = new JCheckBoxMenuItem("SOP errors only");
-	
-	public JMenuItem setFolders = new JMenuItem("Set Folders");
+	private JCheckBoxMenuItem		sopErrMenuItem	= new JCheckBoxMenuItem("SOP errors only");
 
-	public BSAContentDisplay()
-	{
+	public JMenuItem				setFolders		= new JMenuItem("Set Folders");
+
+	public BSAContentDisplay() {
 		super("BSA test display");
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
 		String propValue = BSAToolMain.properties.getProperty("window.main.position");
-		if (propValue != null)
-		{
+		if (propValue != null) {
 			int sep = propValue.indexOf(',');
 			int frameX = Integer.parseInt(propValue.substring(0, sep));
 			int frameY = Integer.parseInt(propValue.substring(sep + 1));
@@ -70,8 +69,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 		int frameWidth = 800;
 		int frameHeight = 640;
 		propValue = BSAToolMain.properties.getProperty("window.main.size");
-		if (propValue != null)
-		{
+		if (propValue != null) {
 			int sep = propValue.indexOf(',');
 			frameWidth = Integer.parseInt(propValue.substring(0, sep));
 			frameHeight = Integer.parseInt(propValue.substring(sep + 1));
@@ -97,16 +95,15 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 		menuItem.setActionCommand("exit");
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
-		menu.add(setFolders);		
+		menu.add(setFolders);
 		setFolders.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
+			public void actionPerformed(ActionEvent arg0) {
 				setFolders();
 			}
 		});
-		
-		menuBar.add(menu);		
+
+		menuBar.add(menu);
 		menu = new JMenu("Action");
 		menu.setMnemonic(65);
 		menuItem = new JMenuItem("Display Selected Files");
@@ -144,19 +141,13 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 		setContentPane(contentPane);
 		addWindowListener(new ApplicationWindowListener());
 
-		tree.addMouseListener(new MouseAdapter()
-		{
+		tree.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent e)
-			{
-				if (e.getClickCount() == 2)
-				{
-					try
-					{
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					try {
 						displayFiles(false, false);
-					}
-					catch (Throwable exc)
-					{
+					} catch (Throwable exc) {
 						BSAToolMain.logException("Exception while processing action event", exc);
 					}
 				}
@@ -165,10 +156,8 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent ae)
-	{
-		try
-		{
+	public void actionPerformed(ActionEvent ae) {
+		try {
 			String action = ae.getActionCommand();
 			if (action.equals("open"))
 				openFile();
@@ -186,65 +175,95 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 				displayFiles(false, true);
 			else if (action.equals("verify all"))
 				displayFiles(true, true);
-		}
-		catch (Throwable exc)
-		{
+		} catch (Throwable exc) {
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
 
-	private void openFile() throws IOException
-	{
+	private void openFile() throws IOException {
 		closeFile();
 		String currentDirectory = BSAToolMain.properties.getProperty("current.directory");
 		JFileChooser chooser;
-		if (currentDirectory != null)
-		{
+		if (currentDirectory != null) {
 			File dirFile = new File(currentDirectory);
 			if (dirFile.exists() && dirFile.isDirectory())
 				chooser = new JFileChooser(dirFile);
 			else
 				chooser = new JFileChooser();
-		}
-		else
-		{
+		} else {
 			chooser = new JFileChooser();
 		}
 		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("Select Archive File");
 		chooser.setFileFilter(new ArchiveFileFilter());
-		if (chooser.showOpenDialog(this) == 0)
-		{
+		if (chooser.showOpenDialog(this) == 0) {
 			File file = chooser.getSelectedFile();
-			BSAToolMain.properties.setProperty("current.directory", file.getParent());
-
-			BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
-
-			if (cbMenuItem.isSelected())
-			{
-				bsaFileSet = new BSAFileSetWithStatus(file.getParent(), true, true);
-			}
-			else
-			{
-				bsaFileSet = new BSAFileSetWithStatus(file.getAbsolutePath(), false, true);
-			}
-
-			DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-			for (MutableTreeNode node : bsaFileSet.nodes)
-			{
-				root.add(node);
-			}
-
-			treeModel = new DefaultTreeModel(root);
-			tree.setModel(treeModel);
-
+			openArchive(file);
 		}
 	}
 
-	private void closeFile() throws IOException
-	{
-		if (bsaFileSet != null)
-		{
+	public void openArchive(File file) {
+		BSAToolMain.properties.setProperty("current.directory", file.getParent());
+
+		BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
+
+		if (cbMenuItem.isSelected()) {
+			bsaFileSet = new BSAFileSetWithStatus(file.getParent(), true, true);
+		} else {
+			bsaFileSet = new BSAFileSetWithStatus(file.getAbsolutePath(), false, true);
+		}
+
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+		for (MutableTreeNode node : bsaFileSet.nodes) {
+			root.add(node);
+		}
+
+		treeModel = new DefaultTreeModel(root);
+		tree.setModel(treeModel);
+	}
+
+	public void setSelectedNode(String[] pathNames) {
+		TreeNode node = (DefaultMutableTreeNode)treeModel.getRoot();
+		
+		node = node.getChildAt(0);// just first archonde deal with multiples later
+
+		for (int level = 0; level < pathNames.length; level++) {
+			DefaultMutableTreeNode foundChild = null;
+			Enumeration<TreeNode> e = (Enumeration<TreeNode>)node.children();
+			TreeNode c = null;
+			while (e.hasMoreElements()) {
+				c = e.nextElement();
+				DefaultMutableTreeNode child = (DefaultMutableTreeNode)c;
+				//Object n = child.getUserObject();
+				if (child instanceof FolderNode) {
+					if (((FolderNode)child).getName().equals(pathNames[level])) {
+						foundChild = child;
+						break;
+					}
+				} else if (child instanceof FileNode) {
+					if (((Displayable)((FileNode)child).getEntry()).getFileName().equals(pathNames[level])) {
+						foundChild = child;
+						break;
+					}
+				}
+			}
+			if (foundChild != null) {
+				System.out.println("child found for " + pathNames[level]);
+				node = c;				
+			}else{
+				System.out.println("no child found for " + pathNames[level]);
+				return;
+			}
+
+		}
+
+		TreePath treePath = new TreePath(treeModel.getPathToRoot(node));
+		tree.expandPath(treePath);
+		tree.setSelectionPath(treePath);
+	}
+
+	private void closeFile() throws IOException {
+		if (bsaFileSet != null) {
 			bsaFileSet.close();
 			bsaFileSet = null;
 		}
@@ -252,84 +271,72 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 		tree.setModel(treeModel);
 	}
 
-	private void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException
-	{
-		if (bsaFileSet == null)
-		{
+	public void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException {
+		if (bsaFileSet == null) {
 			JOptionPane.showMessageDialog(this, "You must open an archive file", "No archive file", 0);
 			return;
 		}
 		StatusDialog statusDialog = new StatusDialog(this, "Displaying files from " + bsaFileSet.getName());
 
 		List<ArchiveEntry> entries = null;
-		if (displayAllFiles)
-		{
+		if (displayAllFiles) {
 			entries = bsaFileSet.getEntries(statusDialog);
-		}
-		else
-		{
+		} else {
 			TreePath treePaths[] = tree.getSelectionPaths();
-			if (treePaths == null)
-			{
-				JOptionPane.showMessageDialog(this, "You must select one or more files to extract", "No files selected", 0);
+			if (treePaths == null) {
+				JOptionPane.showMessageDialog(this, "You must select one or more files to display", "No files selected",
+						0);
 				return;
 			}
 			entries = new ArrayList<ArchiveEntry>(100);
-			for (int i = 0; i < treePaths.length; i++)
-			{
+			for (int i = 0; i < treePaths.length; i++) {
 				TreePath treePath = treePaths[i];
 				Object obj = treePath.getLastPathComponent();
-				if (obj instanceof FolderNode)
-				{
-					addFolderChildren((FolderNode) obj, entries);
+				if (obj instanceof FolderNode) {
+					addFolderChildren((FolderNode)obj, entries);
 					continue;
 				}
 				if (!(obj instanceof FileNode))
 					continue;
-				ArchiveEntry entry = ((FileNode) obj).getEntry();
+				ArchiveEntry entry = ((FileNode)obj).getEntry();
 				if (!entries.contains(entry))
 					entries.add(entry);
 			}
 
 		}
 
-		DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly, sopErrMenuItem.isSelected());
+		DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly,
+				sopErrMenuItem.isSelected());
 		displayTask.start();
 		statusDialog.showDialog();
 		displayTask.join();
 	}
 
-	private void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries)
-	{
+	private void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries) {
 		int count = folderNode.getChildCount();
-		for (int i = 0; i < count; i++)
-		{
+		for (int i = 0; i < count; i++) {
 			TreeNode node = folderNode.getChildAt(i);
-			if (node instanceof FolderNode)
-			{
-				addFolderChildren((FolderNode) node, entries);
+			if (node instanceof FolderNode) {
+				addFolderChildren((FolderNode)node, entries);
 				continue;
 			}
 			if (!(node instanceof FileNode))
 				continue;
-			ArchiveEntry entry = ((FileNode) node).getEntry();
+			ArchiveEntry entry = ((FileNode)node).getEntry();
 			if (!entries.contains(entry))
 				entries.add(entry);
 		}
 
 	}
-	
-	private void setFolders()
-	{
+
+	private void setFolders() {
 		SetBethFoldersDialog setBethFoldersDialog = new SetBethFoldersDialog(this);
 		setBethFoldersDialog.setSize(300, 400);
 		setBethFoldersDialog.setVisible(true);
 	}
 
-	private void exitProgram()
-	{
-		if (!windowMinimized)
-		{
+	private void exitProgram() {
+		if (!windowMinimized) {
 			Point p = BSAToolMain.mainWindow.getLocation();
 			Dimension d = BSAToolMain.mainWindow.getSize();
 			BSAToolMain.properties.setProperty("window.main.position", "" + p.x + "," + p.y);
@@ -339,8 +346,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 		System.exit(0);
 	}
 
-	private void aboutProgram()
-	{
+	private void aboutProgram() {
 		String info = "<html>Phil's reworking of the fallout BSA file manager<br>";
 		info += "<br>User name: ";
 		info += System.getProperty("user.name");
@@ -364,35 +370,27 @@ public class BSAContentDisplay extends JFrame implements ActionListener
 		JOptionPane.showMessageDialog(this, info.toString(), "About This Utility", 1);
 	}
 
-	private class ApplicationWindowListener extends WindowAdapter
-	{
+	private class ApplicationWindowListener extends WindowAdapter {
 
-		public ApplicationWindowListener()
-		{
+		public ApplicationWindowListener() {
 
 		}
 
 		@Override
-		public void windowIconified(WindowEvent we)
-		{
+		public void windowIconified(WindowEvent we) {
 			windowMinimized = true;
 		}
 
 		@Override
-		public void windowDeiconified(WindowEvent we)
-		{
+		public void windowDeiconified(WindowEvent we) {
 			windowMinimized = false;
 		}
 
 		@Override
-		public void windowClosing(WindowEvent we)
-		{
-			try
-			{
+		public void windowClosing(WindowEvent we) {
+			try {
 				exitProgram();
-			}
-			catch (Exception exc)
-			{
+			} catch (Exception exc) {
 				BSAToolMain.logException("Exception while closing application window", exc);
 			}
 		}
