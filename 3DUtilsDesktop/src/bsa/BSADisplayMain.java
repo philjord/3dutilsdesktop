@@ -1,6 +1,5 @@
 package bsa;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -41,6 +40,7 @@ public class BSADisplayMain extends BSAToolMain {
 			properties.setProperty("user.home", System.getProperty("user.home"));
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			SwingUtilities.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					createAndShowGUI();
 				}
@@ -50,14 +50,7 @@ public class BSADisplayMain extends BSAToolMain {
 		}
 	}
 
-	public static String	ARCHIVE_TO_AUTO_OPEN	=								// 
-			"D:\\game_media\\Starfield\\Data\\Starfield - Meshes01.ba2";
-	//null;
-	public static String[] 	FILEPATH_TO_ACTION			=								//
-			//new String[] {"meshes","setdressing","akila","ak_soccer","ak_soccer_ball_01.nif"};	
-			new String[] {"meshes","setdressing","akila","ak_bag_produce01","ak_bag_produce01_close.nif"};
-			//new String[] {"meshes","architecture","catwalks","industrial","catindwalksmstaira_lgbot_5m.nif"};	
-			//null;
+	
 
 	public static void createAndShowGUI() {
 		try {
@@ -65,20 +58,6 @@ public class BSADisplayMain extends BSAToolMain {
 			mainWindow.pack();
 			mainWindow.setLocationRelativeTo(null);
 			mainWindow.setVisible(true);
-			if (ARCHIVE_TO_AUTO_OPEN == null) {
-				//might as well open an archive, not much will happen otherwise
-				((BSAContentDisplay)mainWindow).actionPerformed(new ActionEvent(mainWindow, -1, "open"));
-			} else {
-				//For testing purposes we can place bsa fiel selection then nif file clicking here
-				File arhcive = new File(ARCHIVE_TO_AUTO_OPEN);
-				((BSAContentDisplay)mainWindow).openArchive(arhcive);
-				//synchronous call so now loaded and I can fire the file double click now
-				if (FILEPATH_TO_ACTION != null) {
-					((BSAContentDisplay)mainWindow).setSelectedNode(FILEPATH_TO_ACTION);
-					((BSAContentDisplay)mainWindow).displayFiles(false, false);
-				}
-			}
-
 		} catch (Throwable exc) {
 			logException("Exception while initializing application window", exc);
 		}

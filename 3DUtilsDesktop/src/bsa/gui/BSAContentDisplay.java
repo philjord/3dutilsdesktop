@@ -52,6 +52,10 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 	private JCheckBoxMenuItem		cbMenuItem		= new JCheckBoxMenuItem("Load all BSA Archives");
 
 	private JCheckBoxMenuItem		sopErrMenuItem	= new JCheckBoxMenuItem("SOP errors only");
+		
+	private JCheckBoxMenuItem		autoOpenArchiveMenuItem	= new JCheckBoxMenuItem("autoOpenArchive");
+	
+	private JCheckBoxMenuItem		autoDisplayMenuItem	= new JCheckBoxMenuItem("autoDisplay");
 
 	public JMenuItem				setFolders		= new JMenuItem("Set Folders");
 
@@ -83,6 +87,12 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		cbMenuItem.setSelected(loadAll);
 		menu.add(cbMenuItem);
 		menu.add(sopErrMenuItem);
+		boolean autoOpenArchive = Boolean.parseBoolean(BSAToolMain.properties.getProperty("autoOpenArchive"));
+		autoOpenArchiveMenuItem.setSelected(autoOpenArchive);
+		menu.add(autoOpenArchiveMenuItem);
+		boolean autoDisplay = Boolean.parseBoolean(BSAToolMain.properties.getProperty("autoDisplay"));
+		autoDisplayMenuItem.setSelected(autoDisplay);
+		menu.add(autoDisplayMenuItem);
 		JMenuItem menuItem = new JMenuItem("Open Archive");
 		menuItem.setActionCommand("open");
 		menuItem.addActionListener(this);
@@ -123,6 +133,11 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
 		menuBar.add(menu);
+		menuItem = new JMenuItem("Set Auto Display");
+		menuItem.setActionCommand("auto display");
+		menuItem.addActionListener(this);
+		menu.add(menuItem);
+		menuBar.add(menu);
 		menu = new JMenu("Help");
 		menu.setMnemonic(72);
 		menuItem = new JMenuItem("About");
@@ -153,6 +168,28 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 				}
 			}
 		});
+		
+		//auto open gear
+		if (autoOpenArchive) {
+			String fname = BSAToolMain.properties.getProperty("last opened archive");
+			if (fname != null) {
+				File arhcive = new File(fname);
+				openArchive(arhcive);
+				//synchronous call so now loaded and I can fire the file double click now
+				if (autoDisplay) {
+					String aname = BSAToolMain.properties.getProperty("auto open archive entry");
+					if (aname != null) {
+						setSelectedNode(aname.split("/"));
+						try {
+							displayFiles(false, false);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		
 	}
 
 	@Override
@@ -174,7 +211,9 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 			else if (action.equals("verify selected"))
 				displayFiles(false, true);
 			else if (action.equals("verify all"))
-				displayFiles(true, true);
+				displayFiles(true, true);			
+			else if (action.equals("auto display"))
+				setAutoDisplay();
 		} catch (Throwable exc) {
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
@@ -204,8 +243,8 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 	public void openArchive(File file) {
 		BSAToolMain.properties.setProperty("current.directory", file.getParent());
-
-		BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
+		BSAToolMain.properties.setProperty("last opened archive", file.getAbsolutePath());
+		
 
 		if (cbMenuItem.isSelected()) {
 			bsaFileSet = new BSAFileSetWithStatus(file.getParent(), true, true);
@@ -220,6 +259,18 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 		treeModel = new DefaultTreeModel(root);
 		tree.setModel(treeModel);
+	}
+	
+	private void setAutoDisplay() {
+		String archiveEntryName = "";
+		Object[] stp = tree.getSelectionPath().getPath();
+		// first is root, then archive name
+		for (int i = 2; i < stp.length; i++) {
+			Object pc = stp[i];
+			archiveEntryName = archiveEntryName + (i == 2 ? "" : "/") + pc;
+		}
+		System.out.println("auto open archive entry = " + archiveEntryName);
+		BSAToolMain.properties.setProperty("auto open archive entry", archiveEntryName);
 	}
 
 	public void setSelectedNode(String[] pathNames) {
@@ -341,6 +392,11 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 			Dimension d = BSAToolMain.mainWindow.getSize();
 			BSAToolMain.properties.setProperty("window.main.position", "" + p.x + "," + p.y);
 			BSAToolMain.properties.setProperty("window.main.size", "" + d.width + "," + d.height);
+			
+			BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
+			BSAToolMain.properties.setProperty("autoOpenArchive", Boolean.toString(autoOpenArchiveMenuItem.isSelected()));
+			BSAToolMain.properties.setProperty("autoDisplay", Boolean.toString(autoDisplayMenuItem.isSelected()));
+			
 		}
 		BSAToolMain.saveProperties();
 		System.exit(0);
