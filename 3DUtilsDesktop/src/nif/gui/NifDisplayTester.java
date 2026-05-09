@@ -129,7 +129,6 @@ public class NifDisplayTester {
 		}
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
 
-		BsaTextureSource.allowedTextureFormats = BsaTextureSource.AllowedTextureFormats.KTX;
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 

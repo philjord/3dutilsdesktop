@@ -35,11 +35,10 @@ import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
-import bsaio.displayables.Displayable;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
 public class BSAContentDisplay extends JFrame implements ActionListener {
-	public static boolean			LOAD_ALL		= true;
+	public static boolean			LOAD_ALL				= true;
 
 	private boolean					windowMinimized;
 
@@ -49,15 +48,15 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 	private BSAFileSetWithStatus	bsaFileSet;
 
-	private JCheckBoxMenuItem		cbMenuItem		= new JCheckBoxMenuItem("Load all BSA Archives");
+	private JCheckBoxMenuItem		cbMenuItem				= new JCheckBoxMenuItem("Load all BSA Archives");
 
-	private JCheckBoxMenuItem		sopErrMenuItem	= new JCheckBoxMenuItem("SOP errors only");
-		
+	private JCheckBoxMenuItem		sopErrMenuItem			= new JCheckBoxMenuItem("SOP errors only");
+
 	private JCheckBoxMenuItem		autoOpenArchiveMenuItem	= new JCheckBoxMenuItem("autoOpenArchive");
-	
-	private JCheckBoxMenuItem		autoDisplayMenuItem	= new JCheckBoxMenuItem("autoDisplay");
 
-	public JMenuItem				setFolders		= new JMenuItem("Set Folders");
+	private JCheckBoxMenuItem		autoDisplayMenuItem		= new JCheckBoxMenuItem("autoDisplay");
+
+	public JMenuItem				setFolders				= new JMenuItem("Set Folders");
 
 	public BSAContentDisplay() {
 		super("BSA test display");
@@ -168,7 +167,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 				}
 			}
 		});
-		
+
 		//auto open gear
 		if (autoOpenArchive) {
 			String fname = BSAToolMain.properties.getProperty("last opened archive");
@@ -179,17 +178,19 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 				if (autoDisplay) {
 					String aname = BSAToolMain.properties.getProperty("auto open archive entry");
 					if (aname != null) {
-						setSelectedNode(aname.split("/"));
-						try {
-							displayFiles(false, false);
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
+						System.out.println("Auto opening node: " + aname);
+						if (setSelectedNode(aname.split("/"))) {
+							try {
+								displayFiles(false, false);
+							} catch (InterruptedException e1) {
+								e1.printStackTrace();
+							}
 						}
 					}
 				}
 			}
 		}
-		
+
 	}
 
 	@Override
@@ -211,7 +212,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 			else if (action.equals("verify selected"))
 				displayFiles(false, true);
 			else if (action.equals("verify all"))
-				displayFiles(true, true);			
+				displayFiles(true, true);
 			else if (action.equals("auto display"))
 				setAutoDisplay();
 		} catch (Throwable exc) {
@@ -244,7 +245,6 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 	public void openArchive(File file) {
 		BSAToolMain.properties.setProperty("current.directory", file.getParent());
 		BSAToolMain.properties.setProperty("last opened archive", file.getAbsolutePath());
-		
 
 		if (cbMenuItem.isSelected()) {
 			bsaFileSet = new BSAFileSetWithStatus(file.getParent(), true, true);
@@ -260,23 +260,21 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		treeModel = new DefaultTreeModel(root);
 		tree.setModel(treeModel);
 	}
-	
+
 	private void setAutoDisplay() {
 		String archiveEntryName = "";
 		Object[] stp = tree.getSelectionPath().getPath();
-		// first is root, then archive name
-		for (int i = 2; i < stp.length; i++) {
+		// first is root, not included, then archive name, included
+		for (int i = 1; i < stp.length; i++) {
 			Object pc = stp[i];
-			archiveEntryName = archiveEntryName + (i == 2 ? "" : "/") + pc;
+			archiveEntryName = archiveEntryName + (i == 1 ? "" : "/") + pc.toString();
 		}
-		System.out.println("auto open archive entry = " + archiveEntryName);
+		System.out.println("Auto open archive entry = " + archiveEntryName);
 		BSAToolMain.properties.setProperty("auto open archive entry", archiveEntryName);
 	}
 
-	public void setSelectedNode(String[] pathNames) {
+	public boolean setSelectedNode(String[] pathNames) {
 		TreeNode node = (DefaultMutableTreeNode)treeModel.getRoot();
-		
-		node = node.getChildAt(0);// just first archonde deal with multiples later
 
 		for (int level = 0; level < pathNames.length; level++) {
 			DefaultMutableTreeNode foundChild = null;
@@ -285,25 +283,17 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 			while (e.hasMoreElements()) {
 				c = e.nextElement();
 				DefaultMutableTreeNode child = (DefaultMutableTreeNode)c;
-				//Object n = child.getUserObject();
-				if (child instanceof FolderNode) {
-					if (((FolderNode)child).getName().equals(pathNames[level])) {
-						foundChild = child;
-						break;
-					}
-				} else if (child instanceof FileNode) {
-					if (((Displayable)((FileNode)child).getEntry()).getFileName().equals(pathNames[level])) {
-						foundChild = child;
-						break;
-					}
+				if (child.toString().equals(pathNames[level])) {
+					foundChild = child;
+					break;
 				}
 			}
 			if (foundChild != null) {
 				System.out.println("child found for " + pathNames[level]);
-				node = c;				
-			}else{
+				node = c;
+			} else {
 				System.out.println("no child found for " + pathNames[level]);
-				return;
+				return false;
 			}
 
 		}
@@ -311,6 +301,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		TreePath treePath = new TreePath(treeModel.getPathToRoot(node));
 		tree.expandPath(treePath);
 		tree.setSelectionPath(treePath);
+		return true;
 	}
 
 	private void closeFile() throws IOException {
@@ -392,11 +383,12 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 			Dimension d = BSAToolMain.mainWindow.getSize();
 			BSAToolMain.properties.setProperty("window.main.position", "" + p.x + "," + p.y);
 			BSAToolMain.properties.setProperty("window.main.size", "" + d.width + "," + d.height);
-			
+
 			BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
-			BSAToolMain.properties.setProperty("autoOpenArchive", Boolean.toString(autoOpenArchiveMenuItem.isSelected()));
+			BSAToolMain.properties.setProperty("autoOpenArchive",
+					Boolean.toString(autoOpenArchiveMenuItem.isSelected()));
 			BSAToolMain.properties.setProperty("autoDisplay", Boolean.toString(autoDisplayMenuItem.isSelected()));
-			
+
 		}
 		BSAToolMain.saveProperties();
 		System.exit(0);
