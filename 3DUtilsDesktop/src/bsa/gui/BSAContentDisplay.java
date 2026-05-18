@@ -2,6 +2,9 @@ package bsa.gui;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -23,6 +26,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -35,6 +39,7 @@ import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
+import compressedtexture.DDSImage;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
 public class BSAContentDisplay extends JFrame implements ActionListener {
@@ -57,9 +62,17 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 	private JCheckBoxMenuItem		autoDisplayMenuItem		= new JCheckBoxMenuItem("autoDisplay");
 
 	public JMenuItem				setFolders				= new JMenuItem("Set Folders");
+	
+	public JPopupMenu				treeNodePopup			= new JPopupMenu("Howdy");
+	public JMenuItem				copyPathPopup			= new JMenuItem("copyPathPopup");
+	public JMenuItem				setAutoLoadPopup		= new JMenuItem("setAutoLoadPopup");
 
 	public BSAContentDisplay() {
 		super("BSA test display");
+		
+		DDSImage.OUTPUT_IMAGE_DEBUG = true;
+		
+		
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
 		String propValue = BSAToolMain.properties.getProperty("window.main.position");
@@ -145,6 +158,30 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		menu.add(menuItem);
 		menuBar.add(menu);
 		setJMenuBar(menuBar);
+		
+		
+			
+		copyPathPopup.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String archiveEntryName = getSelectNodeString();
+				System.out.println("Archive entry = " + archiveEntryName);
+				StringSelection selection = new StringSelection(archiveEntryName);
+				Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+				clipboard.setContents(selection, selection);
+			}
+		});
+		treeNodePopup.add(copyPathPopup);
+
+		setAutoLoadPopup.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setAutoDisplay();
+			}
+		});
+		treeNodePopup.add(setAutoLoadPopup);
+		
+		
 		treeModel = new DefaultTreeModel(new ArchiveNode());
 		tree = new JTree(treeModel);
 		JScrollPane scrollPane = new JScrollPane(tree);
@@ -242,6 +279,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		}
 	}
 
+	
 	public void openArchive(File file) {
 		BSAToolMain.properties.setProperty("current.directory", file.getParent());
 		BSAToolMain.properties.setProperty("last opened archive", file.getAbsolutePath());
@@ -259,9 +297,23 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 		treeModel = new DefaultTreeModel(root);
 		tree.setModel(treeModel);
+		
+		// add the popup right click
+		tree.setComponentPopupMenu(treeNodePopup);
+		// make it select a node on right click too, note it is a poor performer, need to dismiss prior pop up
+		MouseAdapter ml = new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+				if (selPath != null) {
+					tree.setSelectionPath(selPath);
+				}
+			}
+		};
+		tree.addMouseListener(ml);
 	}
 
-	private void setAutoDisplay() {
+	private String getSelectNodeString() {		
 		String archiveEntryName = "";
 		Object[] stp = tree.getSelectionPath().getPath();
 		// first is root, not included, then archive name, included
@@ -269,13 +321,18 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 			Object pc = stp[i];
 			archiveEntryName = archiveEntryName + (i == 1 ? "" : "/") + pc.toString();
 		}
+		return archiveEntryName;
+	}
+
+	private void setAutoDisplay() {
+		String archiveEntryName = getSelectNodeString();
 		System.out.println("Auto open archive entry = " + archiveEntryName);
 		BSAToolMain.properties.setProperty("auto open archive entry", archiveEntryName);
 	}
 
 	public boolean setSelectedNode(String[] pathNames) {
 		TreeNode node = (DefaultMutableTreeNode)treeModel.getRoot();
-
+		
 		for (int level = 0; level < pathNames.length; level++) {
 			DefaultMutableTreeNode foundChild = null;
 			Enumeration<TreeNode> e = (Enumeration<TreeNode>)node.children();
@@ -289,10 +346,10 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 				}
 			}
 			if (foundChild != null) {
-				System.out.println("child found for " + pathNames[level]);
+				//System.out.println("child found for " + pathNames[level]);
 				node = c;
 			} else {
-				System.out.println("no child found for " + pathNames[level]);
+				//System.out.println("no child found for " + pathNames[level]);
 				return false;
 			}
 

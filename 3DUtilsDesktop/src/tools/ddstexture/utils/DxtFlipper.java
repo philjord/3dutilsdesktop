@@ -184,14 +184,14 @@ public class DxtFlipper
 		else if (pixelFormat == DDSImage.D3DFMT_R8G8B8 || //
 				pixelFormat == DDSImage.D3DFMT_A8R8G8B8 || //
 				pixelFormat == DDSImage.D3DFMT_X8R8G8B8 || //
-				pixelFormat == DDSImage.DDS_A16B16G16R16F)
+				pixelFormat == DDSImage.D3DFMT_A16B16G16R16F)
 		{
 			ByteBuffer buffer = imageInfo.getData();
 
 			int w = imageInfo.getWidth();
 			int h = imageInfo.getHeight();
 
-			int widBytes = w * (pixelFormat == DDSImage.D3DFMT_R8G8B8 ? 3 : pixelFormat == DDSImage.DDS_A16B16G16R16F ? 8 : 4);
+			int widBytes = w * (pixelFormat == DDSImage.D3DFMT_R8G8B8 ? 3 : pixelFormat == DDSImage.D3DFMT_A16B16G16R16F ? 8 : 4);
 
 			byte[] s = buffer.array();
 			byte[] d = new byte[buffer.limit()];
