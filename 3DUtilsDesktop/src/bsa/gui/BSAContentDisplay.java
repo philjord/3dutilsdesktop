@@ -39,7 +39,6 @@ import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
-import compressedtexture.DDSImage;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
 public class BSAContentDisplay extends JFrame implements ActionListener {
@@ -69,8 +68,6 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 	public BSAContentDisplay() {
 		super("BSA test display");
-		
-		DDSImage.OUTPUT_IMAGE_DEBUG = true;
 		
 		
 		windowMinimized = false;

@@ -14,6 +14,7 @@ import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
 import bsaio.ArchiveEntry;
 import bsaio.displayables.Displayable;
+import compressedtexture.DDSImage;
 import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
@@ -91,6 +92,8 @@ public class DisplayTask extends Thread {
 
 							CompressedTextureLoader.clearCache();
 						} else {
+							// if we are looking at an image we probably wants its info
+							DDSImage.OUTPUT_IMAGE_DEBUG = true;
 							Texture2DDisplay.showImageInShape(fileName,
 									new BsaTextureSource(bsaFileSet).getTexture(fileName));
 						}
