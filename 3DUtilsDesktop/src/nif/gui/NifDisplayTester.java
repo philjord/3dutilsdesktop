@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.prefs.Preferences;
 
-import javax.swing.JSplitPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jogamp.java3d.Alpha;
 import org.jogamp.java3d.AmbientLight;
-import org.jogamp.java3d.Background;
 import org.jogamp.java3d.Behavior;
 import org.jogamp.java3d.BoundingSphere;
 import org.jogamp.java3d.BranchGroup;
@@ -30,6 +28,7 @@ import org.jogamp.java3d.WakeupCondition;
 import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
+import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
 import org.jogamp.vecmath.Point3d;
@@ -58,7 +57,6 @@ import nif.shader.NiGeometryAppearanceShader;
 import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.SimpleCameraHandler;
-import tools3d.utils.Utils3D;
 import tools3d.utils.scenegraph.SpinTransform;
 import utils.PerFrameUpdateBehavior;
 import utils.PerFrameUpdateBehavior.CallBack;
@@ -101,21 +99,13 @@ public class NifDisplayTester {
 
 	private File				nextFileToDisplay;
 
-	private JSplitPane			splitterV				= new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-
-	private JSplitPane			splitterH				= new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-
-	//	private NiObjectDisplayTable niObjectDisplayTable = new NiObjectDisplayTable();
-
-	//	private NifFileDisplayTable nifFileDisplayTable = new NifFileDisplayTable(niObjectDisplayTable);
-
-	//	private NifFileDisplayTree nifFileDisplayTree = new NifFileDisplayTree(niObjectDisplayTable);
-
 	private SimpleUniverse		simpleUniverse;
 
-	private Background			background				= new Background();
 
-	//private JFrame win = new JFrame("Nif model");
+	private AmbientLight ambLight;
+	private DirectionalLight dirLight;
+	private PointLight pointLight;
+	private SpotLight spotLight;
 
 	private static MeshSource			meshSource				= null;
 	private static TextureSource		textureSource			= null;
@@ -178,14 +168,20 @@ public class NifDisplayTester {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 					System.exit(0);
-				} else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					//to quickly bring up a file to debug put it here!
-					// note you should comment out the light cubes to make it easier to debug the shaders etc
-
-					nifDisplay.nextFileToDisplay = new File(
-							"D:\\game_media\\Oblivion\\meshes\\effects\\se01gateway01.nif");
-					//nifDisplay.nextFileToDisplay = new File("D:\\game_media\\Morrowind\\Meshes\\e\\magic_area_alt.nif");
+				} else if (e.getKeyCode() == KeyEvent.VK_1) {
+					ambLight.setEnable(!ambLight.getEnable());
+					System.out.println("ambLight " + ambLight.getEnable());
+				} else if (e.getKeyCode() == KeyEvent.VK_2) {
+					dirLight.setEnable(!dirLight.getEnable());
+					System.out.println("dirLight " + dirLight.getEnable());
+				} else if (e.getKeyCode() == KeyEvent.VK_3) {
+					pointLight.setEnable(!pointLight.getEnable());
+					System.out.println("pointLight " + pointLight.getEnable());
+				} else if (e.getKeyCode() == KeyEvent.VK_4) {
+					spotLight.setEnable(!spotLight.getEnable());
+					System.out.println("spotLight " + spotLight.getEnable());
 				}
+				
 			}
 		});
 
@@ -205,6 +201,10 @@ public class NifDisplayTester {
 				DDSTextureLoader.setAnisotropicFilterDegree(gs.getAnisotropicFilterDegree());
 			*/
 		//TODO: these must come form a new one of those ^
+		
+		
+		
+		//FIXME: I should record the last location and size and reuse them if they are sensible
 		canvas3D.getGLWindow().setSize(800, 600);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		canvas3D.getGLWindow().setPosition((screenSize.width / 2) - (canvas3D.getGLWindow().getWidth() / 2),
@@ -213,29 +213,13 @@ public class NifDisplayTester {
 
 		//win.setVisible(true);
 		canvas3D.addNotify();
-
-		/*	JFrame dataF = new JFrame();
-			dataF.getContentPane().setLayout(new GridLayout(1, 1));
 		
-			splitterH.setTopComponent(nifFileDisplayTree);
-			splitterH.setBottomComponent(nifFileDisplayTable);
-		
-			splitterV.setTopComponent(splitterH);
-			splitterV.setBottomComponent(niObjectDisplayTable);
-		
-			dataF.getContentPane().add(splitterV);
-		
-			dataF.setSize(900, 900);
-			dataF.setLocation(400, 0);
-			dataF.setVisible(true);*/
 
 		spinTransformGroup.addChild(rotateTransformGroup);
 		rotateTransformGroup.addChild(modelGroup);
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
 				modelGroup, rotateTransformGroup, false);
 
-		splitterV.setDividerLocation(0.5d);
-		splitterH.setDividerLocation(0.5d);
 
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -245,14 +229,17 @@ public class NifDisplayTester {
 
 		// Create ambient light	and add it
 		Color3f alColor = new Color3f(0.5f, 0.5f, 0.5f);
-		//Color3f alColor = new Color3f(0.5f, 0.5f, 0.5f);
-		AmbientLight ambLight = new AmbientLight(true, alColor);
+		ambLight = new AmbientLight(true, alColor);
 		ambLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		ambLight.setCapability(Light.ALLOW_STATE_WRITE);
+		ambLight.setEnable(true);
 		ambLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 
 		Color3f dlColor = new Color3f(0.9f, 0.9f, 0.85f);//slightly yellow
-		DirectionalLight dirLight = new DirectionalLight(true, dlColor, new Vector3f(0f, -1f, 0f));
+		dirLight = new DirectionalLight(true, dlColor, new Vector3f(0f, -1f, 0f));
 		dirLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		dirLight.setCapability(Light.ALLOW_STATE_WRITE);
+		dirLight.setEnable(true);
 		dirLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 
 		BranchGroup bg = new BranchGroup();
@@ -285,11 +272,14 @@ public class NifDisplayTester {
 		l1RotTrans.addChild(l1Trans);
 
 		Color3f lColor1 = new Color3f(0.6f, 0.6f, 0.9f);
-		PointLight pLight = new PointLight(true, lColor1, new Point3f(0f, 0f, 0f), new Point3f(1f, 0f, 0f));
-		pLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
-		pLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
-		l1Trans.addChild(pLight);
-
+		pointLight = new PointLight(true, lColor1, new Point3f(0f, 0f, 0f), new Point3f(1f, 0f, 0f));
+		pointLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		pointLight.setCapability(Light.ALLOW_STATE_WRITE);
+		pointLight.setEnable(true);
+		pointLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
+		l1Trans.addChild(pointLight);
+		l1Trans.addChild(new Cube(0.01f, lColor1.x, lColor1.y, lColor1.z));
+		
 		/*Appearance appL1 = new SimpleShaderAppearance(false, false);
 		ColoringAttributes caL1 = new ColoringAttributes();
 		caL1.setColor(lColor1);
@@ -300,7 +290,7 @@ public class NifDisplayTester {
 		bg.addChild(l1RotTrans);
 
 		Transform3D yAxis = new Transform3D();
-		Alpha rotor1Alpha = new Alpha(-1, Alpha.INCREASING_ENABLE, 0, 0, 4000, 0, 0, 0, 0, 0);
+		Alpha rotor1Alpha = new Alpha(-1, Alpha.INCREASING_ENABLE, 0, 0, 10000, 0, 0, 0, 0, 0);
 		RotationInterpolator rotator1 = new RotationInterpolator(rotor1Alpha, l1RotTrans, yAxis, 0.0f,
 				(float)Math.PI * 2.0f);
 		rotator1.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
@@ -310,30 +300,37 @@ public class NifDisplayTester {
 		TransformGroup l2RotTrans = new TransformGroup();
 		l2RotTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		Transform3D t3 = new Transform3D();
-		Vector3f lPos2 = new Vector3f(0.0f, 0.0f, 2.0f);
+		Vector3f lPos2 = new Vector3f(0.0f, 0.0f, 2.5f);
 		t3.set(lPos2);
 		TransformGroup l2Trans = new TransformGroup(t3);
 		l2RotTrans.addChild(l2Trans);
+		
+		
+		
 
 		Color3f lColor2 = new Color3f(0.6f, 0.9f, 0.6f);
-		//NOte default_ffp shader doesn't do spot lights yet
-		SpotLight pLight2 = new SpotLight(true, lColor2, new Point3f(0f, 0f, 0f), new Point3f(3f, 0f, 0f),
-				new Vector3f(0f, -1f, 0f), (float)(Math.PI / 8f), 48);
-		pLight2.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
-		pLight2.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
-		l2Trans.addChild(pLight2);
-
-		//		l2Trans.addChild(new Cube(0.01f));
+		//Note default_ffp shader doesn't do spot lights yet
+		spotLight = new SpotLight(true, lColor2, new Point3f(0f, 0f, 0f), new Point3f(2f, 0f, 0f),
+				new Vector3f(0f, -1f, 0f), (float)(Math.PI / 8f), 48f);
+		spotLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		spotLight.setCapability(Light.ALLOW_STATE_WRITE);
+		spotLight.setEnable(true);
+		spotLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
+		l2Trans.addChild(spotLight);
+		l2Trans.addChild(new Cube(0.01f, lColor2.x, lColor2.y, lColor2.z));
 
 		bg.addChild(l2RotTrans);
 
 		Transform3D yAxis2 = new Transform3D();
 		yAxis2.rotZ(Math.PI / 2f);
-		Alpha rotor2Alpha = new Alpha(-1, Alpha.INCREASING_ENABLE, 0, 0, 6250, 0, 0, 0, 0, 0);
+		Alpha rotor2Alpha = new Alpha(-1, Alpha.INCREASING_ENABLE, 0, 0, 30000, 0, 0, 0, 0, 0);
 		RotationInterpolator rotator2 = new RotationInterpolator(rotor2Alpha, l2RotTrans, yAxis2, 0.0f,
 				(float)Math.PI * 2.0f);
 		rotator2.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l2RotTrans.addChild(rotator2);
+		
+		
+		
 
 		bg.addChild(simpleCameraHandler);
 
@@ -343,14 +340,6 @@ public class NifDisplayTester {
 		spinTransform = new SpinTransform(spinTransformGroup, 0.5);
 		spinTransform.setEnable(false);
 		bg.addChild(spinTransform);
-
-		background.setColor(0.8f, 0.8f, 0.8f);
-		background.setApplicationBounds(null);
-		background.setCapability(Background.ALLOW_APPLICATION_BOUNDS_WRITE);
-		background.setCapability(Background.ALLOW_APPLICATION_BOUNDS_READ);
-		bg.addChild(background);
-
-		//		bg.addChild(new Cube(0.01f));
 
 		simpleUniverse.addBranchGraph(bg);
 
@@ -443,15 +432,6 @@ public class NifDisplayTester {
 	private void toggleVisual() {
 		showVisual = !showVisual;
 		update();
-	}
-
-	private void toggleBackground() {
-		if (background.getApplicationBounds() == null) {
-			background.setApplicationBounds(Utils3D.defaultBounds);
-		} else {
-			background.setApplicationBounds(null);
-		}
-
 	}
 
 	private void toggleCycling() {
@@ -700,9 +680,7 @@ public class NifDisplayTester {
 				toggleAnimateModel();
 			} else if (e.getKeyCode() == KeyEvent.VK_L) {
 				toggleVisual();
-			} else if (e.getKeyCode() == KeyEvent.VK_P) {
-				toggleBackground();
-			}
+			} 
 		}
 
 	}
