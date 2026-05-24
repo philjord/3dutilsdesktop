@@ -1,7 +1,9 @@
 package nif.gui;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.prefs.Preferences;
 
@@ -88,8 +90,8 @@ public class KfLoaderTester {
 			System.out.println("\tFile: " + file);
 
 			//BufferedInputStream in = new BufferedInputStream(new FileInputStream(f), (int) (f.length() + 10));
-			FileChannelRAF nifIn = new FileChannelRAF(file, "r");
-			ByteBuffer buf = nifIn.getChannel().map(MapMode.READ_ONLY, 0, file.length());
+			FileChannel nifIn = new FileInputStream(file).getChannel();
+			ByteBuffer buf = nifIn.map(MapMode.READ_ONLY, 0, file.length());
 			NifFile kfFile = NifFileReader.readNif(file.getCanonicalPath(), buf);
 			nifIn.close();
 			// make the kf file root 

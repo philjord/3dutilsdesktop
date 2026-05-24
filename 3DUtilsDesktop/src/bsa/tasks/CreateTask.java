@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +19,6 @@ import bsaio.DBException;
 import bsaio.HashCode;
 import bsaio.displayables.Displayable;
 import bsaio.displayables.DisplayableArchiveEntry;
-import tools.io.FileChannelRAF;
 
 public class CreateTask extends Thread {
 
@@ -54,7 +55,7 @@ public class CreateTask extends Thread {
 
 	@Override
 	public void run() {
-		FileChannelRAF out = null;
+		FileChannel out = null;
 		try {
 			entries = new ArrayList<ArchiveEntry>(256);
 			folders = new ArrayList<Folder>(256);
@@ -66,7 +67,7 @@ public class CreateTask extends Thread {
 				throw new IOException("Unable to access directory '" + dirFile.getPath() + "'");
 
 			for (int i = 0; i < files.length; i++) {
-				File file = files [i];
+				File file = files[i];
 				if (file.isDirectory())
 					addFolderFiles(file);
 			}
@@ -74,8 +75,9 @@ public class CreateTask extends Thread {
 			if (fileCount != 0) {
 				if (archiveFile.exists() && !archiveFile.delete())
 					throw new IOException("Unable to delete '" + archiveFile.getPath() + "'");
-				out = new FileChannelRAF(new RandomAccessFile(archiveFile, "rw"), "rw");
+				out = new RandomAccessFile(archiveFile, "rw").getChannel();
 				writeArchive(out);
+				out.force(true);
 				out.close();
 				out = null;
 			}
@@ -109,7 +111,7 @@ public class CreateTask extends Thread {
 			return;
 		entries.ensureCapacity(files.length);
 		for (int i = 0; i < files.length; i++) {
-			File file = files [i];
+			File file = files[i];
 			if (file.isDirectory())
 				addFolderFiles(file);
 			else
@@ -142,8 +144,8 @@ public class CreateTask extends Thread {
 			ArchiveEntry listEntry = entries.get(i);
 			int diff = entry.compareTo(listEntry);
 			if (diff == 0) {
-				throw new DBException("Hash collision: '"	+ entry.getName() + "' and '"
-										+ ((Displayable)listEntry).getName() + "'");
+				throw new DBException(
+						"Hash collision: '" + entry.getName() + "' and '" + ((Displayable)listEntry).getName() + "'");
 			}
 			if (diff < 0) {
 				insert = false;
@@ -185,9 +187,9 @@ public class CreateTask extends Thread {
 			}
 		}
 
-		if ((fileFlags & 2) != 0 && (fileFlags & -3) != 0) {
-			throw new DBException("Texture files must be packaged by themselves");
-		}
+		//if ((fileFlags & 2) != 0 && (fileFlags & -3) != 0) {
+		//	throw new DBException("Texture files must be packaged by themselves");
+		//}
 		insert = true;
 		Iterator<Folder> i$ = folders.iterator();
 		while (i$.hasNext()) {
@@ -229,15 +231,15 @@ public class CreateTask extends Thread {
 	 * @throws DBException
 	 * @throws IOException
 	 */
-	private void writeArchive(FileChannelRAF out) throws DBException, IOException {
+	private void writeArchive(FileChannel out) throws DBException, IOException {
 		byte[] buffer = new byte[256];
 		byte[] dataBuffer = new byte[32000];
 		byte[] compressedBuffer = new byte[8000];
 		byte[] header = new byte[36];
 
-		header [0] = 66;
-		header [1] = 83;
-		header [2] = 65;
+		header[0] = 66;
+		header[1] = 83;
+		header[2] = 65;
 		setInteger(104, header, 4);
 		setInteger(36, header, 8);
 		setInteger(archiveFlags, header, 12);
@@ -247,7 +249,7 @@ public class CreateTask extends Thread {
 		setInteger(fileNamesLength, header, 28);
 		setInteger(fileFlags, header, 32);
 
-		out.write(header);
+		out.write(ByteBuffer.wrap(header, 0, header.length));
 
 		long fileOffset = header.length + folderCount * 16 + fileNamesLength;
 		if (fileOffset > 0x7fffffffL) {
@@ -258,7 +260,8 @@ public class CreateTask extends Thread {
 			setLong(folder.getHashCode().getHash(), buffer, 0);
 			setInteger(folder.getFileCount(), buffer, 8);
 			setInteger((int)fileOffset, buffer, 12);
-			out.write(buffer, 0, 16);
+			out.write(ByteBuffer.wrap(buffer, 0, 16));
+
 			fileOffset += folder.getName().length() + 2 + folder.getFileCount() * 16;
 			if (fileOffset > 0x7fffffffL) {
 				throw new DBException("File offset exceeds 2GB");
@@ -272,17 +275,17 @@ public class CreateTask extends Thread {
 			if (nameBuffer.length != folderName.length()) {
 				throw new DBException("Encoded folder name is longer than character name");
 			}
-			buffer [0] = (byte)(nameBuffer.length + 1);
+			buffer[0] = (byte)(nameBuffer.length + 1);
 			System.arraycopy(nameBuffer, 0, buffer, 1, nameBuffer.length);
-			buffer [nameBuffer.length + 1] = 0;
-			out.write(buffer, 0, nameBuffer.length + 2);
+			buffer[nameBuffer.length + 1] = 0;
+			out.write(ByteBuffer.wrap(buffer, 0, nameBuffer.length + 2));
 
 			for (int i = 0; i < folder.getFileCount(); i++) {
 				ArchiveEntry entry = entries.get(fileIndex++);
 				setLong(entry.getFileHashCode(), buffer, 0);
 				setInteger(0, buffer, 8);
 				setInteger(0, buffer, 12);
-				out.write(buffer, 0, 16);
+				out.write(ByteBuffer.wrap(buffer, 0, 16));
 			}
 		}
 
@@ -293,8 +296,8 @@ public class CreateTask extends Thread {
 				throw new DBException("Encoded file name is longer than character name");
 			}
 			System.arraycopy(nameBuffer, 0, buffer, 0, nameBuffer.length);
-			buffer [nameBuffer.length] = 0;
-			out.write(buffer, 0, nameBuffer.length + 1);
+			buffer[nameBuffer.length] = 0;
+			out.write(ByteBuffer.wrap(buffer, 0, nameBuffer.length + 1));
 		}
 
 		int currentProgress = 0;
@@ -307,20 +310,20 @@ public class CreateTask extends Thread {
 			try {
 				File file = new File(dirFile.getPath() + "\\" + ((Displayable)entry).getName());
 				int residualLength = (int)file.length();
-				entry.setFileOffset(out.getFilePointer());
+				entry.setFileOffset(out.position());
 				entry.setFileLength(residualLength);
 				in = new FileInputStream(file);
 
 				if ((archiveFlags & 0x100) != 0) {
 					byte nameBuffer2[] = ((Displayable)entry).getName().getBytes();
-					buffer [0] = (byte)nameBuffer2.length;
-					out.write(buffer, 0, 1);
-					out.write(nameBuffer2);
+					buffer[0] = (byte)nameBuffer2.length;
+					out.write(ByteBuffer.wrap(buffer, 0, 1));
+					out.write(ByteBuffer.wrap(nameBuffer2, 0, nameBuffer2.length));
 				}
 
 				if ((archiveFlags & 4) != 0) {
 					setInteger(residualLength, buffer, 0);
-					out.write(buffer, 0, 4);
+					out.write(ByteBuffer.wrap(buffer, 0, 4));
 					int compressedLength = 4;
 					if (residualLength > 0) {
 						deflater = new Deflater(6);
@@ -339,7 +342,7 @@ public class CreateTask extends Thread {
 							}
 							count = deflater.deflate(compressedBuffer, 0, compressedBuffer.length);
 							if (count > 0) {
-								out.write(compressedBuffer, 0, count);
+								out.write(ByteBuffer.wrap(compressedBuffer, 0, count));
 								compressedLength += count;
 							}
 						}
@@ -353,7 +356,7 @@ public class CreateTask extends Thread {
 						if (count == -1) {
 							throw new EOFException("Unexpected end of stream while copying data");
 						}
-						out.write(dataBuffer, 0, count);
+						out.write(ByteBuffer.wrap(dataBuffer, 0, count));
 					}
 
 					entry.setCompressed(false);
@@ -380,11 +383,14 @@ public class CreateTask extends Thread {
 		}
 
 		long fileOffset2 = header.length + folderCount * 16;
-		out.seek(fileOffset2);
+		out.position(fileOffset2);
 		int entryIndex = 0;
 		for (Folder folder : folders) {
-			int length = out.readByte() & 0xff;
-			out.skipBytes(length);
+			byte[] b = new byte[1];
+			ByteBuffer bb = ByteBuffer.wrap(b);
+			out.read(bb);
+			int length = b[0] & 0xff;
+			out.position(out.position() + length);
 
 			for (int i = 0; i < folder.getFileCount(); i++) {
 				ArchiveEntry entry = entries.get(entryIndex++);
@@ -407,28 +413,28 @@ public class CreateTask extends Thread {
 					throw new DBException("File offset exceeds 2GB");
 				}
 				setInteger((int)fileOffset2, buffer, 4);
-				out.skipBytes(8);
-				out.write(buffer, 0, 8);
+				out.position(out.position() + 8);
+				out.write(ByteBuffer.wrap(buffer, 0, 8));
 			}
 		}
 	}
 
 	private static void setInteger(int number, byte buffer[], int offset) {
-		buffer [offset] = (byte)number;
-		buffer [offset + 1] = (byte)(number >>> 8);
-		buffer [offset + 2] = (byte)(number >>> 16);
-		buffer [offset + 3] = (byte)(number >>> 24);
+		buffer[offset] = (byte)number;
+		buffer[offset + 1] = (byte)(number >>> 8);
+		buffer[offset + 2] = (byte)(number >>> 16);
+		buffer[offset + 3] = (byte)(number >>> 24);
 	}
 
 	private static void setLong(long number, byte buffer[], int offset) {
-		buffer [offset] = (byte)(int)number;
-		buffer [offset + 1] = (byte)(int)(number >>> 8);
-		buffer [offset + 2] = (byte)(int)(number >>> 16);
-		buffer [offset + 3] = (byte)(int)(number >>> 24);
-		buffer [offset + 4] = (byte)(int)(number >>> 32);
-		buffer [offset + 5] = (byte)(int)(number >>> 40);
-		buffer [offset + 6] = (byte)(int)(number >>> 48);
-		buffer [offset + 7] = (byte)(int)(number >>> 56);
+		buffer[offset] = (byte)(int)number;
+		buffer[offset + 1] = (byte)(int)(number >>> 8);
+		buffer[offset + 2] = (byte)(int)(number >>> 16);
+		buffer[offset + 3] = (byte)(int)(number >>> 24);
+		buffer[offset + 4] = (byte)(int)(number >>> 32);
+		buffer[offset + 5] = (byte)(int)(number >>> 40);
+		buffer[offset + 6] = (byte)(int)(number >>> 48);
+		buffer[offset + 7] = (byte)(int)(number >>> 56);
 	}
 
 	private static class Folder {

@@ -212,7 +212,7 @@ public class DisplayTask extends Thread {
 	private NifDisplayTester getNifDisplayer() {
 
 		// up to 5
-		while (nifDisplays.size() > MAX_NIF_CANVAS3D_VISIBLE) {
+		while (nifDisplays.size() > MAX_NIF_CANVAS3D_VISIBLE - 1) {
 			NifDisplayTester ndt = nifDisplays.removeFirst();
 			ndt.close();
 		}
