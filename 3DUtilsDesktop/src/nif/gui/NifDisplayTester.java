@@ -17,6 +17,7 @@ import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Canvas3D;
 import org.jogamp.java3d.DirectionalLight;
 import org.jogamp.java3d.Group;
+import org.jogamp.java3d.JoglesPipeline;
 import org.jogamp.java3d.Light;
 import org.jogamp.java3d.Node;
 import org.jogamp.java3d.PointLight;
@@ -67,45 +68,30 @@ import utils.source.file.FileMediaRoots;
 import utils.source.file.FileMeshSource;
 
 public class NifDisplayTester {
-	private SimpleCameraHandler	simpleCameraHandler;
+	private SimpleCameraHandler			simpleCameraHandler;
 
-	private TransformGroup		spinTransformGroup		= new TransformGroup();
+	private TransformGroup				spinTransformGroup		= new TransformGroup();
 
-	private TransformGroup		rotateTransformGroup	= new TransformGroup();
+	private TransformGroup				rotateTransformGroup	= new TransformGroup();
 
-	private BranchGroup			modelGroup				= new BranchGroup();
+	private BranchGroup					modelGroup				= new BranchGroup();
 
-	private SpinTransform		spinTransform;
+	private SpinTransform				spinTransform;
 
-	private FileManageBehavior	fileManageBehavior		= new FileManageBehavior();
+	private boolean						showHavok				= true;
 
-	private boolean				cycle					= true;
+	private boolean						showVisual				= true;
 
-	private boolean				showHavok				= true;
+	private boolean						animateModel			= true;
 
-	private boolean				showVisual				= true;
+	private boolean						spin					= false;
 
-	private boolean				animateModel			= true;
+	private SimpleUniverse				simpleUniverse;
 
-	private boolean				spin					= false;
-
-	private long				currentFileLoadTime		= 0;
-
-	private File				currentFileTreeRoot;
-
-	private File				nextFileTreeRoot;
-
-	private File				currentFileDisplayed;
-
-	private File				nextFileToDisplay;
-
-	private SimpleUniverse		simpleUniverse;
-
-
-	private AmbientLight ambLight;
-	private DirectionalLight dirLight;
-	private PointLight pointLight;
-	private SpotLight spotLight;
+	private AmbientLight				ambLight;
+	private DirectionalLight			dirLight;
+	private PointLight					pointLight;
+	private SpotLight					spotLight;
 
 	private static MeshSource			meshSource				= null;
 	private static TextureSource		textureSource			= null;
@@ -113,18 +99,23 @@ public class NifDisplayTester {
 
 	public NifDisplayTester(BSAFileSetWithStatus parentBsaFileSet) {
 
+		// FIXME: the holding of context may add speed but it causes the pipeline to not call releaseContext on each update pass
+		// on the GLWindow Surface so the GLWindow setVisible(false) won't remove it
+		// and it can't be destroyed, to fix this issue at the least stopping renderer should force a releaseCtx on the pipeline		
+		JoglesPipeline.LATE_RELEASE_CONTEXT = false;
+		
+		
 		//DDS requires no installed java3D
 		if (QueryProperties.checkForInstalledJ3d()) {
-			System.exit(0);
+			System.err.println("//DDS requires no installed java3D");
 		}
 		NifToJ3d.SUPPRESS_EXCEPTIONS = false;
 
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 
-		
 		// only load reasources once 
-		if(textureSource == null) {
+		if (textureSource == null) {
 			BSAFileSetWithStatus bsaFileSet;
 			if (parentBsaFileSet == null) {
 				//Test for android
@@ -143,11 +134,11 @@ public class NifDisplayTester {
 				// must create a new set that includes the sibling texture bsas
 				bsaFileSet = new BSAFileSetWithStatus(new String[] {parentBsaFileSet.getName()}, true, false);
 			}
-	
+
 			textureSource = new BsaTextureSource(bsaFileSet);
 			materialsSource = new BsaMaterialsSource(bsaFileSet);
 			meshSource = new BsaMeshSource(bsaFileSet);
-	
+
 			//TODO: clean up this stupid
 			MaterialsSource.setBgsmSource(materialsSource);
 			MeshSource.setMeshSource(meshSource);
@@ -181,7 +172,7 @@ public class NifDisplayTester {
 					spotLight.setEnable(!spotLight.getEnable());
 					System.out.println("spotLight " + spotLight.getEnable());
 				}
-				
+
 			}
 		});
 
@@ -201,9 +192,7 @@ public class NifDisplayTester {
 				DDSTextureLoader.setAnisotropicFilterDegree(gs.getAnisotropicFilterDegree());
 			*/
 		//TODO: these must come form a new one of those ^
-		
-		
-		
+
 		//FIXME: I should record the last location and size and reuse them if they are sensible
 		canvas3D.getGLWindow().setSize(800, 600);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -213,13 +202,11 @@ public class NifDisplayTester {
 
 		//win.setVisible(true);
 		canvas3D.addNotify();
-		
 
 		spinTransformGroup.addChild(rotateTransformGroup);
 		rotateTransformGroup.addChild(modelGroup);
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
 				modelGroup, rotateTransformGroup, false);
-
 
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -279,7 +266,7 @@ public class NifDisplayTester {
 		pointLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l1Trans.addChild(pointLight);
 		l1Trans.addChild(new Cube(0.01f, lColor1.x, lColor1.y, lColor1.z));
-		
+
 		/*Appearance appL1 = new SimpleShaderAppearance(false, false);
 		ColoringAttributes caL1 = new ColoringAttributes();
 		caL1.setColor(lColor1);
@@ -304,9 +291,6 @@ public class NifDisplayTester {
 		t3.set(lPos2);
 		TransformGroup l2Trans = new TransformGroup(t3);
 		l2RotTrans.addChild(l2Trans);
-		
-		
-		
 
 		Color3f lColor2 = new Color3f(0.6f, 0.9f, 0.6f);
 		//Note default_ffp shader doesn't do spot lights yet
@@ -328,9 +312,6 @@ public class NifDisplayTester {
 				(float)Math.PI * 2.0f);
 		rotator2.setSchedulingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l2RotTrans.addChild(rotator2);
-		
-		
-		
 
 		bg.addChild(simpleCameraHandler);
 
@@ -373,45 +354,6 @@ public class NifDisplayTester {
 
 	}
 
-	public void setNextFileTreeRoot(File nextFileTreeRoot) {
-		this.nextFileToDisplay = null;
-		this.nextFileTreeRoot = nextFileTreeRoot;
-	}
-
-	public void setNextFileToDisplay(File nextFileToDisplay) {
-		this.nextFileTreeRoot = null;
-		this.nextFileToDisplay = nextFileToDisplay;
-	}
-
-	private void manage() {
-
-		if (nextFileTreeRoot != null) {
-			if (!nextFileTreeRoot.equals(currentFileTreeRoot)) {
-				currentFileTreeRoot = nextFileTreeRoot;
-				currentFileDisplayed = null;
-				currentFileLoadTime = Long.MAX_VALUE;
-			}
-		} else if (currentFileTreeRoot != null) {
-			if (cycle) {
-				File[] files = currentFileTreeRoot.listFiles(new NifKfFileFilter());
-				if (files.length > 0) {
-					if (currentFileDisplayed == null) {
-						currentFileDisplayed = files[0];
-						displayNif(currentFileDisplayed);
-					} else if (System.currentTimeMillis() - currentFileLoadTime > 3000) {
-
-					}
-				}
-			}
-		} else if (nextFileToDisplay != null) {
-			if (!nextFileToDisplay.equals(currentFileDisplayed)) {
-				currentFileDisplayed = nextFileToDisplay;
-				displayNif(currentFileDisplayed);
-				nextFileToDisplay = null;
-			}
-		}
-	}
-
 	private void toggleSpin() {
 		spin = !spin;
 		if (spinTransform != null) {
@@ -434,20 +376,8 @@ public class NifDisplayTester {
 		update();
 	}
 
-	private void toggleCycling() {
-		cycle = !cycle;
-		/*if (cycle)
-		{
-			// awake the directory processing thread
-			synchronized (waitMonitor)
-			{
-				waitMonitor.notifyAll();
-			}
-		}*/
-	}
-
 	/**
-	 * Only used by non bsa mesh file display so mesh source is forcibly set to the file system root of file 
+	 * Only used by non bsa mesh file display so mesh source is forcibly set to the file system root of file
 	 * @param f
 	 */
 	public void displayNif(File f) {
@@ -593,6 +523,58 @@ public class NifDisplayTester {
 
 	}
 
+	public void close() {
+		Canvas3D c = simpleUniverse.getCanvas();
+		c.removeNotify();
+		c.getGLWindow().destroy();
+	}
+
+	private class KeyHandler extends KeyAdapter {
+
+		public KeyHandler() {
+			System.out.println("H toggle havok display");
+			System.out.println("L toggle visual display");
+			System.out.println("J toggle spin");
+			System.out.println("K toggle animate model");
+			System.out.println("P toggle background color");
+			System.out.println("Space toggle cycle through files");
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+
+			if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+				toggleCycling();
+			} else if (e.getKeyCode() == KeyEvent.VK_H) {
+				toggleHavok();
+			} else if (e.getKeyCode() == KeyEvent.VK_J) {
+				toggleSpin();
+			} else if (e.getKeyCode() == KeyEvent.VK_K) {
+				toggleAnimateModel();
+			} else if (e.getKeyCode() == KeyEvent.VK_L) {
+				toggleVisual();
+			}
+		}
+
+	}
+
+	//***************************************
+	//Below here are the older File System based methods, for cycling through directories etc
+
+	private boolean					cycle				= true;
+
+	private long					currentFileLoadTime	= 0;
+
+	private FileManageBehavior		fileManageBehavior	= new FileManageBehavior();
+
+	private File					currentFileTreeRoot;
+
+	private File					nextFileTreeRoot;
+
+	private File					currentFileDisplayed;
+
+	private File					nextFileToDisplay;
+
 	public static NifDisplayTester	nifDisplay;
 
 	private static Preferences		prefs;
@@ -656,33 +638,55 @@ public class NifDisplayTester {
 
 	}
 
-	private class KeyHandler extends KeyAdapter {
+	private void toggleCycling() {
+		cycle = !cycle;
+		/*if (cycle)
+		{
+			// awake the directory processing thread
+			synchronized (waitMonitor)
+			{
+				waitMonitor.notifyAll();
+			}
+		}*/
+	}
 
-		public KeyHandler() {
-			System.out.println("H toggle havok display");
-			System.out.println("L toggle visual display");
-			System.out.println("J toggle spin");
-			System.out.println("K toggle animate model");
-			System.out.println("P toggle background color");
-			System.out.println("Space toggle cycle through files");
+	public void setNextFileTreeRoot(File nextFileTreeRoot) {
+		this.nextFileToDisplay = null;
+		this.nextFileTreeRoot = nextFileTreeRoot;
+	}
+
+	public void setNextFileToDisplay(File nextFileToDisplay) {
+		this.nextFileTreeRoot = null;
+		this.nextFileToDisplay = nextFileToDisplay;
+	}
+
+	private void manage() {
+
+		if (nextFileTreeRoot != null) {
+			if (!nextFileTreeRoot.equals(currentFileTreeRoot)) {
+				currentFileTreeRoot = nextFileTreeRoot;
+				currentFileDisplayed = null;
+				currentFileLoadTime = Long.MAX_VALUE;
+			}
+		} else if (currentFileTreeRoot != null) {
+			if (cycle) {
+				File[] files = currentFileTreeRoot.listFiles(new NifKfFileFilter());
+				if (files.length > 0) {
+					if (currentFileDisplayed == null) {
+						currentFileDisplayed = files[0];
+						displayNif(currentFileDisplayed);
+					} else if (System.currentTimeMillis() - currentFileLoadTime > 3000) {
+
+					}
+				}
+			}
+		} else if (nextFileToDisplay != null) {
+			if (!nextFileToDisplay.equals(currentFileDisplayed)) {
+				currentFileDisplayed = nextFileToDisplay;
+				displayNif(currentFileDisplayed);
+				nextFileToDisplay = null;
+			}
 		}
-
-		@Override
-		public void keyPressed(KeyEvent e) {
-
-			if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-				toggleCycling();
-			} else if (e.getKeyCode() == KeyEvent.VK_H) {
-				toggleHavok();
-			} else if (e.getKeyCode() == KeyEvent.VK_J) {
-				toggleSpin();
-			} else if (e.getKeyCode() == KeyEvent.VK_K) {
-				toggleAnimateModel();
-			} else if (e.getKeyCode() == KeyEvent.VK_L) {
-				toggleVisual();
-			} 
-		}
-
 	}
 
 }

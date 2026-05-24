@@ -1,5 +1,6 @@
 package bsa.tasks;
 
+import java.util.ArrayDeque;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
@@ -23,6 +24,9 @@ import texture.Texture2DDisplay;
 import utils.source.DummyTextureSource;
 
 public class DisplayTask extends Thread {
+	
+	private static final int MAX_NIF_CANVAS3D_VISIBLE = 3;
+	
 	private BSAFileSetWithStatus	bsaFileSet;
 
 	private List<ArchiveEntry>		entries;
@@ -202,12 +206,18 @@ public class DisplayTask extends Thread {
 		});
 	}
 
-	private NifDisplayTester nifDisplay;
+	
+	private static ArrayDeque<NifDisplayTester> nifDisplays = new ArrayDeque<NifDisplayTester>();
 
 	private NifDisplayTester getNifDisplayer() {
-		if (nifDisplay == null) {
-			nifDisplay = new NifDisplayTester(bsaFileSet);
+
+		// up to 5
+		while (nifDisplays.size() > MAX_NIF_CANVAS3D_VISIBLE) {
+			NifDisplayTester ndt = nifDisplays.removeFirst();
+			ndt.close();
 		}
+		NifDisplayTester nifDisplay = new NifDisplayTester(bsaFileSet);
+		nifDisplays.addLast(nifDisplay);
 
 		return nifDisplay;
 	}
