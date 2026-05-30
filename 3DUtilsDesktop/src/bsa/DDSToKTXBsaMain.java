@@ -100,6 +100,8 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
+	
+	private String openFileName = "";
 
 	private void openFile() throws IOException
 	{
@@ -111,7 +113,8 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0)
 		{
-			File file = chooser.getSelectedFile();			
+			File file = chooser.getSelectedFile();	
+			openFileName = file.getAbsolutePath();
 
 			bsaFileSet = new BSAFileSetWithStatus(file.getAbsolutePath(), false, true);
 			
@@ -140,6 +143,10 @@ public class DDSToKTXBsaMain extends JFrame implements ActionListener
 		chooser.setDialogTitle("New Archive File");
 		chooser.setApproveButtonText("Create");
 		chooser.setFileFilter(new ArchiveFileFilter());
+		
+		// give it a reasonable default name
+		chooser.setSelectedFile(new File(openFileName.replace(".ba2", "").replace(".bsa","") + "_ktx.bsa"));
+		
 		if (chooser.showOpenDialog(this) != 0)
 			return;
 		File file = chooser.getSelectedFile();
