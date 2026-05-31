@@ -35,7 +35,10 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
+
 import bsa.BSAToolMain;
+import bsa.source.BsaTextureSource.CompressedTextureLoaderETCPackDDS;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
@@ -59,6 +62,8 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 	private JCheckBoxMenuItem		autoOpenArchiveMenuItem	= new JCheckBoxMenuItem("autoOpenArchive");
 
 	private JCheckBoxMenuItem		autoDisplayMenuItem		= new JCheckBoxMenuItem("autoDisplay");
+	
+	private JCheckBoxMenuItem		convertDDStoKTXMenuItem		= new JCheckBoxMenuItem("Convert DDS to KTX");
 
 	public JMenuItem				setFolders				= new JMenuItem("Set Folders");
 	
@@ -96,12 +101,30 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		cbMenuItem.setSelected(loadAll);
 		menu.add(cbMenuItem);
 		menu.add(sopErrMenuItem);
+		
 		boolean autoOpenArchive = Boolean.parseBoolean(BSAToolMain.properties.getProperty("autoOpenArchive"));
 		autoOpenArchiveMenuItem.setSelected(autoOpenArchive);
 		menu.add(autoOpenArchiveMenuItem);
+		
 		boolean autoDisplay = Boolean.parseBoolean(BSAToolMain.properties.getProperty("autoDisplay"));
 		autoDisplayMenuItem.setSelected(autoDisplay);
 		menu.add(autoDisplayMenuItem);
+		
+		boolean convertDDStoKTX = Boolean.parseBoolean(BSAToolMain.properties.getProperty("convertDDStoKTX"));
+		convertDDStoKTXMenuItem.setSelected(convertDDStoKTX);
+		menu.add(convertDDStoKTXMenuItem);			
+		CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2  = convertDDStoKTX;
+		convertDDStoKTXMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2  = convertDDStoKTXMenuItem.isSelected();
+				CompressedTextureLoader.clearCache();
+				BSAToolMain.properties.setProperty("convertDDStoKTX",
+						Boolean.toString(convertDDStoKTXMenuItem.isSelected()));
+				BSAToolMain.saveProperties();
+			}
+		});		
+		
 		JMenuItem menuItem = new JMenuItem("Open Archive");
 		menuItem.setActionCommand("open");
 		menuItem.addActionListener(this);
@@ -442,7 +465,8 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 			BSAToolMain.properties.setProperty("autoOpenArchive",
 					Boolean.toString(autoOpenArchiveMenuItem.isSelected()));
 			BSAToolMain.properties.setProperty("autoDisplay", Boolean.toString(autoDisplayMenuItem.isSelected()));
-
+			BSAToolMain.properties.setProperty("convertDDStoKTX",
+					Boolean.toString(convertDDStoKTXMenuItem.isSelected()));
 		}
 		BSAToolMain.saveProperties();
 		System.exit(0);
