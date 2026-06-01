@@ -42,6 +42,7 @@ import bsa.source.BsaTextureSource.CompressedTextureLoaderETCPackDDS;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
+import nif.gui.NifDisplayTester;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
 public class BSAContentDisplay extends JFrame implements ActionListener {
@@ -279,6 +280,9 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 	private void openFile() throws IOException {
 		closeFile();
+		// also forget current texture source in case of a new nif bsa 
+		NifDisplayTester.clearTextureSource();
+		
 		String currentDirectory = BSAToolMain.properties.getProperty("current.directory");
 		JFileChooser chooser;
 		if (currentDirectory != null) {

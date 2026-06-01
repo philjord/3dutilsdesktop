@@ -94,7 +94,7 @@ public class NifDisplayTester {
 	private SpotLight					spotLight;
 
 	private static MeshSource			meshSource				= null;
-	private static TextureSource		textureSource			= null;
+	private static TextureSource		textureSource				= null;
 	private static BsaMaterialsSource	materialsSource			= null;
 
 	public NifDisplayTester(BSAFileSetWithStatus parentBsaFileSet) {
@@ -352,6 +352,10 @@ public class NifDisplayTester {
 		//win.setJMenuBar(menuBar);
 		//win.setVisible(true);
 
+	}
+	
+	public static void clearTextureSource() {
+		textureSource = null;
 	}
 
 	private void toggleSpin() {
