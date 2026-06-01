@@ -230,18 +230,21 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		if (autoOpenArchive) {
 			String fname = BSAToolMain.properties.getProperty("last opened archive");
 			if (fname != null) {
-				File arhcive = new File(fname);
-				openArchive(arhcive);
-				//synchronous call so now loaded and I can fire the file double click now
-				if (autoDisplay) {
-					String aname = BSAToolMain.properties.getProperty("auto open archive entry");
-					if (aname != null) {
-						System.out.println("Auto opening node: " + aname);
-						if (setSelectedNode(aname.split("/"))) {
-							try {
-								displayFiles(false, false);
-							} catch (InterruptedException e1) {
-								e1.printStackTrace();
+				File archive = new File(fname);
+				// sometimes deleted/moved since
+				if (archive.exists()) {
+					openArchive(archive);
+					//synchronous call so now loaded and I can fire the file double click now
+					if (autoDisplay) {
+						String aname = BSAToolMain.properties.getProperty("auto open archive entry");
+						if (aname != null) {
+							System.out.println("Auto opening node: " + aname);
+							if (setSelectedNode(aname.split("/"))) {
+								try {
+									displayFiles(false, false);
+								} catch (InterruptedException e1) {
+									e1.printStackTrace();
+								}
 							}
 						}
 					}
