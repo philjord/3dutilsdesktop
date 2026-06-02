@@ -68,7 +68,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 	public JMenuItem				setFolders				= new JMenuItem("Set Folders");
 	
-	public JPopupMenu				treeNodePopup			= new JPopupMenu("Howdy");
+	public JPopupMenu				treeNodePopup			= new JPopupMenu("Unseen");
 	public JMenuItem				copyPathPopup			= new JMenuItem("copyPathPopup");
 	public JMenuItem				setAutoLoadPopup		= new JMenuItem("setAutoLoadPopup");
 
@@ -282,9 +282,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 	}
 
 	private void openFile() throws IOException {
-		closeFile();
-		// also forget current texture source in case of a new nif bsa 
-		NifDisplayTester.clearTextureSource();
+		
 		
 		String currentDirectory = BSAToolMain.properties.getProperty("current.directory");
 		JFileChooser chooser;
@@ -301,6 +299,12 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 		chooser.setDialogTitle("Select Archive File");
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0) {
+			
+			// we close late in case they just cancel
+			closeFile();
+			// also forget current texture source in case of a new nif bsa 
+			NifDisplayTester.clearTextureSource();
+			
 			File file = chooser.getSelectedFile();
 			openArchive(file);
 		}
