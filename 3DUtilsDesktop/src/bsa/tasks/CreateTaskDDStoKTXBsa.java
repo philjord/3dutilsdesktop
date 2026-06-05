@@ -13,20 +13,21 @@ public class CreateTaskDDStoKTXBsa extends Thread {
 
 	private boolean					completed;
 
-	private DDSToKTXBsaConverter ddsToKTXBsaConverter;
+	private DDSToKTXBsaConverter	ddsToKTXBsaConverter;
 
 	public CreateTaskDDStoKTXBsa(java.io.File outputArchiveFile, ArchiveFile inputArchive, StatusDialog statusDialog) {
-		if(!outputArchiveFile.getName().endsWith("_ktx.bsa")) {
-			System.out.println("outputArchiveFile " + outputArchiveFile.getName() + " REALLY shold end with \"_ktx.bsa\" ");
+		if (!outputArchiveFile.getName().endsWith("_ktx.bsa")) {
+			System.out.println(
+					"outputArchiveFile " + outputArchiveFile.getName() + " REALLY should end with \"_ktx.bsa\" ");
 		}
 		this.statusDialog = statusDialog;
 		try {
 			@SuppressWarnings("resource") // not closed until run finished
 			FileChannel fco = new java.io.RandomAccessFile(outputArchiveFile, "rw").getChannel();
-		
+
 			// I can use fco twice because it comes from a RAF		
 			ddsToKTXBsaConverter = new DDSToKTXBsaConverter(fco, fco, inputArchive, statusDialog);
-        
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -39,9 +40,9 @@ public class CreateTaskDDStoKTXBsa extends Thread {
 			ddsToKTXBsaConverter.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}	
-		if(statusDialog != null)
-			statusDialog.closeDialog(completed);		
+		}
+		if (statusDialog != null)
+			statusDialog.closeDialog(completed);
 	}
-  
+
 }

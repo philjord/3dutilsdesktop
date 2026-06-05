@@ -29,6 +29,7 @@ import javax.swing.tree.TreePath;
 import bsa.BSAToolMain;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.CreateTask;
+import bsa.tasks.CreateTaskDDStoKTXBsa;
 import bsa.tasks.ExtractTask;
 import bsa.tasks.LoadTask;
 import bsaio.ArchiveEntry;
@@ -36,7 +37,7 @@ import bsaio.ArchiveFile;
 import bsaio.DBException;
 
 public class BSAToolMainWindow extends JFrame implements ActionListener {
-
+	
 	private boolean				windowMinimized;
 
 	private JTree				tree;
@@ -44,6 +45,8 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 	private DefaultTreeModel	treeModel;
 
 	private ArchiveFile			archiveFile;
+	
+	private String 				openFileName = "";
 
 	public BSAToolMainWindow() {
 		super("Bethesda Softworks Archive Utility");
@@ -96,6 +99,10 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 		menuItem.setActionCommand("extract all");
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
+		menuItem = new JMenuItem("Convert Archive to KTX Archive");
+		menuItem.setActionCommand("convert");
+		menuItem.addActionListener(this);
+		menu.add(menuItem);
 		menuBar.add(menu);
 		menu = new JMenu("Help");
 		menu.setMnemonic(72);
@@ -114,6 +121,13 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 		contentPane.add(scrollPane);
 		setContentPane(contentPane);
 		addWindowListener(new ApplicationWindowListener());
+		
+		try {
+			//might as well open an archive, not much will happen otherwise
+			openFile();
+		} catch (Throwable exc) {
+			BSAToolMain.logException("Exception while processing action event", exc);
+		}
 	}
 
 	@Override
@@ -134,6 +148,8 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 				extractFiles(false);
 			else if (action.equals("extract all"))
 				extractFiles(true);
+			else if (action.equals("convert"))
+				convertFile();
 		} catch (Throwable exc) {
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
@@ -238,6 +254,7 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0) {
 			File file = chooser.getSelectedFile();
+			openFileName = file.getAbsolutePath();
 			BSAToolMain.properties.setProperty("current.directory", file.getParent());
 			ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(),
 					file.getName());
@@ -321,6 +338,67 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 			statusDialog.showDialog();
 			extractTask.join();
 		}
+	}
+	
+	private void convertFile() throws InterruptedException, IOException, DBException {
+		 
+		JFileChooser  chooser = new JFileChooser();
+ 
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
+		chooser.setDialogTitle("New Archive File");
+		chooser.setApproveButtonText("Create");
+		chooser.setFileFilter(new ArchiveFileFilter());
+		
+		// give it a reasonable default name
+		chooser.setSelectedFile(new File(openFileName.replace(".ba2", "").replace(".bsa","") + "_ktx.bsa"));
+		
+		if (chooser.showOpenDialog(this) != 0)
+			return;
+		File file = chooser.getSelectedFile();
+
+		
+		if (file.exists()) {
+			int option = JOptionPane.showConfirmDialog(this,
+					file.getPath() + " already exists.  Do you want to overwrite it?", "File already exists", 0);
+			if (option != 0)
+				return;
+			if (!file.delete()) {
+				JOptionPane.showMessageDialog(this, "Unable to delete " + file.getPath(), "Delete failed", 0);
+				return;
+			}
+		}
+	
+		long tstart = System.currentTimeMillis();
+		StatusDialog statusDialog = new StatusDialog(this, "Creating " + file.getPath());
+		CreateTaskDDStoKTXBsa createTask = new CreateTaskDDStoKTXBsa(file, archiveFile, statusDialog);
+		createTask.start();
+		int status = statusDialog.showDialog();
+		createTask.join();
+		if (status != 1)
+			return;
+		if (!file.exists()) {
+			JOptionPane.showMessageDialog(this, "No files were included in the archive", "Archive empty", 1);
+			return;
+		}
+		System.out.println(""	+ (System.currentTimeMillis() - tstart) + "ms to compress " + file.getPath() );
+
+		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(),
+				file.getName());
+
+		ArchiveNode archiveNode = new ArchiveNode(archiveFile2);
+		statusDialog = new StatusDialog(this, "Loading " + archiveFile2.getName());
+		LoadTask loadTask = new LoadTask(archiveFile2, archiveNode, statusDialog);
+		loadTask.start();
+		status = statusDialog.showDialog();
+		loadTask.join();
+		if (status == 1) {
+			this.archiveFile = archiveFile2;
+			treeModel = new DefaultTreeModel(archiveNode);
+			tree.setModel(treeModel);
+		} else {
+			archiveFile2.close();
+		}
+
 	}
 
 	private void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries) {

@@ -60,9 +60,9 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 
 	private JCheckBoxMenuItem		sopErrMenuItem			= new JCheckBoxMenuItem("SOP errors only");
 
-	private JCheckBoxMenuItem		autoOpenArchiveMenuItem	= new JCheckBoxMenuItem("autoOpenArchive");
+	private JCheckBoxMenuItem		autoOpenArchiveMenuItem	= new JCheckBoxMenuItem("Auto Open Archive");
 
-	private JCheckBoxMenuItem		autoDisplayMenuItem		= new JCheckBoxMenuItem("autoDisplay");
+	private JCheckBoxMenuItem		autoDisplayMenuItem		= new JCheckBoxMenuItem("Auto Display");
 	
 	private JCheckBoxMenuItem		convertDDStoKTXMenuItem		= new JCheckBoxMenuItem("Convert DDS to KTX");
 
