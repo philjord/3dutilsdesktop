@@ -66,6 +66,7 @@ public class DisplayTask extends Thread {
 				int sep = fileName.lastIndexOf('.');
 				if (sep >= 0) {
 					String ext = fileName.substring(sep);
+					DDSImage.OUTPUT_IMAGE_DEBUG = false;//turn off, only for dds files
 					if (ext.equals(".nif")) {
 						//make life easier
 						BsaTextureSource.allowedTextureFormats	= BsaTextureSource.AllowedTextureFormats.ALL;
@@ -84,6 +85,8 @@ public class DisplayTask extends Thread {
 							getNifDisplayer().showNif(fileName, new BsaMeshSource(bsaFileSet));
 						}
 					} else if (ext.equals(".dds") || ext.equals(".ktx")) {
+						// if we are looking at an image we probably wants its info
+						DDSImage.OUTPUT_IMAGE_DEBUG = true;
 						if (verifyOnly) {
 							Texture tex = new BsaTextureSource(bsaFileSet).getTexture(fileName);
 							if (tex != null) {
@@ -95,13 +98,12 @@ public class DisplayTask extends Thread {
 							}
 
 							CompressedTextureLoader.clearCache();
-						} else {
-							// if we are looking at an image we probably wants its info
-							DDSImage.OUTPUT_IMAGE_DEBUG = true;
+						} else {							
 							Texture2DDisplay.showImageInShape(fileName,
 									new BsaTextureSource(bsaFileSet).getTexture(fileName));
 						}
 					} else if (ext.equals(".kf")) {
+
 						//only verify with no skeleton
 						KfJ3dRoot kr = NifToJ3d.loadKf(fileName, new BsaMeshSource(bsaFileSet));
 						if (kr != null) {
