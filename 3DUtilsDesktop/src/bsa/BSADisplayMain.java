@@ -7,7 +7,7 @@ import java.util.Properties;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import bsa.gui.BSAContentDisplay;
+import bsa.gui.BSADisplayFrame;
 
 public class BSADisplayMain extends BSAToolMain {
 	public static void main(String args[]) {
@@ -54,7 +54,7 @@ public class BSADisplayMain extends BSAToolMain {
 
 	public static void createAndShowGUI() {
 		try {
-			mainWindow = new BSAContentDisplay();
+			mainWindow = new BSADisplayFrame();
 			mainWindow.pack();
 			mainWindow.setLocationRelativeTo(null);
 			mainWindow.setVisible(true);

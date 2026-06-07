@@ -45,7 +45,7 @@ import bsaio.ArchiveEntry;
 import nif.gui.NifDisplayTester;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
-public class BSAContentDisplay extends JFrame implements ActionListener {
+public class BSADisplayFrame extends JFrame implements ActionListener {
 	public static boolean			LOAD_ALL				= true;
 
 	private boolean					windowMinimized;
@@ -72,7 +72,7 @@ public class BSAContentDisplay extends JFrame implements ActionListener {
 	public JMenuItem				copyPathPopup			= new JMenuItem("copyPathPopup");
 	public JMenuItem				setAutoLoadPopup		= new JMenuItem("setAutoLoadPopup");
 
-	public BSAContentDisplay() {
+	public BSADisplayFrame() {
 		super("BSA test display");
 		
 		

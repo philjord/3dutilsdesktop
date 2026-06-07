@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import bsa.gui.BSAToolMainWindow;
+import bsa.gui.BSAToolFrame;
 
 public class BSAToolMain
 {
@@ -85,7 +85,7 @@ public class BSAToolMain
 	{
 		try
 		{
-			mainWindow = new BSAToolMainWindow();
+			mainWindow = new BSAToolFrame();
 			mainWindow.pack();
 			mainWindow.setVisible(true);
 		}

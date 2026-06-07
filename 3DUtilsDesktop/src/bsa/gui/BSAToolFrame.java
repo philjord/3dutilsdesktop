@@ -36,7 +36,7 @@ import bsaio.ArchiveEntry;
 import bsaio.ArchiveFile;
 import bsaio.DBException;
 
-public class BSAToolMainWindow extends JFrame implements ActionListener {
+public class BSAToolFrame extends JFrame implements ActionListener {
 	
 	private boolean				windowMinimized;
 
@@ -48,7 +48,7 @@ public class BSAToolMainWindow extends JFrame implements ActionListener {
 	
 	private String 				openFileName = "";
 
-	public BSAToolMainWindow() {
+	public BSAToolFrame() {
 		super("Bethesda Softworks Archive Utility");
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
