@@ -1,6 +1,7 @@
 package bsa.gui;
 
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +38,7 @@ import bsaio.ArchiveFile;
 import bsaio.DBException;
 
 public class BSAToolFrame extends JFrame implements ActionListener {
-	
+
 	private boolean				windowMinimized;
 
 	private JTree				tree;
@@ -45,11 +46,25 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 	private DefaultTreeModel	treeModel;
 
 	private ArchiveFile			archiveFile;
-	
-	private String 				openFileName = "";
+
+	private String				openFileName	= "";
 
 	public BSAToolFrame() {
 		super("Bethesda Softworks Archive Utility");
+
+		setupWindow();
+		setUpMenus();
+		setUpTree();
+		
+		try {
+			//might as well open an archive, not much will happen otherwise
+			openFile();
+		} catch (Throwable exc) {
+			BSAToolMain.logException("Exception while processing action event", exc);
+		}
+	}
+
+	private void setupWindow() {
 		windowMinimized = false;
 		setDefaultCloseOperation(2);
 		String propValue = BSAToolMain.properties.getProperty("window.main.position");
@@ -68,6 +83,10 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 			frameHeight = Integer.parseInt(propValue.substring(sep + 1));
 		}
 		setPreferredSize(new Dimension(frameWidth, frameHeight));
+
+	}
+
+	private void setUpMenus() {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setOpaque(true);
 		JMenu menu = new JMenu("File");
@@ -112,22 +131,19 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 		menu.add(menuItem);
 		menuBar.add(menu);
 		setJMenuBar(menuBar);
+
+	}
+
+	private void setUpTree() {
 		treeModel = new DefaultTreeModel(new ArchiveNode());
 		tree = new JTree(treeModel);
 		JScrollPane scrollPane = new JScrollPane(tree);
-		scrollPane.setPreferredSize(new Dimension(700, 540));
 		JPanel contentPane = new JPanel();
 		contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+		contentPane.setLayout(new GridLayout(1,1));
 		contentPane.add(scrollPane);
 		setContentPane(contentPane);
-		addWindowListener(new ApplicationWindowListener());
-		
-		try {
-			//might as well open an archive, not much will happen otherwise
-			openFile();
-		} catch (Throwable exc) {
-			BSAToolMain.logException("Exception while processing action event", exc);
-		}
+		addWindowListener(new ApplicationWindowListener());	
 	}
 
 	@Override
@@ -300,7 +316,7 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 			}
 			entries = new ArrayList<ArchiveEntry>(100);
 			for (int i = 0; i < treePaths.length; i++) {
-				TreePath treePath = treePaths [i];
+				TreePath treePath = treePaths[i];
 				Object obj = treePath.getLastPathComponent();
 				if (obj instanceof FolderNode) {
 					addFolderChildren((FolderNode)obj, entries);
@@ -339,24 +355,23 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 			extractTask.join();
 		}
 	}
-	
+
 	private void convertFile() throws InterruptedException, IOException, DBException {
-		 
-		JFileChooser  chooser = new JFileChooser();
- 
+
+		JFileChooser chooser = new JFileChooser();
+
 		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("New Archive File");
 		chooser.setApproveButtonText("Create");
 		chooser.setFileFilter(new ArchiveFileFilter());
-		
+
 		// give it a reasonable default name
-		chooser.setSelectedFile(new File(openFileName.replace(".ba2", "").replace(".bsa","") + "_ktx.bsa"));
-		
+		chooser.setSelectedFile(new File(openFileName.replace(".ba2", "").replace(".bsa", "") + "_ktx.bsa"));
+
 		if (chooser.showOpenDialog(this) != 0)
 			return;
 		File file = chooser.getSelectedFile();
 
-		
 		if (file.exists()) {
 			int option = JOptionPane.showConfirmDialog(this,
 					file.getPath() + " already exists.  Do you want to overwrite it?", "File already exists", 0);
@@ -367,7 +382,7 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 				return;
 			}
 		}
-	
+
 		long tstart = System.currentTimeMillis();
 		StatusDialog statusDialog = new StatusDialog(this, "Creating " + file.getPath());
 		CreateTaskDDStoKTXBsa createTask = new CreateTaskDDStoKTXBsa(file, archiveFile, statusDialog);
@@ -380,7 +395,7 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(this, "No files were included in the archive", "Archive empty", 1);
 			return;
 		}
-		System.out.println(""	+ (System.currentTimeMillis() - tstart) + "ms to compress " + file.getPath() );
+		System.out.println("" + (System.currentTimeMillis() - tstart) + "ms to compress " + file.getPath());
 
 		ArchiveFile archiveFile2 = ArchiveFile.createArchiveFile(true, new FileInputStream(file).getChannel(),
 				file.getName());
@@ -430,7 +445,7 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 	}
 
 	private void aboutProgram() {
-		String info = "<html>Bethesda Softworks Archive Utility Version 1.0<br>";
+		String info = "<html>PJ's version of Bethesda Softworks Archive Utility Version 1.0<br>";
 		info += "<br>User name: ";
 		info += System.getProperty("user.name");
 		info += "<br>Home directory: ";
@@ -447,8 +462,8 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 		info += System.getProperty("java.version");
 		info += "<br>Java home directory: ";
 		info += System.getProperty("java.home");
-		info += "<br>Java class path: ";
-		info += System.getProperty("java.class.path");
+		//info += "<br>Java class path: ";
+		//info += System.getProperty("java.class.path");
 		info += "</html>";
 		JOptionPane.showMessageDialog(this, info.toString(), "About Bethesda Softworks Archive Utility", 1);
 	}
