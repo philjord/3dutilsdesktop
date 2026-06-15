@@ -53,7 +53,7 @@ import nif.gui.util.ControllerInvokerThread;
 import nif.j3d.J3dNiAVObject;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiGeomMorpherController;
-import nif.j3d.particles.tes3.J3dNiParticles;
+import nif.j3d.particles.J3dNiParticleSystem;
 import nif.shader.NiGeometryAppearanceShader;
 import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
@@ -179,11 +179,13 @@ public class NifDisplayTester {
 		canvas3D.getGLWindow().addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowResized(final WindowEvent e) {
-				J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
+				J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
 			}
 		});
-		J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
-
+		J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
+		J3dNiParticleSystem.setSHOW_DEBUG_LINES(true);
+		
+		
 		simpleUniverse = new SimpleUniverse(canvas3D);
 		/*		GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
 						true);

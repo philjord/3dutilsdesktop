@@ -48,7 +48,7 @@ import nif.character.NifCharacterTes3;
 import nif.character.NifJ3dSkeletonRoot;
 import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.tes3.J3dNiSequenceStreamHelper;
-import nif.j3d.particles.tes3.J3dNiParticles;
+import nif.j3d.particles.J3dNiParticleSystem;
 import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
@@ -150,10 +150,10 @@ public class KfDisplayTester
 			@Override
 			public void windowResized(final WindowEvent e)
 			{
-				J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
+				J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
 			}
 		});
-		J3dNiParticles.setScreenWidth(canvas3D.getGLWindow().getWidth());
+		J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
 
 		simpleUniverse = new SimpleUniverse(canvas3D);
 		//	GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
