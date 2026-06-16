@@ -62,12 +62,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 	private BSAFileSetWithStatus	bsaFileSet;
 	
 	private JPopupMenu				treeNodePopup			= new JPopupMenu("Unseen");
-
 	
 	private JCheckBoxMenuItem		cbMenuItem				= new JCheckBoxMenuItem("Load all BSA Archives");
 	private JCheckBoxMenuItem		sopErrMenuItem			= new JCheckBoxMenuItem("SOP errors only");
 
-	
+	private JMenu 					menuRecentFile = new JMenu("Recent Files");
 	
 	public BSADisplayFrame() {
 		super("BSA test display");
@@ -110,6 +109,9 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuItem.setActionCommand("open");
 		menuItem.addActionListener(this);
 		menuFile.add(menuItem);
+		
+		menuFile.add(menuRecentFile);
+		
 		menuItem = new JMenuItem("Close Archive");
 		menuItem.setActionCommand("close");
 		menuItem.addActionListener(this);
@@ -236,7 +238,59 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		setAutoLoadPopup.addActionListener(this);
 		treeNodePopup.add(setAutoLoadPopup);
 		
-		
+		createRecentMenu();
+	}
+	
+	private void createRecentMenu() {
+		menuRecentFile.removeAll();
+		for (int i = 0; i < 10; i++) {
+			String recentFileName = BSAToolMain.properties.getProperty("recentFile" + i);
+			if (recentFileName == null)
+				break;
+			JMenuItem recentFileMenuItem = new JMenuItem(recentFileName);
+			recentFileMenuItem.setActionCommand("loadRecent" + i);
+			recentFileMenuItem.addActionListener(this);
+			menuRecentFile.add(recentFileMenuItem);
+		}
+	}
+	
+	private void openFilePutInRecent(String fileName) {
+		// grab all ten out to a arrary
+		String[] recents = new String[10];
+		int idx = 0;
+
+		for (int i = 0; i < 10; i++) {
+			String recentFileName = BSAToolMain.properties.getProperty("recentFile" + i);
+			if (recentFileName == null)
+				break;
+			// skip a match
+			if (!recentFileName.equals(fileName))
+				recents[idx++] = recentFileName;
+		}
+
+		// now set them again after the current
+		BSAToolMain.properties.setProperty("recentFile" + 0, fileName);
+		// tenth item is dropped
+		for (int i = 0; i < 9; i++) {
+			if (recents[i] == null)
+				break;
+
+			BSAToolMain.properties.setProperty("recentFile" + (i + 1), recents[i]);
+		}
+		createRecentMenu();
+	}
+	
+	private void loadRecent(String action) {
+		int recentIdx = Integer.parseInt(action.substring(action.length() - 1));
+		String recentFileName = BSAToolMain.properties.getProperty("recentFile" + recentIdx);
+		if (recentFileName != null) {
+			File file = new File(recentFileName);
+			if (file.exists()) {
+				openArchive(file);
+			} else {
+				System.out.println(recentFileName + " does not exist");
+			}
+		}
 	}
 	
 	private void setUpTree() {
@@ -318,7 +372,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 				displayFiles(true, true);
 			else if (action.equals("setAutoDisplayEntry"))
 				setAutoDisplayEntry();
-			
+			else if (action.startsWith("loadRecent"))
+				loadRecent(action);
 			
 			
 		} catch (Throwable exc) {
@@ -377,6 +432,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			NifDisplayTester.clearTextureSource();
 			
 			File file = chooser.getSelectedFile();
+			openFilePutInRecent(file.getAbsolutePath());
 			openArchive(file);
 		}
 	}
