@@ -277,6 +277,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 
 			BSAToolMain.properties.setProperty("recentFile" + (i + 1), recents[i]);
 		}
+		BSAToolMain.saveProperties();
 		createRecentMenu();
 	}
 	
