@@ -74,6 +74,8 @@ public class NifDisplayTester {
 
 	private TransformGroup				rotateTransformGroup	= new TransformGroup();
 
+	// used for debug moving the model about a bit
+	private TransformGroup				modelTransformGroup				= new TransformGroup();
 	private BranchGroup					modelGroup				= new BranchGroup();
 
 	private SpinTransform				spinTransform;
@@ -183,7 +185,7 @@ public class NifDisplayTester {
 			}
 		});
 		J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
-		J3dNiParticleSystem.setSHOW_DEBUG_LINES(true);
+		//J3dNiParticleSystem.setSHOW_DEBUG_LINES(true);// H to toggle
 		
 		
 		simpleUniverse = new SimpleUniverse(canvas3D);
@@ -206,7 +208,13 @@ public class NifDisplayTester {
 		canvas3D.addNotify();
 
 		spinTransformGroup.addChild(rotateTransformGroup);
-		rotateTransformGroup.addChild(modelGroup);
+		rotateTransformGroup.addChild(modelTransformGroup);
+		// debug move ita bout a bit
+		Transform3D t = new Transform3D();
+		t.setTranslation(new Vector3f(0,0,0));
+		modelTransformGroup.setTransform(t);		
+		modelTransformGroup.addChild(modelGroup);
+		
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
 				modelGroup, rotateTransformGroup, false);
 
@@ -373,8 +381,11 @@ public class NifDisplayTester {
 	}
 
 	private void toggleHavok() {
-		showHavok = !showHavok;
+		showHavok = !showHavok;		
 		update();
+		
+		// also show debug lines on particles on the same basis
+		J3dNiParticleSystem.setSHOW_DEBUG_LINES(showHavok);
 	}
 
 	private void toggleVisual() {

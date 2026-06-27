@@ -49,6 +49,7 @@ import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
 import nif.gui.NifDisplayTester;
+import nif.j3d.particles.J3dNiParticleSystem;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 
 public class BSADisplayFrame extends JFrame implements ActionListener, ItemListener {
@@ -70,6 +71,12 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 	
 	public BSADisplayFrame() {
 		super("BSA test display");
+		
+		
+		// just for the now
+		J3dNiParticleSystem.DEBUG_DATA = true;
+		
+		
 		
 		setupWindow();		
 		setUpMenus(); 
