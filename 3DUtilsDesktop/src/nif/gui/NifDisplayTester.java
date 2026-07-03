@@ -68,6 +68,7 @@ import utils.source.file.FileMediaRoots;
 import utils.source.file.FileMeshSource;
 
 public class NifDisplayTester {
+	public static boolean				ADD_LIGHT_LOCATION_BOX	= true;
 	private SimpleCameraHandler			simpleCameraHandler;
 
 	private TransformGroup				spinTransformGroup		= new TransformGroup();
@@ -75,12 +76,12 @@ public class NifDisplayTester {
 	private TransformGroup				rotateTransformGroup	= new TransformGroup();
 
 	// used for debug moving the model about a bit
-	private TransformGroup				modelTransformGroup				= new TransformGroup();
+	private TransformGroup				modelTransformGroup		= new TransformGroup();
 	private BranchGroup					modelGroup				= new BranchGroup();
 
 	private SpinTransform				spinTransform;
 
-	private boolean						showHavok				= true;
+	private boolean						showHavok				= false;
 
 	private boolean						showVisual				= true;
 
@@ -96,7 +97,7 @@ public class NifDisplayTester {
 	private SpotLight					spotLight;
 
 	private static MeshSource			meshSource				= null;
-	private static TextureSource		textureSource				= null;
+	private static TextureSource		textureSource			= null;
 	private static BsaMaterialsSource	materialsSource			= null;
 
 	public NifDisplayTester(BSAFileSetWithStatus parentBsaFileSet) {
@@ -105,8 +106,7 @@ public class NifDisplayTester {
 		// on the GLWindow Surface so the GLWindow setVisible(false) won't remove it
 		// and it can't be destroyed, to fix this issue at the least stopping renderer should force a releaseCtx on the pipeline		
 		JoglesPipeline.LATE_RELEASE_CONTEXT = false;
-		
-		
+
 		//DDS requires no installed java3D
 		if (QueryProperties.checkForInstalledJ3d()) {
 			System.err.println("//DDS requires no installed java3D");
@@ -186,8 +186,7 @@ public class NifDisplayTester {
 		});
 		J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
 		//J3dNiParticleSystem.setSHOW_DEBUG_LINES(true);// H to toggle
-		
-		
+
 		simpleUniverse = new SimpleUniverse(canvas3D);
 		/*		GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
 						true);
@@ -211,10 +210,10 @@ public class NifDisplayTester {
 		rotateTransformGroup.addChild(modelTransformGroup);
 		// debug move ita bout a bit
 		Transform3D t = new Transform3D();
-		t.setTranslation(new Vector3f(0,0,0));
-		modelTransformGroup.setTransform(t);		
+		t.setTranslation(new Vector3f(0, 0, 0));
+		modelTransformGroup.setTransform(t);
 		modelTransformGroup.addChild(modelGroup);
-		
+
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
 				modelGroup, rotateTransformGroup, false);
 
@@ -275,7 +274,8 @@ public class NifDisplayTester {
 		pointLight.setEnable(true);
 		pointLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l1Trans.addChild(pointLight);
-		l1Trans.addChild(new Cube(0.01f, lColor1.x, lColor1.y, lColor1.z));
+		if (ADD_LIGHT_LOCATION_BOX)
+			l1Trans.addChild(new Cube(0.01f, lColor1.x, lColor1.y, lColor1.z));
 
 		/*Appearance appL1 = new SimpleShaderAppearance(false, false);
 		ColoringAttributes caL1 = new ColoringAttributes();
@@ -311,7 +311,8 @@ public class NifDisplayTester {
 		spotLight.setEnable(true);
 		spotLight.setInfluencingBounds(new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.POSITIVE_INFINITY));
 		l2Trans.addChild(spotLight);
-		l2Trans.addChild(new Cube(0.01f, lColor2.x, lColor2.y, lColor2.z));
+		if (ADD_LIGHT_LOCATION_BOX)
+			l2Trans.addChild(new Cube(0.01f, lColor2.x, lColor2.y, lColor2.z));
 
 		bg.addChild(l2RotTrans);
 
@@ -363,7 +364,7 @@ public class NifDisplayTester {
 		//win.setVisible(true);
 
 	}
-	
+
 	public static void clearTextureSource() {
 		textureSource = null;
 	}
@@ -381,9 +382,10 @@ public class NifDisplayTester {
 	}
 
 	private void toggleHavok() {
-		showHavok = !showHavok;		
+		showHavok = !showHavok;
 		update();
-		
+
+		//FIXME: there should be a showoutlines api so that I can see or hide otu line for everything generally
 		// also show debug lines on particles on the same basis
 		J3dNiParticleSystem.setSHOW_DEBUG_LINES(showHavok);
 	}
