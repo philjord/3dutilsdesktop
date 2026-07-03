@@ -69,6 +69,7 @@ public class BSAToolMain
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			SwingUtilities.invokeLater(new Runnable()
 			{
+				@Override
 				public void run()
 				{
 					BSAToolMain.createAndShowGUI();
@@ -86,7 +87,6 @@ public class BSAToolMain
 		try
 		{
 			mainWindow = new BSAToolFrame();
-			mainWindow.pack();
 			mainWindow.setVisible(true);
 		}
 		catch (Throwable exc)
@@ -142,6 +142,7 @@ public class BSAToolMain
 			{
 				SwingUtilities.invokeAndWait(new Runnable()
 				{
+					@Override
 					public void run()
 					{
 						BSAToolMain.logException(BSAToolMain.deferredText, BSAToolMain.deferredException);

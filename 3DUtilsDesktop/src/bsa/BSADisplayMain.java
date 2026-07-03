@@ -55,8 +55,8 @@ public class BSADisplayMain extends BSAToolMain {
 	public static void createAndShowGUI() {
 		try {
 			mainWindow = new BSADisplayFrame();
-			mainWindow.pack();
-			mainWindow.setLocationRelativeTo(null);
+			//mainWindow.pack();
+			//mainWindow.setLocationRelativeTo(null);
 			mainWindow.setVisible(true);
 		} catch (Throwable exc) {
 			logException("Exception while initializing application window", exc);

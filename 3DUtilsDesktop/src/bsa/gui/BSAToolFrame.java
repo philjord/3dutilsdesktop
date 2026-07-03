@@ -83,7 +83,7 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 			frameHeight = Integer.parseInt(propValue.substring(sep + 1));
 		}
 		setPreferredSize(new Dimension(frameWidth, frameHeight));
-
+		setSize(new Dimension(frameWidth, frameHeight));
 	}
 
 	private void setUpMenus() {

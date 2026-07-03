@@ -82,7 +82,10 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		setUpMenus(); 
 		setUpTree();
 	}
-	
+	  @Override
+	    public void setLocation(int x, int y) {
+	        super.setLocation(x, y);
+	    }
 	private void setupWindow() {
 
 		windowMinimized = false;
@@ -103,6 +106,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			frameHeight = Integer.parseInt(propValue.substring(sep + 1));
 		}
 		setPreferredSize(new Dimension(frameWidth, frameHeight));
+		setSize(new Dimension(frameWidth, frameHeight));
 	}
 	
 	private void setUpMenus() {
