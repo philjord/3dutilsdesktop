@@ -268,7 +268,7 @@ public class NifDisplayTester {
 		l1RotTrans.addChild(l1Trans);
 
 		Color3f lColor1 = new Color3f(0.6f, 0.6f, 0.9f);
-		pointLight = new PointLight(true, lColor1, new Point3f(0f, 0f, 0f), new Point3f(1f, 0f, 0f));
+		pointLight = new PointLight(true, lColor1, new Point3f(0f, 0f, 0f), new Point3f(0f, 1.1f, 0f));
 		pointLight.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
 		pointLight.setCapability(Light.ALLOW_STATE_WRITE);
 		pointLight.setEnable(true);
