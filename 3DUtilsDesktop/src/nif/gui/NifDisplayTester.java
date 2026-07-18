@@ -116,7 +116,7 @@ public class NifDisplayTester {
 		NiGeometryAppearanceFactoryShader.setAsDefault();
 		//FileMediaRoots.setMediaRoots(new String[]{"E:\\Java\\dsstexturesconvert"});
 
-		// only load reasources once 
+		// only load resources once 
 		if (textureSource == null) {
 			BSAFileSetWithStatus bsaFileSet;
 			if (parentBsaFileSet == null) {
@@ -152,7 +152,6 @@ public class NifDisplayTester {
 		NiGeometryAppearanceShader.OUTPUT_BINDINGS = true;
 
 		//win.setVisible(true);
-
 		//win.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		final Canvas3D canvas3D = new Canvas3D();
@@ -188,14 +187,7 @@ public class NifDisplayTester {
 		//J3dNiParticleSystem.setSHOW_DEBUG_LINES(true);// H to toggle
 
 		simpleUniverse = new SimpleUniverse(canvas3D);
-		/*		GraphicsSettings gs = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win, false, true,
-						true);
 		
-				canvas3D.getView().setSceneAntialiasingEnable(gs.isAaRequired());
-				DDSTextureLoader.setAnisotropicFilterDegree(gs.getAnisotropicFilterDegree());
-			*/
-		//TODO: these must come form a new one of those ^
-
 		//FIXME: I should record the last location and size and reuse them if they are sensible
 		canvas3D.getGLWindow().setSize(800, 600);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -203,7 +195,6 @@ public class NifDisplayTester {
 				(screenSize.height / 2) - (canvas3D.getGLWindow().getHeight() / 2));
 		CompressedTextureLoader.setAnisotropicFilterDegree(8);
 
-		//win.setVisible(true);
 		canvas3D.addNotify();
 
 		spinTransformGroup.addChild(rotateTransformGroup);
@@ -326,7 +317,7 @@ public class NifDisplayTester {
 
 		bg.addChild(simpleCameraHandler);
 
-		bg.addChild(fileManageBehavior);
+		//bg.addChild(fileManageBehavior);
 
 		bg.addChild(spinTransformGroup);
 		spinTransform = new SpinTransform(spinTransformGroup, 0.5);
@@ -338,31 +329,6 @@ public class NifDisplayTester {
 		simpleUniverse.getViewer().getView().setBackClipDistance(5000);
 
 		simpleUniverse.getCanvas().getGLWindow().addKeyListener(new KeyHandler());
-		//simpleUniverse.getCanvas().getGLWindow().setPosition(500, 20);
-
-		/*	JMenuBar menuBar = new JMenuBar();
-			menuBar.setOpaque(true);
-			JMenu menu = new JMenu("File");
-			menu.setMnemonic(70);
-			menuBar.add(menu);
-		
-			menu.add(setGraphics);
-			setGraphics.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0)
-				{
-					GraphicsSettings gs2 = ScreenResolution.organiseResolution(Preferences.userNodeForPackage(NifDisplayTester.class), win,
-							false, true, true);
-		
-					simpleUniverse.getCanvas().getView().setSceneAntialiasingEnable(gs2.isAaRequired());
-					DDSTextureLoader.setAnisotropicFilterDegree(gs2.getAnisotropicFilterDegree());
-					System.out.println("filtering will require newly loaded textures remember");
-				}
-			});*/
-
-		//win.setJMenuBar(menuBar);
-		//win.setVisible(true);
-
 	}
 
 	public static void clearTextureSource() {
@@ -371,6 +337,7 @@ public class NifDisplayTester {
 
 	private void toggleSpin() {
 		spin = !spin;
+		System.out.println("spin: " +spin);
 		if (spinTransform != null) {
 			spinTransform.setEnable(spin);
 		}
@@ -378,11 +345,13 @@ public class NifDisplayTester {
 
 	private void toggleAnimateModel() {
 		animateModel = !animateModel;
+		System.out.println("animateModel: " +animateModel);
 		update();
 	}
 
 	private void toggleHavok() {
 		showHavok = !showHavok;
+		System.out.println("showHavok: " +showHavok);
 		update();
 
 		//FIXME: there should be a showoutlines api so that I can see or hide otu line for everything generally
@@ -392,29 +361,11 @@ public class NifDisplayTester {
 
 	private void toggleVisual() {
 		showVisual = !showVisual;
+		System.out.println("showVisual: " +showVisual);
 		update();
 	}
 
-	/**
-	 * Only used by non bsa mesh file display so mesh source is forcibly set to the file system root of file
-	 * @param f
-	 */
-	public void displayNif(File f) {
-		System.out.println("Selected file: " + f);
-
-		if (f.isDirectory()) {
-			//spinTransform.setEnable(true);
-			//processDir(f);
-			System.out.println("Bad news dir sent into display nif");
-		} else if (f.isFile()) {
-			//special single file mesh source
-			FileMediaRoots.setMediaRoots(new String[] {FileMediaRoots.splitOffMediaRoot(f.getAbsolutePath())[0]});
-			showNif(f.getAbsolutePath(), new FileMeshSource(), textureSource);
-		}
-
-		System.out.println("done");
-
-	}
+	
 
 	public void showNif(String filename, MeshSource meshSource) {
 
@@ -472,9 +423,11 @@ public class NifDisplayTester {
 
 			hbg = new BranchGroup();
 			hbg.setCapability(BranchGroup.ALLOW_DETACH);
-
-			if (showHavok && havok != null) {
+			if( havok != null) {
 				hbg.addChild(havok);
+			}
+						
+			if (showHavok) {
 				modelGroup.addChild(hbg);
 			}
 
@@ -482,6 +435,8 @@ public class NifDisplayTester {
 			vbg.setCapability(BranchGroup.ALLOW_DETACH);
 			vbg.setCapability(Node.ALLOW_BOUNDS_READ);
 
+			//FIXME: notice if we start without showvisuals we can never show them, unlike havok, probably
+			// should always load and show when asked for
 			if (showVisual) {
 				// check for skins!
 				if (NifJ3dSkeletonRoot.isSkeleton(nif.getNiToJ3dData())) {
@@ -527,7 +482,7 @@ public class NifDisplayTester {
 			//			bgc.addChild(new Cube(0.01f));
 			modelGroup.addChild(bgc);
 
-			//Particles are aut looping for now
+			//Particles are auto looping for now
 			// if a j3dparticlesystem exists fire it off
 
 			for (J3dNiAVObject j3dNiAVObject : nif.getNiToJ3dData().j3dNiAVObjectValues()) {
@@ -574,12 +529,31 @@ public class NifDisplayTester {
 				toggleVisual();
 			}
 		}
-
 	}
 
 	//***************************************
 	//Below here are the older File System based methods, for cycling through directories etc
+	/**
+	 * Only used by non bsa mesh file display so mesh source is forcibly set to the file system root of file
+	 * @param f
+	 */
+	public void displayNif(File f) {
+		System.out.println("Selected file: " + f);
 
+		if (f.isDirectory()) {
+			//spinTransform.setEnable(true);
+			//processDir(f);
+			System.out.println("Bad news dir sent into display nif");
+		} else if (f.isFile()) {
+			//special single file mesh source
+			FileMediaRoots.setMediaRoots(new String[] {FileMediaRoots.splitOffMediaRoot(f.getAbsolutePath())[0]});
+			showNif(f.getAbsolutePath(), new FileMeshSource(), textureSource);
+		}
+
+		System.out.println("done");
+
+	}
+	
 	private boolean					cycle				= true;
 
 	private long					currentFileLoadTime	= 0;
@@ -659,6 +633,7 @@ public class NifDisplayTester {
 
 	private void toggleCycling() {
 		cycle = !cycle;
+		System.out.println("cycle: " +cycle);
 		/*if (cycle)
 		{
 			// awake the directory processing thread

@@ -1,5 +1,6 @@
 package bsa.gui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -16,6 +17,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -43,11 +45,13 @@ import javax.swing.tree.TreePath;
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
 import bsa.BSAToolMain;
+import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
 import bsa.source.BsaTextureSource.CompressedTextureLoaderETCPackDDS;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
+import nif.gui.KfDisplayTester;
 import nif.gui.NifDisplayTester;
 import nif.j3d.particles.J3dNiParticleSystem;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
@@ -68,6 +72,9 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 	private JCheckBoxMenuItem		sopErrMenuItem	= new JCheckBoxMenuItem("SOP errors only");
 
 	private JMenu					menuRecentFile	= new JMenu("Recent Files");
+
+	private JMenu					menuSkele		= new JMenu("Skeleton");
+	private JMenu					menuSkins		= new JMenu("Skins");
 
 	public BSADisplayFrame() {
 		super("BSA test display");
@@ -168,6 +175,10 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuItem.setActionCommand("verify all");
 		menuItem.addActionListener(this);
 		menuAction.add(menuItem);
+		menuItem = new JMenuItem("Extract Selected Files");
+		menuItem.setActionCommand("extract selected");
+		menuItem.addActionListener(this);
+		menuAction.add(menuItem);
 		menuItem = new JMenuItem("Set Auto Display");
 		menuItem.setActionCommand("setAutoDisplayEntry");
 		menuItem.addActionListener(this);
@@ -211,8 +222,25 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		} else if (allowableTextureType.equals("useOnlyDDSMenuItem")) {
 			useOnlyDDSMenuItem.setSelected(true);
 		}
-
 		menuBar.add(menuNif);
+
+		JMenu menuAnimation = new JMenu("Animation");
+		menuItem = new JMenuItem("Select Skeleton");
+		menuItem.setActionCommand("select skeleton");
+		menuItem.addActionListener(this);
+		menuAnimation.add(menuItem);
+		menuItem = new JMenuItem("Select Skin");
+		menuItem.setActionCommand("select skin");
+		menuItem.addActionListener(this);
+		menuAnimation.add(menuItem);
+		menuAnimation.add(menuSkele);
+		menuAnimation.add(menuSkins);
+		menuItem = new JMenuItem("Play Animation");
+		menuItem.setActionCommand("play animation");
+		menuItem.addActionListener(this);
+		menuAnimation.add(menuItem);
+
+		menuBar.add(menuAnimation);
 
 		JMenu menuHelp = new JMenu("Help");
 		menuHelp.setMnemonic(72);
@@ -223,6 +251,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuBar.add(menuHelp);
 
 		setJMenuBar(menuBar);
+		
+		//************ now add pop ups for right click
 
 		JMenuItem copyPathPopup = new JMenuItem("Copy Path To Clipboard");
 		copyPathPopup.addActionListener(new ActionListener() {
@@ -241,7 +271,23 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		setAutoLoadPopup.setActionCommand("setAutoDisplayEntry");
 		setAutoLoadPopup.addActionListener(this);
 		treeNodePopup.add(setAutoLoadPopup);
-
+		
+		
+		JMenuItem selectSkeletonPopup = new JMenuItem("Select Skeleton");
+		selectSkeletonPopup.setActionCommand("select skeleton");
+		selectSkeletonPopup.addActionListener(this);
+		treeNodePopup.add(selectSkeletonPopup);
+		
+		JMenuItem selectSkinPopup = new JMenuItem("Select Skin");
+		selectSkinPopup.setActionCommand("select skin");
+		selectSkinPopup.addActionListener(this);
+		treeNodePopup.add(selectSkinPopup);	
+		
+		JMenuItem playAnimationPopup = new JMenuItem("Play Animation");
+		playAnimationPopup.setActionCommand("play animation");
+		playAnimationPopup.addActionListener(this);
+		treeNodePopup.add(playAnimationPopup);	
+		
 		createRecentMenu();
 	}
 
@@ -267,10 +313,10 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		//System.out.println("Putting  " + fileName);
 		for (int i = 0; i < 10; i++) {
 			String recentFileName = BSAToolMain.properties.getProperty("recentFile" + i);
-			
+
 			if (recentFileName == null)
 				break;
-			
+
 			//System.out.println("checking " + i + " recent of " + recentFileName);
 			// skip a match
 			if (!recentFileName.equals(fileName)) {
@@ -287,7 +333,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 				break;
 
 			BSAToolMain.properties.setProperty("recentFile" + (i + 1), recents[i]);
-			
+
 			//System.out.println("setting " + "recentFile" + (i + 1) + " to " + recents[i]);
 		}
 		BSAToolMain.saveProperties();
@@ -300,7 +346,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		if (recentFileName != null) {
 			File file = new File(recentFileName);
 			if (file.exists()) {
-				openArchiveFile(file);
+				openArchiveFile(new File[] {file});
 			} else {
 				System.out.println(recentFileName + " does not exist");
 			}
@@ -341,7 +387,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 				File archive = new File(fname);
 				// sometimes deleted/moved since
 				if (archive.exists()) {
-					openArchiveFile(archive);
+					openArchiveFile(new File[] {archive});
 					//synchronous call so now loaded and I can fire the file double click now
 					if (autoDisplay) {
 						String aname = BSAToolMain.properties.getProperty("auto open archive entry");
@@ -384,14 +430,176 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 				displayFiles(false, true);
 			else if (action.equals("verify all"))
 				displayFiles(true, true);
-			else if (action.equals("setAutoDisplayEntry"))
+			else if (action.equals("extract selected")) {
+				//TODO: extract task requires a single archive file, need to modfiy to use a bsafileset like display does
+				//BSAToolFrame.extractFiles(archiveFile, this, tree, false);
+				System.out.println("extractFiles not implemeneted yet");
+			} else if (action.equals("setAutoDisplayEntry"))
 				setAutoDisplayEntry();
 			else if (action.startsWith("loadRecent"))
 				loadRecent(action);
+			else if (action.equals("select skeleton"))
+				selectSkeleton();
+			else if (action.equals("select skin"))
+				selectSkin();
+			else if (action.equals("play animation"))
+				playAnimation();
 
 		} catch (Throwable exc) {
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
+	}
+
+	private void selectSkeleton() {
+		String skeleName = getSelectNodeString();
+		// check it's a reasonable skele
+		if (skeleName.contains("skeleton") || (skeleName.contains("xbase_anim") && skeleName.endsWith(".nif"))) {
+			System.out.println("setting skeleton to: " + skeleName);
+
+			menuSkele.removeAll();
+
+			JMenuItem skeleMenu = new JMenuItem(skeleName);
+			skeleMenu.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					menuSkele.remove((JMenuItem)e.getSource());
+				}
+			});
+			menuSkele.add(skeleMenu);
+		}
+	}
+
+	private void selectSkin() {
+		String skinName = getSelectNodeString();
+		// check it's a reasonable skele
+		if (skinName.endsWith(".nif")) {
+			System.out.println("adding skin : " + skinName);
+
+			// remove if present
+			for (Component c : menuSkins.getMenuComponents()) {
+				if (((JMenuItem)c).getText().equals(skinName))
+					menuSkins.remove(c);
+			}
+
+			JMenuItem skinMenu = new JMenuItem(skinName);
+			skinMenu.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					menuSkins.remove((JMenuItem)e.getSource());
+				}
+			});
+			menuSkins.add(skinMenu);
+
+			// if there is no skeleton file selected, but one exists in the same folder, set it now as it's likely right
+			if (menuSkele.getMenuComponentCount() == 0) {
+				String skeleName = "";
+				Object[] stp = tree.getSelectionPath().getPath();
+				// first is root, not included, then archive name, included
+				for (int i = 1; i < stp.length - 1; i++) {
+					Object pc = stp[i];
+					skeleName = skeleName + (i == 1 ? "" : "/") + pc.toString();
+				}
+				skeleName += "/skeleton.nif";
+				// check if that file exists						
+				BsaMeshSource meshSource = new BsaMeshSource(bsaFileSet);
+				if (meshSource.nifFileExists(stripArchiveFile(skeleName))) {
+					JMenuItem skeleMenu = new JMenuItem(skeleName);
+					skeleMenu.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							menuSkele.remove((JMenuItem)e.getSource());
+						}
+					});
+					menuSkele.add(skeleMenu);
+				}
+
+			}
+
+		}
+
+	}
+
+	// strip the archive name
+	private static String stripArchiveFile(String entryName) {
+		int start = entryName.indexOf(".bsa");
+		if (start == -1)
+			start = entryName.indexOf(".ba2");
+		if (start != -1)
+			return entryName.substring(start + 5);//for .bxx/
+		else
+			return entryName;
+	}
+
+	private void playAnimation() {
+		String animationToDisplay = getSelectNodeString();
+		if (menuSkele.getMenuComponentCount() > 0) {
+			String skeletonNifModelFile = ((JMenuItem)menuSkele.getMenuComponent(0)).getText();
+			// before stripping
+			boolean isMorrowind = skeletonNifModelFile.toLowerCase().contains("morrowind");
+			skeletonNifModelFile = stripArchiveFile(skeletonNifModelFile);
+			System.out.println("Selected skeleton file: " + skeletonNifModelFile);
+
+			// morrowind ignores the animation file and uses one based on the skele
+			if (isMorrowind || animationToDisplay.toLowerCase().endsWith(".kf")
+				|| animationToDisplay.toLowerCase().endsWith(".hkx")) {
+
+				ArrayList<String> skinNifModelFiles = new ArrayList<String>();
+
+				if (menuSkins.getMenuComponentCount() > 0) {
+					for (Component c : menuSkins.getMenuComponents()) {
+						String skinName = ((JMenuItem)c).getText();
+						skinName = stripArchiveFile(skinName);
+						System.out.println("Selected skin file : " + skinName);
+						skinNifModelFiles.add(skinName);
+					}
+				} else {
+					//This is fine, just animate the bones and show them
+					System.out.println("No skins selectd animating bones only");
+				}
+
+				KfDisplayTester kfDisplayTester = getKfDisplayer();
+
+				if (!isMorrowind) {
+					if (animationToDisplay != null) {
+						animationToDisplay = stripArchiveFile(animationToDisplay);
+						System.out.println("Animation file: " + animationToDisplay);
+
+						try {
+							kfDisplayTester.display(skeletonNifModelFile, skinNifModelFiles, animationToDisplay);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					} else {
+						System.out.println("No Animation file selected");
+					}
+				} else {
+					//morrowind has a single kf files named after skeleton
+					kfDisplayTester.displayTes3(skeletonNifModelFile, skinNifModelFiles);
+				}
+			} else {
+				System.out.println("Animation file no good " + animationToDisplay);
+			}
+		} else {
+			System.out.println("No Skeleton selected");
+		}
+
+	}
+
+	//This code set is similar to the DisplayTask which manages Nif Display windows
+	private static final int					MAX_KF_CANVAS3D_VISIBLE	= 3;
+	private static ArrayDeque<KfDisplayTester>	kfDisplays				= new ArrayDeque<KfDisplayTester>();
+
+	private KfDisplayTester getKfDisplayer() {
+
+		// up to 5
+		while (kfDisplays.size() > MAX_KF_CANVAS3D_VISIBLE - 1) {
+			KfDisplayTester ndt = kfDisplays.removeFirst();
+			ndt.close();
+		}
+		KfDisplayTester kfDisplay = new KfDisplayTester(bsaFileSet);
+		kfDisplays.addLast(kfDisplay);
+
+		return kfDisplay;
 	}
 
 	//used by checkboxes/radio buttons
@@ -431,28 +639,34 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		} else {
 			chooser = new JFileChooser();
 		}
+		chooser.setMultiSelectionEnabled(true);
 		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
 		chooser.setDialogTitle("Select Archive File");
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0) {
-			File file = chooser.getSelectedFile();			
-			openArchiveFile(file);
+			File[] files = chooser.getSelectedFiles();
+			openArchiveFile(files);
 		}
 	}
 
-	public void openArchiveFile(File file) {
-		// record it's opening in the list
-		openFilePutInRecent(file.getAbsolutePath());
+	public void openArchiveFile(File[] files) {
+		// record it's opening in the list (but only when 1 is selected too chaos otherwise
+		if (files.length == 1) {
+			openFilePutInRecent(files[0].getAbsolutePath());
+			BSAToolMain.properties.setProperty("current.directory", files[0].getParent());
+			BSAToolMain.properties.setProperty("last opened archive", files[0].getAbsolutePath());
+		}
 		// we close late in case they just cancel
 		closeFile();
 
-		BSAToolMain.properties.setProperty("current.directory", file.getParent());
-		BSAToolMain.properties.setProperty("last opened archive", file.getAbsolutePath());
 		BSAToolMain.saveProperties();
 		if (cbMenuItem.isSelected()) {
-			bsaFileSet = new BSAFileSetWithStatus(file.getParent(), true, true);
+			bsaFileSet = new BSAFileSetWithStatus(files[0].getParent(), true, true);
 		} else {
-			bsaFileSet = new BSAFileSetWithStatus(file.getAbsolutePath(), false, true);
+			String[] fileNames = new String[files.length];
+			for (int i = 0; i < files.length; i++)
+				fileNames[i] = files[i].getAbsolutePath();
+			bsaFileSet = new BSAFileSetWithStatus(fileNames, false, true);
 		}
 
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode();
@@ -538,6 +752,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		}
 		// forget current texture source as it's likely the next open will be whole new game folder 
 		NifDisplayTester.clearTextureSource();
+		KfDisplayTester.clearTextureSource();
 		treeModel = new DefaultTreeModel(new ArchiveNode());
 		tree.setModel(treeModel);
 	}

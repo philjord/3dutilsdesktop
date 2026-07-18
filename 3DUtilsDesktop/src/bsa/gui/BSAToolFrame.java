@@ -1,5 +1,6 @@
 package bsa.gui;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -55,7 +56,7 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 		setupWindow();
 		setUpMenus();
 		setUpTree();
-		
+
 		try {
 			//might as well open an archive, not much will happen otherwise
 			openFile();
@@ -140,10 +141,10 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 		JScrollPane scrollPane = new JScrollPane(tree);
 		JPanel contentPane = new JPanel();
 		contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-		contentPane.setLayout(new GridLayout(1,1));
+		contentPane.setLayout(new GridLayout(1, 1));
 		contentPane.add(scrollPane);
 		setContentPane(contentPane);
-		addWindowListener(new ApplicationWindowListener());	
+		addWindowListener(new ApplicationWindowListener());
 	}
 
 	@Override
@@ -161,9 +162,9 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 			else if (action.equals("about"))
 				aboutProgram();
 			else if (action.equals("extract selected"))
-				extractFiles(false);
+				extractFiles(archiveFile, this, tree, false);
 			else if (action.equals("extract all"))
-				extractFiles(true);
+				extractFiles(archiveFile, this, tree, true);
 			else if (action.equals("convert"))
 				convertFile();
 		} catch (Throwable exc) {
@@ -299,63 +300,6 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 		tree.setModel(treeModel);
 	}
 
-	private void extractFiles(boolean extractAllFiles) throws InterruptedException {
-		if (archiveFile == null) {
-			JOptionPane.showMessageDialog(this, "You must open an archive file", "No archive file", 0);
-			return;
-		}
-		List<ArchiveEntry> entries = null;
-		if (extractAllFiles) {
-			entries = archiveFile.getEntries();
-		} else {
-			TreePath treePaths[] = tree.getSelectionPaths();
-			if (treePaths == null) {
-				JOptionPane.showMessageDialog(this, "You must select one or more files to extract", "No files selected",
-						0);
-				return;
-			}
-			entries = new ArrayList<ArchiveEntry>(100);
-			for (int i = 0; i < treePaths.length; i++) {
-				TreePath treePath = treePaths[i];
-				Object obj = treePath.getLastPathComponent();
-				if (obj instanceof FolderNode) {
-					addFolderChildren((FolderNode)obj, entries);
-					continue;
-				}
-				if (!(obj instanceof FileNode))
-					continue;
-				ArchiveEntry entry = ((FileNode)obj).getEntry();
-				if (!entries.contains(entry))
-					entries.add(entry);
-			}
-
-		}
-		String extractDirectory = BSAToolMain.properties.getProperty("extract.directory");
-		JFileChooser chooser;
-		if (extractDirectory != null) {
-			File dirFile = new File(extractDirectory);
-			if (dirFile.exists() && dirFile.isDirectory())
-				chooser = new JFileChooser(dirFile);
-			else
-				chooser = new JFileChooser();
-		} else {
-			chooser = new JFileChooser();
-		}
-		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
-		chooser.setDialogTitle("Select Destination Directory");
-		chooser.setApproveButtonText("Select");
-		chooser.setFileSelectionMode(1);
-		if (chooser.showOpenDialog(this) == 0) {
-			File dirFile = chooser.getSelectedFile();
-			BSAToolMain.properties.setProperty("extract.directory", dirFile.getPath());
-			StatusDialog statusDialog = new StatusDialog(this, "Extracting files from " + archiveFile.getName());
-			ExtractTask extractTask = new ExtractTask(dirFile, archiveFile, entries, statusDialog);
-			extractTask.start();
-			statusDialog.showDialog();
-			extractTask.join();
-		}
-	}
-
 	private void convertFile() throws InterruptedException, IOException, DBException {
 
 		JFileChooser chooser = new JFileChooser();
@@ -416,7 +360,66 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 
 	}
 
-	private void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries) {
+	public static void extractFiles(ArchiveFile archiveFile, JFrame parentFrame, JTree tree,
+									boolean extractAllFiles)
+			throws InterruptedException {
+		if (archiveFile == null) {
+			JOptionPane.showMessageDialog(parentFrame, "You must open an archive file", "No archive file", 0);
+			return;
+		}
+		List<ArchiveEntry> entries = null;
+		if (extractAllFiles) {
+			entries = archiveFile.getEntries();
+		} else {
+			TreePath treePaths[] = tree.getSelectionPaths();
+			if (treePaths == null) {
+				JOptionPane.showMessageDialog(parentFrame, "You must select one or more files to extract", "No files selected",
+						0);
+				return;
+			}
+			entries = new ArrayList<ArchiveEntry>(100);
+			for (int i = 0; i < treePaths.length; i++) {
+				TreePath treePath = treePaths[i];
+				Object obj = treePath.getLastPathComponent();
+				if (obj instanceof FolderNode) {
+					addFolderChildren((FolderNode)obj, entries);
+					continue;
+				}
+				if (!(obj instanceof FileNode))
+					continue;
+				ArchiveEntry entry = ((FileNode)obj).getEntry();
+				if (!entries.contains(entry))
+					entries.add(entry);
+			}
+
+		}
+		String extractDirectory = BSAToolMain.properties.getProperty("extract.directory");
+		JFileChooser chooser;
+		if (extractDirectory != null) {
+			File dirFile = new File(extractDirectory);
+			if (dirFile.exists() && dirFile.isDirectory())
+				chooser = new JFileChooser(dirFile);
+			else
+				chooser = new JFileChooser();
+		} else {
+			chooser = new JFileChooser();
+		}
+		chooser.putClientProperty("FileChooser.useShellFolder", Boolean.valueOf(BSAToolMain.useShellFolder));
+		chooser.setDialogTitle("Select Destination Directory");
+		chooser.setApproveButtonText("Select");
+		chooser.setFileSelectionMode(1);
+		if (chooser.showOpenDialog(parentFrame) == 0) {
+			File dirFile = chooser.getSelectedFile();
+			BSAToolMain.properties.setProperty("extract.directory", dirFile.getPath());
+			StatusDialog statusDialog = new StatusDialog(parentFrame, "Extracting files from " + archiveFile.getName());
+			ExtractTask extractTask = new ExtractTask(dirFile, archiveFile, entries, statusDialog);
+			extractTask.start();
+			statusDialog.showDialog();
+			extractTask.join();
+		}
+	}
+
+	public static void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries) {
 		int count = folderNode.getChildCount();
 		for (int i = 0; i < count; i++) {
 			TreeNode node = folderNode.getChildAt(i);
