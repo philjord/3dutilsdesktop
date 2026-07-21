@@ -1,11 +1,12 @@
 package bsa.gui;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -22,6 +23,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
@@ -49,6 +51,8 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 	private ArchiveFile			archiveFile;
 
 	private String				openFileName	= "";
+
+	private JPopupMenu			treeNodePopup	= new JPopupMenu("Unseen");
 
 	public BSAToolFrame() {
 		super("Bethesda Softworks Archive Utility");
@@ -133,11 +137,32 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 		menuBar.add(menu);
 		setJMenuBar(menuBar);
 
+		//************ now add pop ups for right click
+		JMenuItem setAutoLoadPopup = new JMenuItem("Extract Selected");
+		setAutoLoadPopup.setActionCommand("extract selected");
+		setAutoLoadPopup.addActionListener(this);
+		treeNodePopup.add(setAutoLoadPopup);
+
 	}
 
 	private void setUpTree() {
 		treeModel = new DefaultTreeModel(new ArchiveNode());
 		tree = new JTree(treeModel);
+
+		// add the popup right click
+		tree.setComponentPopupMenu(treeNodePopup);
+		// make it select a node on right click too, note it is a poor performer, need to dismiss prior pop up
+		MouseAdapter ml = new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+				if (selPath != null) {
+					tree.setSelectionPath(selPath);
+				}
+			}
+		};
+		tree.addMouseListener(ml);
+
 		JScrollPane scrollPane = new JScrollPane(tree);
 		JPanel contentPane = new JPanel();
 		contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -360,8 +385,7 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 
 	}
 
-	public static void extractFiles(ArchiveFile archiveFile, JFrame parentFrame, JTree tree,
-									boolean extractAllFiles)
+	public static void extractFiles(ArchiveFile archiveFile, JFrame parentFrame, JTree tree, boolean extractAllFiles)
 			throws InterruptedException {
 		if (archiveFile == null) {
 			JOptionPane.showMessageDialog(parentFrame, "You must open an archive file", "No archive file", 0);
@@ -373,8 +397,8 @@ public class BSAToolFrame extends JFrame implements ActionListener {
 		} else {
 			TreePath treePaths[] = tree.getSelectionPaths();
 			if (treePaths == null) {
-				JOptionPane.showMessageDialog(parentFrame, "You must select one or more files to extract", "No files selected",
-						0);
+				JOptionPane.showMessageDialog(parentFrame, "You must select one or more files to extract",
+						"No files selected", 0);
 				return;
 			}
 			entries = new ArrayList<ArchiveEntry>(100);
