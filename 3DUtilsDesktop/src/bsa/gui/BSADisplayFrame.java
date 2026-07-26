@@ -225,6 +225,10 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuBar.add(menuNif);
 
 		JMenu menuAnimation = new JMenu("Animation");
+		menuItem = new JMenuItem("Clear"); // because we will record across session, make it easy to reset
+		menuItem.setActionCommand("clear animation");
+		menuItem.addActionListener(this);
+		menuAnimation.add(menuItem);
 		menuItem = new JMenuItem("Select Skeleton");
 		menuItem.setActionCommand("select skeleton");
 		menuItem.addActionListener(this);
@@ -240,6 +244,28 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuItem.addActionListener(this);
 		menuAnimation.add(menuItem);
 
+		//*************************************************************************************************************
+		//Just for fast debug, perhaps I should record across session to make it always fast?
+/*		String skeleName = "ArchiveFile:Fallout4 - Meshes.ba2/meshes/actors/character/characterassets/skeleton.nif";
+		JMenuItem skeleMenu = new JMenuItem(skeleName);
+		skeleMenu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				menuSkele.remove((JMenuItem)e.getSource());
+			}
+		});
+		menuSkele.add(skeleMenu);
+		String skinName = "ArchiveFile:Fallout4 - Meshes.ba2/meshes/actors/character/characterassets/malebody.nif";
+		JMenuItem skinMenu = new JMenuItem(skinName);
+		skinMenu.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				menuSkins.remove((JMenuItem)e.getSource());
+			}
+		});
+		menuSkins.add(skinMenu);*/
+		//*************************************************************************************************************
+
 		menuBar.add(menuAnimation);
 
 		JMenu menuHelp = new JMenu("Help");
@@ -251,7 +277,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuBar.add(menuHelp);
 
 		setJMenuBar(menuBar);
-		
+
 		//************ now add pop ups for right click
 
 		JMenuItem copyPathPopup = new JMenuItem("Copy Path To Clipboard");
@@ -271,23 +297,22 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		setAutoLoadPopup.setActionCommand("setAutoDisplayEntry");
 		setAutoLoadPopup.addActionListener(this);
 		treeNodePopup.add(setAutoLoadPopup);
-		
-		
+
 		JMenuItem selectSkeletonPopup = new JMenuItem("Select Skeleton");
 		selectSkeletonPopup.setActionCommand("select skeleton");
 		selectSkeletonPopup.addActionListener(this);
 		treeNodePopup.add(selectSkeletonPopup);
-		
+
 		JMenuItem selectSkinPopup = new JMenuItem("Select Skin");
 		selectSkinPopup.setActionCommand("select skin");
 		selectSkinPopup.addActionListener(this);
-		treeNodePopup.add(selectSkinPopup);	
-		
+		treeNodePopup.add(selectSkinPopup);
+
 		JMenuItem playAnimationPopup = new JMenuItem("Play Animation");
 		playAnimationPopup.setActionCommand("play animation");
 		playAnimationPopup.addActionListener(this);
-		treeNodePopup.add(playAnimationPopup);	
-		
+		treeNodePopup.add(playAnimationPopup);
+
 		createRecentMenu();
 	}
 
@@ -438,6 +463,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 				setAutoDisplayEntry();
 			else if (action.startsWith("loadRecent"))
 				loadRecent(action);
+			else if (action.equals("clear animation"))
+				clearAnimation();
 			else if (action.equals("select skeleton"))
 				selectSkeleton();
 			else if (action.equals("select skin"))
@@ -448,6 +475,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		} catch (Throwable exc) {
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
+	}
+
+	private void clearAnimation() {
+		menuSkele.removeAll();
+		menuSkins.removeAll();
 	}
 
 	private void selectSkeleton() {
@@ -512,9 +544,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 					});
 					menuSkele.add(skeleMenu);
 				}
-
 			}
-
 		}
 
 	}
@@ -541,7 +571,12 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 
 			// morrowind ignores the animation file and uses one based on the skele
 			if (isMorrowind || animationToDisplay.toLowerCase().endsWith(".kf")
-				|| animationToDisplay.toLowerCase().endsWith(".hkx")) {
+				|| animationToDisplay.toLowerCase().endsWith(".hkx")
+
+				//https://forums.nexusmods.com/topic/13200546-animation-in-af-afx/	
+				// so its back to the lab again
+				|| animationToDisplay.toLowerCase().endsWith(".afx")
+				|| animationToDisplay.toLowerCase().endsWith(".af")) {
 
 				ArrayList<String> skinNifModelFiles = new ArrayList<String>();
 
@@ -656,10 +691,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			BSAToolMain.properties.setProperty("current.directory", files[0].getParent());
 			BSAToolMain.properties.setProperty("last opened archive", files[0].getAbsolutePath());
 		}
+		BSAToolMain.saveProperties();
+		
 		// we close late in case they just cancel
 		closeFile();
-
-		BSAToolMain.saveProperties();
+		
 		if (cbMenuItem.isSelected()) {
 			bsaFileSet = new BSAFileSetWithStatus(files[0].getParent(), true, true);
 		} else {
@@ -690,6 +726,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			}
 		};
 		tree.addMouseListener(ml);
+		
+		loadAnimationMenus();
 	}
 
 	private String getSelectNodeString() {
@@ -839,7 +877,65 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		BSAToolMain.saveProperties();
 	}
 
+	
+	private void loadAnimationMenus() {
+		menuSkele.removeAll();
+		String skeleName = BSAToolMain.properties.getProperty("anim.skele", null);
+		if (skeleName != null) {
+			JMenuItem skeleMenu = new JMenuItem(skeleName);
+			skeleMenu.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					menuSkele.remove((JMenuItem)e.getSource());
+				}
+			});
+			menuSkele.add(skeleMenu);
+		}
+		menuSkins.removeAll();
+		for (int i = 0; i < 10; i++) {
+			String skinName = BSAToolMain.properties.getProperty("anim.skin" + i, null);
+			if (skinName != null) {
+				JMenuItem skinMenu = new JMenuItem(skinName);
+				skinMenu.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						menuSkins.remove((JMenuItem)e.getSource());
+					}
+				});
+				menuSkins.add(skinMenu);
+			}
+		}
+	}
+	
+	private void saveAnimationMenus() {
+		if (menuSkele.getMenuComponentCount() > 0) {
+			String skeletonNifModelFile = ((JMenuItem)menuSkele.getMenuComponent(0)).getText();
+			BSAToolMain.properties.setProperty("anim.skele", skeletonNifModelFile);
+		} else {
+			BSAToolMain.properties.setProperty("anim.skele", "");
+		}
+
+		ArrayList<String> skinNifModelFiles = new ArrayList<String>();
+		if (menuSkins.getMenuComponentCount() > 0) {
+			for (Component c : menuSkins.getMenuComponents()) {
+				String skinName = ((JMenuItem)c).getText();
+				skinNifModelFiles.add(skinName);
+			}
+		}
+
+		for (int i = 0; i < 10; i++) {
+			String skinName = "";
+			if (skinNifModelFiles.size() > i) {
+				skinName = skinNifModelFiles.get(i);
+			}
+			BSAToolMain.properties.setProperty("anim.skin" + i, skinName);
+		}
+		BSAToolMain.saveProperties();
+	}
+
 	private void exitProgram() {
+		saveAnimationMenus();
+
 		// don't record window if minimised!
 		if (!windowMinimized) {
 			Point p = BSAToolMain.mainWindow.getLocation();
@@ -851,7 +947,6 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		}
 
 		BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
-
 		BSAToolMain.saveProperties();
 		//System.exit(0);
 	}

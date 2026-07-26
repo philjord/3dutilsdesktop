@@ -348,6 +348,14 @@ public class KfDisplayTester {
 		display(skeletonNifFile, skinNifFiles, kff != null ? kff.getAbsolutePath() : null);
 	}
 
+	
+	// morrowind in this tool doesn't attch skins, but they are clearly in the explorer
+	// obliv, falout3 all good
+	// skyrim currently use the converted kf files, so time to decode the hkx files!
+	// fallout4 shows skele cubes but no skin
+	// fallout 76 shows skele with skinny skin (also seen in faout 4?)
+	// starfield shows skele no skin, and af file need decoding
+	
 	public void display(String skeletonNifFile, ArrayList<String> skinNifFiles, String animationFile) {
 		modelGroup.removeAllChildren();
 
