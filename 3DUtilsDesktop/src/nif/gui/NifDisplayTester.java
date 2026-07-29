@@ -57,6 +57,7 @@ import nif.j3d.particles.J3dNiParticleSystem;
 import nif.shader.NiGeometryAppearanceShader;
 import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
+import tools3d.camera.simple.MyKeyboardMover;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.scenegraph.SpinTransform;
 import utils.PerFrameUpdateBehavior;
@@ -70,6 +71,7 @@ import utils.source.file.FileMeshSource;
 public class NifDisplayTester {
 	public static boolean				ADD_LIGHT_LOCATION_BOX	= true;
 	private SimpleCameraHandler			simpleCameraHandler;
+	private MyKeyboardMover				modelKeyboardMover;
 
 	private TransformGroup				spinTransformGroup		= new TransformGroup();
 
@@ -197,22 +199,23 @@ public class NifDisplayTester {
 
 		canvas3D.addNotify();
 
-		spinTransformGroup.addChild(rotateTransformGroup);
-		rotateTransformGroup.addChild(modelTransformGroup);
-		// debug move ita bout a bit
-		Transform3D t = new Transform3D();
-		t.setTranslation(new Vector3f(0, 0, 0));
-		modelTransformGroup.setTransform(t);
-		modelTransformGroup.addChild(modelGroup);
-
-		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
-				modelGroup, rotateTransformGroup, false);
-
+		
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		spinTransformGroup.addChild(modelTransformGroup);
 
+		modelTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		modelTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		modelTransformGroup.addChild(rotateTransformGroup);
+		modelKeyboardMover = new MyKeyboardMover(canvas3D, modelTransformGroup);
+		
+		rotateTransformGroup.addChild(modelGroup);
+		
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+		
+		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
+				modelGroup, rotateTransformGroup, false);
 
 		// Create ambient light	and add it
 		Color3f alColor = new Color3f(0.5f, 0.5f, 0.5f);

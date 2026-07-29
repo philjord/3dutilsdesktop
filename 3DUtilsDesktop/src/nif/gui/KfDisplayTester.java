@@ -63,6 +63,8 @@ import nif.shader.NiGeometryAppearanceShader;
 import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
+import tools3d.camera.simple.MyKeyboardMover;
+import tools3d.camera.simple.MyMouseRotater;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.scenegraph.SpinTransform;
 import utils.source.MaterialsSource;
@@ -82,12 +84,13 @@ public class KfDisplayTester {
 
 	public static boolean				ADD_LIGHT_LOCATION_BOX	= false;
 	private SimpleCameraHandler			simpleCameraHandler;
+	private MyKeyboardMover				modelKeyboardMover;
 
 	private TransformGroup				spinTransformGroup		= new TransformGroup();
 
 	private TransformGroup				rotateTransformGroup	= new TransformGroup();
 
-	// used for debug moving the model about a bit
+	// used for  moving the model about 
 	private TransformGroup				modelTransformGroup		= new TransformGroup();
 	private BranchGroup					modelGroup				= new BranchGroup();
 
@@ -203,23 +206,23 @@ public class KfDisplayTester {
 		CompressedTextureLoader.setAnisotropicFilterDegree(8);
 
 		canvas3D.addNotify();
-
-		spinTransformGroup.addChild(rotateTransformGroup);
-		rotateTransformGroup.addChild(modelTransformGroup);
-		// debug move ita bout a bit
-		Transform3D t = new Transform3D();
-		t.setTranslation(new Vector3f(0, 0, 0));
-		modelTransformGroup.setTransform(t);
-		modelTransformGroup.addChild(modelGroup);
-
-		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
-				modelGroup, rotateTransformGroup, false);
-
+				
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		spinTransformGroup.addChild(modelTransformGroup);
 
+		modelTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+		modelTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		modelTransformGroup.addChild(rotateTransformGroup);
+		modelKeyboardMover = new MyKeyboardMover(canvas3D, modelTransformGroup);
+		
+		rotateTransformGroup.addChild(modelGroup);
+		
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+		
+		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
+				modelGroup, rotateTransformGroup, false);
 
 		// Create ambient light	and add it
 		Color3f alColor = new Color3f(0.5f, 0.5f, 0.5f);
@@ -348,14 +351,13 @@ public class KfDisplayTester {
 		display(skeletonNifFile, skinNifFiles, kff != null ? kff.getAbsolutePath() : null);
 	}
 
-	
 	// morrowind in this tool doesn't attch skins, but they are clearly in the explorer
 	// obliv, falout3 all good
 	// skyrim currently use the converted kf files, so time to decode the hkx files!
 	// fallout4 shows skele cubes but no skin
 	// fallout 76 shows skele with skinny skin (also seen in faout 4?)
 	// starfield shows skele no skin, and af file need decoding
-	
+
 	public void display(String skeletonNifFile, ArrayList<String> skinNifFiles, String animationFile) {
 		modelGroup.removeAllChildren();
 

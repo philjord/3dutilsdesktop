@@ -244,28 +244,6 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuItem.addActionListener(this);
 		menuAnimation.add(menuItem);
 
-		//*************************************************************************************************************
-		//Just for fast debug, perhaps I should record across session to make it always fast?
-/*		String skeleName = "ArchiveFile:Fallout4 - Meshes.ba2/meshes/actors/character/characterassets/skeleton.nif";
-		JMenuItem skeleMenu = new JMenuItem(skeleName);
-		skeleMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				menuSkele.remove((JMenuItem)e.getSource());
-			}
-		});
-		menuSkele.add(skeleMenu);
-		String skinName = "ArchiveFile:Fallout4 - Meshes.ba2/meshes/actors/character/characterassets/malebody.nif";
-		JMenuItem skinMenu = new JMenuItem(skinName);
-		skinMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				menuSkins.remove((JMenuItem)e.getSource());
-			}
-		});
-		menuSkins.add(skinMenu);*/
-		//*************************************************************************************************************
-
 		menuBar.add(menuAnimation);
 
 		JMenu menuHelp = new JMenu("Help");
@@ -894,7 +872,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuSkins.removeAll();
 		for (int i = 0; i < 10; i++) {
 			String skinName = BSAToolMain.properties.getProperty("anim.skin" + i, null);
-			if (skinName != null) {
+			if (skinName != null && skinName.length() > 0) {
 				JMenuItem skinMenu = new JMenuItem(skinName);
 				skinMenu.addActionListener(new ActionListener() {
 					@Override
