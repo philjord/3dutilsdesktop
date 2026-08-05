@@ -21,6 +21,7 @@ import javax.swing.table.TableRowSorter;
 import org.jogamp.java3d.Alpha;
 import org.jogamp.java3d.AmbientLight;
 import org.jogamp.java3d.BoundingSphere;
+import org.jogamp.java3d.Bounds;
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Canvas3D;
 import org.jogamp.java3d.DirectionalLight;
@@ -206,7 +207,7 @@ public class KfDisplayTester {
 		CompressedTextureLoader.setAnisotropicFilterDegree(8);
 
 		canvas3D.addNotify();
-				
+
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		spinTransformGroup.addChild(modelTransformGroup);
@@ -215,12 +216,12 @@ public class KfDisplayTester {
 		modelTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		modelTransformGroup.addChild(rotateTransformGroup);
 		modelKeyboardMover = new MyKeyboardMover(canvas3D, modelTransformGroup);
-		
+
 		rotateTransformGroup.addChild(modelGroup);
-		
+
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
-		
+
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
 				modelGroup, rotateTransformGroup, false);
 
@@ -382,7 +383,15 @@ public class KfDisplayTester {
 
 		modelGroup.addChild(bg);
 
-		simpleCameraHandler.viewBounds(nifCharacter.getBounds());
+		Bounds bound = nifCharacter.getBounds();
+		// characters have big overly bounds reduce by 1/8
+		if (bound instanceof BoundingSphere) {
+			bound = new BoundingSphere(bound);
+			((BoundingSphere)bound).setRadius(((BoundingSphere)bound).getRadius() / 8f);
+		}
+
+		// note assumes char at 0,0,0
+		simpleCameraHandler.viewBounds(bound);
 
 	}
 

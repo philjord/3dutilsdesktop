@@ -51,6 +51,7 @@ import bsa.source.BsaTextureSource.CompressedTextureLoaderETCPackDDS;
 import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
+import bsaio.displayables.Displayable;
 import nif.gui.KfDisplayTester;
 import nif.gui.NifDisplayTester;
 import nif.j3d.particles.J3dNiParticleSystem;
@@ -672,10 +673,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			BSAToolMain.properties.setProperty("last opened archive", files[0].getAbsolutePath());
 		}
 		BSAToolMain.saveProperties();
-		
-		
-		
-		
+
 		if (cbMenuItem.isSelected()) {
 			bsaFileSet = new BSAFileSetWithStatus(files[0].getParent(), true, true);
 		} else {
@@ -706,7 +704,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			}
 		};
 		tree.addMouseListener(ml);
-		
+
 		loadAnimationMenus();
 	}
 
@@ -815,11 +813,17 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 
 		}
 
-		DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly,
-				sopErrMenuItem.isSelected());
-		displayTask.start();
-		statusDialog.showDialog();
-		displayTask.join();
+		// if the first entry is an animation file, do a playAnimation on that single file instead
+		String fileName = ((Displayable)entries.get(0)).getName();
+		if (fileName.endsWith(".kf") || fileName.endsWith(".hkx")) {
+			playAnimation();
+		} else {
+			DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly,
+					sopErrMenuItem.isSelected());
+			displayTask.start();
+			statusDialog.showDialog();
+			displayTask.join();
+		}
 	}
 
 	private void addFolderChildren(FolderNode folderNode, List<ArchiveEntry> entries) {
@@ -858,7 +862,6 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		BSAToolMain.saveProperties();
 	}
 
-	
 	private void loadAnimationMenus() {
 		menuSkele.removeAll();
 		String skeleName = BSAToolMain.properties.getProperty("anim.skele", null);
@@ -887,7 +890,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			}
 		}
 	}
-	
+
 	private void saveAnimationMenus() {
 		if (menuSkele.getMenuComponentCount() > 0) {
 			String skeletonNifModelFile = ((JMenuItem)menuSkele.getMenuComponent(0)).getText();
