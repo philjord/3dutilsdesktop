@@ -658,6 +658,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		chooser.setFileFilter(new ArchiveFileFilter());
 		if (chooser.showOpenDialog(this) == 0) {
 			File[] files = chooser.getSelectedFiles();
+			// we close late in case they just cancel
+			closeFile();
 			openArchiveFile(files);
 		}
 	}
@@ -671,8 +673,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		}
 		BSAToolMain.saveProperties();
 		
-		// we close late in case they just cancel
-		closeFile();
+		
+		
 		
 		if (cbMenuItem.isSelected()) {
 			bsaFileSet = new BSAFileSetWithStatus(files[0].getParent(), true, true);
@@ -766,6 +768,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			}
 			bsaFileSet = null;
 		}
+		saveAnimationMenus();
 		// forget current texture source as it's likely the next open will be whole new game folder 
 		NifDisplayTester.clearTextureSource();
 		KfDisplayTester.clearTextureSource();
