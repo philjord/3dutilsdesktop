@@ -42,6 +42,7 @@ import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
 
+import com.jogamp.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowAdapter;
@@ -171,7 +172,7 @@ public class KfDisplayTester {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-					System.exit(0);
+					canvas3D.removeNotify();
 				} else if (e.getKeyCode() == KeyEvent.VK_1) {
 					ambLight.setEnable(!ambLight.getEnable());
 					System.out.println("ambLight " + ambLight.getEnable());
@@ -197,6 +198,13 @@ public class KfDisplayTester {
 		J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
 		//J3dNiParticleSystem.setSHOW_DEBUG_LINES(true);// H to toggle
 
+		canvas3D.getGLWindow().setWindowDestroyNotifyAction(new Runnable() {			
+			@Override
+			public void run() {
+				canvas3D.removeNotify();
+			}
+		});
+		
 		simpleUniverse = new SimpleUniverse(canvas3D);
 
 		//FIXME: I should record the last location and size and reuse them if they are sensible
