@@ -77,11 +77,12 @@ public class DisplayTask extends Thread {
 								}
 							} else {
 								System.out.println("issue: " + fileName);
-							}
-							NifToJ3d.clearCache();
+							}							
 						} else {
 							getNifDisplayer().showNif(fileName, new BsaMeshSource(bsaFileSet));
 						}
+						//always clear in case same names appears in 2 different bsa files (fo4vfo76)
+						NifToJ3d.clearCache();
 					} else if (ext.equals(".dds") || ext.equals(".ktx")) {
 						// if we are looking at an image we probably wants its info
 						DDSImage.OUTPUT_IMAGE_DEBUG = true;
@@ -93,13 +94,13 @@ public class DisplayTask extends Thread {
 								}
 							} else {
 								System.out.println("issue: " + fileName);
-							}
-
-							CompressedTextureLoader.clearCache();
+							}							
 						} else {							
 							Texture2DDisplay.showImageInShape(fileName,
 									new BsaTextureSource(bsaFileSet).getTexture(fileName));
 						}
+						//always clear in case same names appears in 2 different bsa files (fo4vfo76)
+						CompressedTextureLoader.clearCache();
 					} else if (ext.equals(".kf")) {
 
 						//only verify with no skeleton

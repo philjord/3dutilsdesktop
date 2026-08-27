@@ -380,6 +380,7 @@ public class NifDisplayTester {
 	public void showNif(String filename, MeshSource meshSource) {
 
 		try {
+			System.out.println("showNif: " + filename);
 			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -390,6 +391,7 @@ public class NifDisplayTester {
 	private void showNif(String filename, MeshSource meshSource, TextureSource textureSource) {
 
 		try {
+			System.out.println("showNif: " + filename);
 			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
 		} catch (Exception e) {
 			e.printStackTrace();
