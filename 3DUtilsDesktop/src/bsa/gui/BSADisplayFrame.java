@@ -42,8 +42,6 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
-
 import bsa.BSAToolMain;
 import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
@@ -57,6 +55,7 @@ import nif.gui.KfDisplayTester;
 import nif.gui.NifDisplayTester;
 import nif.j3d.particles.J3dNiParticleSystem;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
+import texture.CompressedTextureLoaderExt;
 
 public class BSADisplayFrame extends JFrame implements ActionListener, ItemListener {
 
@@ -192,8 +191,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		convertDDStoKTXMenuItem.setActionCommand("convertDDStoKTXMenuItem");
 		convertDDStoKTXMenuItem.addItemListener(this);
 		boolean convertDDStoKTX = Boolean.parseBoolean(BSAToolMain.properties.getProperty("convertDDStoKTX"));
-		convertDDStoKTXMenuItem.setSelected(convertDDStoKTX);	
-		CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2 = convertDDStoKTX;
+		convertDDStoKTXMenuItem.setSelected(convertDDStoKTX);	// calling set will fire the Item listener to set statics
 		menuTexture.add(convertDDStoKTXMenuItem);
 
 		menuBar.add(menuTexture);
@@ -629,12 +627,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		} else if (action.equals("convertDDStoKTXMenuItem")) {
 			boolean convertDDStoKTX = e.getStateChange() == ItemEvent.SELECTED;
 			CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2 = convertDDStoKTX;
-			CompressedTextureLoader.clearCache();
 			BSAToolMain.properties.setProperty("convertDDStoKTX", Boolean.toString(convertDDStoKTX));
 			BSAToolMain.saveProperties();
 			// clear the texture caches so we load up the newly set format
 			BsaTextureSource.clearCache();
-			CompressedTextureLoader.clearCache();
+			CompressedTextureLoaderExt.clearCache();
 			// and any loaded nifs too
 			NifToJ3d.clearCache();
 		} else if (action.equals("autoOpenArchiveMenuItem")) {
@@ -869,7 +866,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		BSAToolMain.saveProperties();
 		// clear the texture caches so we load up the newly set format
 		BsaTextureSource.clearCache();
-		CompressedTextureLoader.clearCache();
+		CompressedTextureLoaderExt.clearCache();
 		// and any loaded nifs too
 		NifToJ3d.clearCache();
 	}

@@ -28,7 +28,6 @@ import org.jogamp.java3d.TransformGroup;
 import org.jogamp.java3d.WakeupCondition;
 import org.jogamp.java3d.WakeupCriterion;
 import org.jogamp.java3d.WakeupOnElapsedFrames;
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
@@ -55,6 +54,7 @@ import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.J3dNiGeomMorpherController;
 import nif.j3d.particles.J3dNiParticleSystem;
 import nif.shader.NiGeometryAppearanceShader;
+import texture.CompressedTextureLoaderExt;
 import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
 import tools3d.camera.simple.MyKeyboardMover;
@@ -202,7 +202,7 @@ public class NifDisplayTester {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		canvas3D.getGLWindow().setPosition((screenSize.width / 2) - (canvas3D.getGLWindow().getWidth() / 2),
 				(screenSize.height / 2) - (canvas3D.getGLWindow().getHeight() / 2));
-		CompressedTextureLoader.setAnisotropicFilterDegree(8);
+		CompressedTextureLoaderExt.setAnisotropicFilterDegree(8);
 
 		canvas3D.addNotify();
 
@@ -381,6 +381,7 @@ public class NifDisplayTester {
 
 		try {
 			System.out.println("showNif: " + filename);
+			simpleUniverse.getCanvas().getGLWindow().setTitle("Nif: " + filename);
 			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -391,7 +392,7 @@ public class NifDisplayTester {
 	private void showNif(String filename, MeshSource meshSource, TextureSource textureSource) {
 
 		try {
-			System.out.println("showNif: " + filename);
+			simpleUniverse.getCanvas().getGLWindow().setTitle("Nif: " + filename);
 			display(NifToJ3d.loadNif(filename, meshSource, textureSource));
 		} catch (Exception e) {
 			e.printStackTrace();

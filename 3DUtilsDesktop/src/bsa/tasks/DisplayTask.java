@@ -6,7 +6,6 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 
 import org.jogamp.java3d.Texture;
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
 import bsa.BSAToolMain;
 import bsa.gui.BSAFileSetWithStatus;
@@ -21,6 +20,7 @@ import nif.NifJ3dVisRoot;
 import nif.NifToJ3d;
 import nif.character.KfJ3dRoot;
 import nif.gui.NifDisplayTester;
+import texture.CompressedTextureLoaderExt;
 import texture.Texture2DDisplay;
 import utils.source.DummyTextureSource;
 
@@ -106,7 +106,7 @@ public class DisplayTask extends Thread {
 							BsaTextureSource.allowedTextureFormats = prevAllowedTextureType;
 						}
 						//always clear in case same names appears in 2 different bsa files (fo4vfo76)
-						CompressedTextureLoader.clearCache();
+						CompressedTextureLoaderExt.clearCache();
 					} else if (ext.equals(".kf")) {
 
 						//only verify with no skeleton

@@ -34,7 +34,6 @@ import org.jogamp.java3d.RotationInterpolator;
 import org.jogamp.java3d.SpotLight;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 import org.jogamp.java3d.utils.shader.Cube;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Color3f;
@@ -42,7 +41,6 @@ import org.jogamp.vecmath.Point3d;
 import org.jogamp.vecmath.Point3f;
 import org.jogamp.vecmath.Vector3f;
 
-import com.jogamp.nativewindow.WindowClosingProtocol.WindowClosingMode;
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.WindowAdapter;
@@ -62,11 +60,11 @@ import nif.j3d.J3dNiSkinInstance;
 import nif.j3d.animation.tes3.J3dNiSequenceStreamHelper;
 import nif.j3d.particles.J3dNiParticleSystem;
 import nif.shader.NiGeometryAppearanceShader;
+import texture.CompressedTextureLoaderExt;
 import tools.QueryProperties;
 import tools.swing.DetailsFileChooser;
 import tools.swing.TitledJFileChooser;
 import tools3d.camera.simple.MyKeyboardMover;
-import tools3d.camera.simple.MyMouseRotater;
 import tools3d.camera.simple.SimpleCameraHandler;
 import tools3d.utils.scenegraph.SpinTransform;
 import utils.source.MaterialsSource;
@@ -212,7 +210,7 @@ public class KfDisplayTester {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		canvas3D.getGLWindow().setPosition((screenSize.width / 2) - (canvas3D.getGLWindow().getWidth() / 2),
 				(screenSize.height / 2) - (canvas3D.getGLWindow().getHeight() / 2));
-		CompressedTextureLoader.setAnisotropicFilterDegree(8);
+		CompressedTextureLoaderExt.setAnisotropicFilterDegree(8);
 
 		canvas3D.addNotify();
 
@@ -368,6 +366,7 @@ public class KfDisplayTester {
 	// starfield shows skele no skin, and af file need decoding
 
 	public void display(String skeletonNifFile, ArrayList<String> skinNifFiles, String animationFile) {
+		simpleUniverse.getCanvas().getGLWindow().setTitle("Animation: " + animationFile);		
 		modelGroup.removeAllChildren();
 
 		BranchGroup bg = new BranchGroup();

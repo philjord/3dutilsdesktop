@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.prefs.Preferences;
 
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
-
 import bsa.gui.BSAFileSetWithStatus;
 import bsaio.ArchiveEntry;
 import bsaio.displayables.Displayable;
@@ -15,6 +13,7 @@ import esfilemanager.utils.source.EsmSoundKeyToName;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
 import scrollsexplorer.PropertyLoader;
+import texture.CompressedTextureLoaderExt;
 import tools.QueryProperties;
 import tools.io.ConfigLoader;
 import utils.source.MediaSources;
@@ -29,7 +28,7 @@ public class SkyrimTreesExporter
 	private SkyrimTreesExporter() throws IOException
 	{
 		NiGeometryAppearanceFactoryShader.setAsDefault();
-		CompressedTextureLoader.setAnisotropicFilterDegree(8);
+		CompressedTextureLoaderExt.setAnisotropicFilterDegree(8);
 		
 		PropertyLoader.load();
 

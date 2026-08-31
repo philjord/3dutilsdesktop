@@ -15,8 +15,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 
-import compressedtexture.KTXImage;
 import etcpack.ETCPack;
+import texture.CompressedTextureLoaderExt;
 import tools.swing.DetailsFileChooser;
 
 /**
@@ -102,7 +102,7 @@ public class KTXTextureLoaderTester {
 		}
 
 		try {
-			ByteBuffer bb = CompressedTextureLoader.toByteBuffer(inputStream);
+			ByteBuffer bb = CompressedTextureLoaderExt.toByteBuffer(inputStream);
 			int[] w = new int[1];
 			int[] h = new int[1];
 

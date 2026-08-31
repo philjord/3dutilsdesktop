@@ -16,13 +16,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
 import org.jogamp.java3d.compressedtexture.dktxtools.dds.DDSDecompressor;
 
 import compressedtexture.DDSImage;
 import javaawt.VMEventQueue;
 import javaawt.image.VMBufferedImage;
 import javaawt.imageio.VMImageIO;
+import texture.CompressedTextureLoaderExt;
 import tools.swing.DetailsFileChooser;
 
 /**
@@ -126,7 +126,7 @@ public class DDSTextureLoaderTester
 		DDSImage ddsImage;
 		try
 		{
-			ddsImage = DDSImage.read(CompressedTextureLoader.toByteBuffer(inputStream));
+			ddsImage = DDSImage.read(CompressedTextureLoaderExt.toByteBuffer(inputStream));
 			ddsImage.debugPrint();
 		}
 		catch (IOException e)

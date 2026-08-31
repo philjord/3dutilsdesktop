@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.nio.Buffer;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -28,15 +27,11 @@ import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.Canvas3D;
 import org.jogamp.java3d.GeometryArray;
 import org.jogamp.java3d.IndexedTriangleStripArray;
-import org.jogamp.java3d.NioImageBuffer;
 import org.jogamp.java3d.PolygonAttributes;
 import org.jogamp.java3d.RotationInterpolator;
 import org.jogamp.java3d.Shape3D;
-import org.jogamp.java3d.Texture2D;
 import org.jogamp.java3d.Transform3D;
 import org.jogamp.java3d.TransformGroup;
-import org.jogamp.java3d.compressedtexture.CompressedTextureLoader;
-import org.jogamp.java3d.compressedtexture.dktxtools.dds.DDSDecompressor;
 import org.jogamp.java3d.utils.shader.SimpleShaderAppearance;
 import org.jogamp.java3d.utils.universe.SimpleUniverse;
 import org.jogamp.vecmath.Point3d;
@@ -46,15 +41,12 @@ import org.jogamp.vecmath.TexCoord2f;
 import com.jogamp.newt.event.KeyAdapter;
 import com.jogamp.newt.event.KeyEvent;
 
-import compressedtexture.DDSImage;
 import compressedtexture.KTXImage;
 import compressedtexture.dktxtools.ktx.KTXFormatException;
-import etcpack.ETCPack;
-import etcpack.ETCPack.FORMAT;
-import etcpack.QuickETC;
 import javaawt.VMEventQueue;
 import javaawt.image.VMBufferedImage;
 import javaawt.imageio.VMImageIO;
+import texture.CompressedTextureLoaderExt;
 import texture.DDSToKTXConverter;
 import tools.swing.DetailsFileChooser;
 
@@ -310,7 +302,7 @@ public class DDSToETCFileConverter {
 		ap.setPolygonAttributes(pa);
 		shape.setAppearance(ap);
 
-		ap.setTexture(CompressedTextureLoader.DDS.getTexture(filename, inputStream));
+		ap.setTexture(CompressedTextureLoaderExt.DDS.getTexture(filename, inputStream));
 
 		// Set up a simple RotationInterpolator
 		BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), 5.0);
