@@ -192,7 +192,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		convertDDStoKTXMenuItem.setActionCommand("convertDDStoKTXMenuItem");
 		convertDDStoKTXMenuItem.addItemListener(this);
 		boolean convertDDStoKTX = Boolean.parseBoolean(BSAToolMain.properties.getProperty("convertDDStoKTX"));
-		convertDDStoKTXMenuItem.setSelected(convertDDStoKTX);
+		convertDDStoKTXMenuItem.setSelected(convertDDStoKTX);	
+		CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2 = convertDDStoKTX;
 		menuTexture.add(convertDDStoKTXMenuItem);
 
 		menuBar.add(menuTexture);
@@ -631,6 +632,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			CompressedTextureLoader.clearCache();
 			BSAToolMain.properties.setProperty("convertDDStoKTX", Boolean.toString(convertDDStoKTX));
 			BSAToolMain.saveProperties();
+			// clear the texture caches so we load up the newly set format
+			BsaTextureSource.clearCache();
+			CompressedTextureLoader.clearCache();
+			// and any loaded nifs too
+			NifToJ3d.clearCache();
 		} else if (action.equals("autoOpenArchiveMenuItem")) {
 			BSAToolMain.properties.setProperty("autoOpenArchive",
 					Boolean.toString(e.getStateChange() == ItemEvent.SELECTED));
