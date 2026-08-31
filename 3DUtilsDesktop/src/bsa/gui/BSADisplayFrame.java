@@ -52,6 +52,7 @@ import bsa.tasks.ArchiveFileFilter;
 import bsa.tasks.DisplayTask;
 import bsaio.ArchiveEntry;
 import bsaio.displayables.Displayable;
+import nif.NifToJ3d;
 import nif.gui.KfDisplayTester;
 import nif.gui.NifDisplayTester;
 import nif.j3d.particles.J3dNiParticleSystem;
@@ -860,6 +861,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		System.out.println("setAllowableTextureType " + action);
 		BSAToolMain.properties.setProperty("AllowableTextureType", action);
 		BSAToolMain.saveProperties();
+		// clear the texture caches so we load up the newly set format
+		BsaTextureSource.clearCache();
+		CompressedTextureLoader.clearCache();
+		// and any loaded nifs too
+		NifToJ3d.clearCache();
 	}
 
 	private void loadAnimationMenus() {
