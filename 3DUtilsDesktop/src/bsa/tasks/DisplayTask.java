@@ -13,6 +13,7 @@ import bsa.gui.BSAFileSetWithStatus;
 import bsa.gui.StatusDialog;
 import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
+import bsa.source.BsaTextureSource.AllowedTextureFormats;
 import bsaio.ArchiveEntry;
 import bsaio.displayables.Displayable;
 import compressedtexture.DDSImage;
@@ -95,9 +96,14 @@ public class DisplayTask extends Thread {
 							} else {
 								System.out.println("issue: " + fileName);
 							}							
-						} else {							
+						} else {
+							// when showing an image, we need to ignore extension swapping, cos we only have 1 bsa and 1 possible type						
+							AllowedTextureFormats prevAllowedTextureType = BsaTextureSource.allowedTextureFormats;
+							BsaTextureSource.allowedTextureFormats = AllowedTextureFormats.ALL;
 							Texture2DDisplay.showImageInShape(fileName,
 									new BsaTextureSource(bsaFileSet).getTexture(fileName));
+							// now set it back
+							BsaTextureSource.allowedTextureFormats = prevAllowedTextureType;
 						}
 						//always clear in case same names appears in 2 different bsa files (fo4vfo76)
 						CompressedTextureLoader.clearCache();
