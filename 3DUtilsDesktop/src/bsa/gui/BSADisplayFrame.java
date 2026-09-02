@@ -54,6 +54,7 @@ import nif.NifToJ3d;
 import nif.gui.KfDisplayTester;
 import nif.gui.NifDisplayTester;
 import nif.j3d.particles.J3dNiParticleSystem;
+import nifbullet.util.NifBulletDisplay;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 import texture.CompressedTextureLoaderExt;
 
@@ -291,6 +292,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		playAnimationPopup.setActionCommand("play animation");
 		playAnimationPopup.addActionListener(this);
 		treeNodePopup.add(playAnimationPopup);
+		
+		JMenuItem showJBulletPopup = new JMenuItem("Show JBullet");
+		showJBulletPopup.setActionCommand("show jbullet");
+		showJBulletPopup.addActionListener(this);
+		treeNodePopup.add(showJBulletPopup);
 
 		createRecentMenu();
 	}
@@ -449,12 +455,15 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			else if (action.equals("select skin"))
 				selectSkin();
 			else if (action.equals("play animation"))
-				playAnimation();
+				playAnimation();			
+			else if (action.equals("show jbullet"))
+				showJBullet();
 
 		} catch (Throwable exc) {
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
+
 
 	private void clearAnimation() {
 		menuSkele.removeAll();
@@ -614,6 +623,32 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		kfDisplays.addLast(kfDisplay);
 
 		return kfDisplay;
+	}
+	
+	
+	
+
+	private void showJBullet() {
+		String nifToDisplay = stripArchiveFile(getSelectNodeString());
+		NifBulletDisplay nifBulletDisplay = getNifBulletDisplayer();
+		nifBulletDisplay.displayNif(nifToDisplay);
+	}
+	
+	//This code set is similar to the DisplayTask which manages Nif Display windows
+	private static final int					MAX_NIFBULLET_VISIBLE	= 3;
+	private static ArrayDeque<NifBulletDisplay>	nifBulletDisplays		= new ArrayDeque<NifBulletDisplay>();
+
+	private NifBulletDisplay getNifBulletDisplayer() {
+
+		// up to 5
+		while (nifBulletDisplays.size() > MAX_NIFBULLET_VISIBLE - 1) {
+			NifBulletDisplay ndt = nifBulletDisplays.removeFirst();
+			ndt.close();
+		}
+		NifBulletDisplay nifBulletDisplay = new NifBulletDisplay(bsaFileSet);
+		nifBulletDisplays.addLast(nifBulletDisplay);
+
+		return nifBulletDisplay;
 	}
 
 	//used by checkboxes/radio buttons
