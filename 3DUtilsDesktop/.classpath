@@ -17,6 +17,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/esmj3d"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsExplorerBase"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/ElderScrollsExplorer"/>
-	<classpathentry kind="lib" path="/jbullet1.1/dist/jbullet1.1.jar"/>
+	<classpathentry kind="lib" path="/jbullet1.1/dist/jbullet1.1.jar" sourcepath="/jbullet1.1"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

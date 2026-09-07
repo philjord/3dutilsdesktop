@@ -793,6 +793,10 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		TreePath treePath = new TreePath(treeModel.getPathToRoot(node));
 		tree.expandPath(treePath);
 		tree.setSelectionPath(treePath);
+		
+		// now make the JScropllPane scroll to visible
+		tree.scrollPathToVisible(treePath);
+		
 		return true;
 	}
 
