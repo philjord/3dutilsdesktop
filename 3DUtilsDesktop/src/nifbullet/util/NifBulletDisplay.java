@@ -8,7 +8,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jogamp.java3d.BranchGroup;
 import org.jogamp.java3d.JoglesPipeline;
-import org.jogamp.java3d.Transform3D;
 import org.jogamp.vecmath.Vector3f;
 
 import com.bulletphysics.collision.broadphase.BroadphaseInterface;
@@ -139,19 +138,44 @@ public class NifBulletDisplay {
 				bnm.removeFromDynamicsWorld();
 			}
 
+			// this guy will show all categories on sop
 			BulletNifModelClassifier.testNif(nifToDisplay, meshSource);
 			
+	
 			BulletNifModel nb = BulletNifModelClassifier.createNifBullet(nifToDisplay, meshSource, 0);
 			
-			// for fun
-			nb = new NBSimpleModel(nifToDisplay, meshSource, new Transform3D());
 			
+			//Fo4: Croup Manor get visuals and phys and bullet to all move together
+			// this is not calssifiable, presumable kinematics are not finished yet
+			//Auto opening node: ArchiveFile:Fallout4 - Meshes.ba2/meshes/interiors/building/woodp/doors/bldwoodpdoorload01.nif
 			
-			//Fo4: Croup Manor has a SetDressing/Rowboat/Rowboat.nif showing in JBullet, but not for rendered physics
-			// what the hell
-			// also 2 bookshelve not in rend phys nor bullet
-			// fan is in rend physics but not bull
+			//door are not rotating in the bullet world with the physics world for FO4 and FO76
+			//ArchiveFile:SeventySix - Meshes.ba2/meshes/interiors/hightech/animated/doors/hitdoorsm01.nif
+			//I see the filing cabinet in croup manior opening the drawer without moving visuals!!
+						
+			//Auto opening node: ArchiveFile:SeventySix - Meshes.ba2/meshes/interiors/hightech/animated/doors/hitdoorsm01.nif
+			// is not opening the jbullet side
+						
+			// I see the life pods missing in prewar vault 1111 , just bullet, no doubt a complex one
 			
+			//phys skipping isComplexDynamic Clutter\Bones\TrollSkull.nif
+			// this has 2 rigid bodies, skull and jaw with a bhkLimitedHingeConstraint between them
+			//phys skipping isComplexDynamic Clutter\Books\BasicBook03.nif
+			//phys skipping isComplexDynamic Clutter\Books\BasicBook05a.nif			
+			//phys skipping isComplexDynamic Clutter\Books\SpellTomeConjurationLowPoly.nif
+			// good candidates, books, 2 rigid bodies boxes and a hinge constraint
+			// the trishapes are skinned to the 3 bones connected to the 2 boxes
+		
+						
+			// as an aside skyrim Dungeons\Imperial\Jail\ImpJailDoorFrame01.nif is laoded in bullet but not in vis or phys
+			// loads fine in bsa display? but not in Setting cell to ID:469070
+			//ArchiveFile:Skyrim - Meshes.bsa/meshes/dungeons/imperial/jail/impjaildoorframe01.nif
+			
+			// in fact glossy pots, silver candles stick and the jail doors all fail to render
+			// it the env thing breaking stuff again like brass all ovver agina press L twice slowly gets them back
+			// need ot investigate the pipelines sending of shader attributes, dman it
+			// and I can't do that easily ousing BSA display
+			// unless of course I display 2 at once?? oooo....??
 			
 			
 			if (nb != null) {
