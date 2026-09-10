@@ -41,6 +41,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import bsa.BSAToolMain;
 import bsa.source.BsaMeshSource;
@@ -143,11 +144,13 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		JCheckBoxMenuItem autoOpenArchiveMenuItem = new JCheckBoxMenuItem("Auto Open Archive");
 		autoOpenArchiveMenuItem.setSelected(autoOpenArchive);
 		autoOpenArchiveMenuItem.setActionCommand("autoOpenArchiveMenuItem");
+		autoOpenArchiveMenuItem.addItemListener(this);
 		menuFile.add(autoOpenArchiveMenuItem);
 		boolean autoDisplay = Boolean.parseBoolean(BSAToolMain.properties.getProperty("autoDisplay"));
 		JCheckBoxMenuItem autoDisplayMenuItem = new JCheckBoxMenuItem("Auto Display");
 		autoDisplayMenuItem.setSelected(autoDisplay);
 		autoDisplayMenuItem.setActionCommand("autoDisplayMenuItem");
+		autoDisplayMenuItem.addItemListener(this);
 		menuFile.add(autoDisplayMenuItem);
 		menuItem = new JMenuItem("Set Folders");
 		menuItem.setActionCommand("setfolders");
@@ -165,10 +168,15 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuItem.setActionCommand("display selected");
 		menuItem.addActionListener(this);
 		menuAction.add(menuItem);
-		menuItem = new JMenuItem("Display All Files");
-		menuItem.setActionCommand("display all");
+		menuItem = new JMenuItem("Display Selected Files Together");
+		menuItem.setActionCommand("display selected together");
 		menuItem.addActionListener(this);
 		menuAction.add(menuItem);
+		// too dangerous
+		/*menuItem = new JMenuItem("Display All Files");
+		menuItem.setActionCommand("display all");
+		menuItem.addActionListener(this);
+		menuAction.add(menuItem);*/
 		menuItem = new JMenuItem("Verify Selected Files");
 		menuItem.setActionCommand("verify selected");
 		menuItem.addActionListener(this);
@@ -192,7 +200,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		convertDDStoKTXMenuItem.setActionCommand("convertDDStoKTXMenuItem");
 		convertDDStoKTXMenuItem.addItemListener(this);
 		boolean convertDDStoKTX = Boolean.parseBoolean(BSAToolMain.properties.getProperty("convertDDStoKTX"));
-		convertDDStoKTXMenuItem.setSelected(convertDDStoKTX);	// calling set will fire the Item listener to set statics
+		convertDDStoKTXMenuItem.setSelected(convertDDStoKTX); // calling set will fire the Item listener to set statics
 		menuTexture.add(convertDDStoKTXMenuItem);
 
 		menuBar.add(menuTexture);
@@ -292,7 +300,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		playAnimationPopup.setActionCommand("play animation");
 		playAnimationPopup.addActionListener(this);
 		treeNodePopup.add(playAnimationPopup);
-		
+
 		JMenuItem showJBulletPopup = new JMenuItem("Show JBullet");
 		showJBulletPopup.setActionCommand("show jbullet");
 		showJBulletPopup.addActionListener(this);
@@ -367,6 +375,10 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 
 		treeModel = new DefaultTreeModel(new ArchiveNode());
 		tree = new JTree(treeModel);
+
+		// how about multi select?
+		tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+
 		JScrollPane scrollPane = new JScrollPane(tree);
 		JPanel contentPane = new JPanel();
 		contentPane.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -433,9 +445,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			else if (action.equals("setfolders"))
 				setFolders();
 			else if (action.equals("display selected"))
-				displayFiles(false, false);
+				displayFiles();
+			else if (action.equals("display selected together"))
+				displayFiles(false, false, true);			
 			else if (action.equals("display all"))
-				displayFiles(true, false);
+				displayFiles(true);
 			else if (action.equals("verify selected"))
 				displayFiles(false, true);
 			else if (action.equals("verify all"))
@@ -455,7 +469,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			else if (action.equals("select skin"))
 				selectSkin();
 			else if (action.equals("play animation"))
-				playAnimation();			
+				playAnimation();
 			else if (action.equals("show jbullet"))
 				showJBullet();
 
@@ -463,7 +477,35 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
+	//used by checkboxes/radio buttons
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		String action = ((JMenuItem)e.getItemSelectable()).getActionCommand();
+		if ((action.equals("useOnlyKTXMenuItem")	|| action.equals("useOnlyDDSMenuItem")
+				|| action.equals("anyTextureMenuItem"))
+			&& e.getStateChange() == ItemEvent.SELECTED) {
+			setAllowableTextureType(action);
+		} else if (action.equals("convertDDStoKTXMenuItem")) {
+			boolean convertDDStoKTX = e.getStateChange() == ItemEvent.SELECTED;
+			CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2 = convertDDStoKTX;
+			BSAToolMain.properties.setProperty("convertDDStoKTX", Boolean.toString(convertDDStoKTX));
+			// clear the texture caches so we load up the newly set format
+			BsaTextureSource.clearCache();
+			CompressedTextureLoaderExt.clearCache();
+			// and any loaded nifs too
+			NifToJ3d.clearCache();
+		} else if (action.equals("autoOpenArchiveMenuItem")) {
+			BSAToolMain.properties.setProperty("autoOpenArchive",
+					Boolean.toString(e.getStateChange() == ItemEvent.SELECTED));
+		} else if (action.equals("autoDisplayMenuItem")) {
+			BSAToolMain.properties.setProperty("autoDisplay",
+					Boolean.toString(e.getStateChange() == ItemEvent.SELECTED));
+		}
+		BSAToolMain.saveProperties();
 
+	}
+
+	
 
 	private void clearAnimation() {
 		menuSkele.removeAll();
@@ -624,16 +666,13 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 
 		return kfDisplay;
 	}
-	
-	
-	
 
 	private void showJBullet() {
 		String nifToDisplay = stripArchiveFile(getSelectNodeString());
 		NifBulletDisplay nifBulletDisplay = getNifBulletDisplayer();
 		nifBulletDisplay.displayNif(nifToDisplay);
 	}
-	
+
 	//This code set is similar to the DisplayTask which manages Nif Display windows
 	private static final int					MAX_NIFBULLET_VISIBLE	= 3;
 	private static ArrayDeque<NifBulletDisplay>	nifBulletDisplays		= new ArrayDeque<NifBulletDisplay>();
@@ -651,33 +690,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		return nifBulletDisplay;
 	}
 
-	//used by checkboxes/radio buttons
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		String action = ((JMenuItem)e.getItemSelectable()).getActionCommand();
-		if ((action.equals("useOnlyKTXMenuItem")	|| action.equals("useOnlyDDSMenuItem")
-				|| action.equals("anyTextureMenuItem"))
-			&& e.getStateChange() == ItemEvent.SELECTED) {
-			setAllowableTextureType(action);
-		} else if (action.equals("convertDDStoKTXMenuItem")) {
-			boolean convertDDStoKTX = e.getStateChange() == ItemEvent.SELECTED;
-			CompressedTextureLoaderETCPackDDS.CONVERT_DDS_TO_ETC2 = convertDDStoKTX;
-			BSAToolMain.properties.setProperty("convertDDStoKTX", Boolean.toString(convertDDStoKTX));
-			BSAToolMain.saveProperties();
-			// clear the texture caches so we load up the newly set format
-			BsaTextureSource.clearCache();
-			CompressedTextureLoaderExt.clearCache();
-			// and any loaded nifs too
-			NifToJ3d.clearCache();
-		} else if (action.equals("autoOpenArchiveMenuItem")) {
-			BSAToolMain.properties.setProperty("autoOpenArchive",
-					Boolean.toString(e.getStateChange() == ItemEvent.SELECTED));
-		} else if (action.equals("autoDisplayMenuItem")) {
-			BSAToolMain.properties.setProperty("autoDisplay",
-					Boolean.toString(e.getStateChange() == ItemEvent.SELECTED));
-		}
 
-	}
 
 	private void selectAndOpenFile() throws IOException {
 
@@ -736,9 +749,12 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		MouseAdapter ml = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-				if (selPath != null) {
-					tree.setSelectionPath(selPath);
+				//3 is the right mouse, isPopupTrigger is not good
+				if (e.getButton() == 3) {
+					TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+					if (selPath != null) {
+						tree.setSelectionPath(selPath);
+					}
 				}
 			}
 		};
@@ -793,10 +809,10 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		TreePath treePath = new TreePath(treeModel.getPathToRoot(node));
 		tree.expandPath(treePath);
 		tree.setSelectionPath(treePath);
-		
+
 		// now make the JScropllPane scroll to visible
 		tree.scrollPathToVisible(treePath);
-		
+
 		return true;
 	}
 
@@ -817,7 +833,19 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		tree.setModel(treeModel);
 	}
 
-	public void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException {
+	public void displayFiles() throws InterruptedException {	
+		displayFiles(false, false, false);		
+	}
+	
+	public void displayFiles(boolean displayAllFiles) throws InterruptedException {	
+		displayFiles(displayAllFiles, false, false);		
+	}
+	
+	public void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException {	
+		displayFiles(displayAllFiles, verifyOnly, false);		
+	}
+	
+	private void displayFiles(boolean displayAllFiles, boolean verifyOnly, boolean together) throws InterruptedException{
 		if (bsaFileSet == null) {
 			JOptionPane.showMessageDialog(this, "You must open an archive file", "No archive file", 0);
 			return;
@@ -861,7 +889,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		if (fileName.endsWith(".kf") || fileName.endsWith(".hkx")) {
 			playAnimation();
 		} else {
-			DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly,
+			DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly, together,
 					sopErrMenuItem.isSelected());
 			displayTask.start();
 			statusDialog.showDialog();

@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -44,6 +45,8 @@ import bsa.gui.BSAFileSetWithStatus;
 import bsa.source.BsaMaterialsSource;
 import bsa.source.BsaMeshSource;
 import bsa.source.BsaTextureSource;
+import bsaio.ArchiveEntry;
+import bsaio.displayables.Displayable;
 import nif.NifJ3dVisPhysRoot;
 import nif.NifToJ3d;
 import nif.appearance.NiGeometryAppearanceFactoryShader;
@@ -188,15 +191,15 @@ public class NifDisplayTester {
 		J3dNiParticleSystem.setScreenWidth(canvas3D.getGLWindow().getWidth());
 		//J3dNiParticleSystem.setSHOW_DEBUG_LINES(true);// H to toggle
 
-		canvas3D.getGLWindow().setWindowDestroyNotifyAction(new Runnable() {			
+		canvas3D.getGLWindow().setWindowDestroyNotifyAction(new Runnable() {
 			@Override
 			public void run() {
 				canvas3D.removeNotify();
 			}
 		});
-		
+
 		simpleUniverse = new SimpleUniverse(canvas3D);
-		
+
 		//FIXME: I should record the last location and size and reuse them if they are sensible
 		canvas3D.getGLWindow().setSize(800, 600);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -206,7 +209,6 @@ public class NifDisplayTester {
 
 		canvas3D.addNotify();
 
-		
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		spinTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		spinTransformGroup.addChild(modelTransformGroup);
@@ -215,12 +217,12 @@ public class NifDisplayTester {
 		modelTransformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		modelTransformGroup.addChild(rotateTransformGroup);
 		modelKeyboardMover = new MyKeyboardMover(canvas3D, modelTransformGroup);
-		
+
 		rotateTransformGroup.addChild(modelGroup);
-		
+
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		modelGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
-		
+
 		simpleCameraHandler = new SimpleCameraHandler(simpleUniverse.getViewingPlatform(), simpleUniverse.getCanvas(),
 				modelGroup, rotateTransformGroup, false);
 
@@ -347,7 +349,7 @@ public class NifDisplayTester {
 
 	private void toggleSpin() {
 		spin = !spin;
-		System.out.println("spin: " +spin);
+		System.out.println("spin: " + spin);
 		if (spinTransform != null) {
 			spinTransform.setEnable(spin);
 		}
@@ -355,13 +357,13 @@ public class NifDisplayTester {
 
 	private void toggleAnimateModel() {
 		animateModel = !animateModel;
-		System.out.println("animateModel: " +animateModel);
+		System.out.println("animateModel: " + animateModel);
 		update();
 	}
 
 	private void toggleHavok() {
 		showHavok = !showHavok;
-		System.out.println("showHavok: " +showHavok);
+		System.out.println("showHavok: " + showHavok);
 		update();
 
 		//FIXME: there should be a showoutlines api so that I can see or hide otu line for everything generally
@@ -371,11 +373,9 @@ public class NifDisplayTester {
 
 	private void toggleVisual() {
 		showVisual = !showVisual;
-		System.out.println("showVisual: " +showVisual);
+		System.out.println("showVisual: " + showVisual);
 		update();
 	}
-
-	
 
 	public void showNif(String filename, MeshSource meshSource) {
 
@@ -400,6 +400,23 @@ public class NifDisplayTester {
 
 	}
 
+	/**
+	 * show many in one window at the same time, for shader debug
+	 * @param entries
+	 * @param bsaMeshSource
+	 */
+	public void showNifs(List<ArchiveEntry> entries, BsaMeshSource bsaMeshSource) {
+		try {
+			for (ArchiveEntry entry : entries) {
+				String fileName = ((Displayable)entry).getName();
+				display(NifToJ3d.loadNif(fileName, meshSource, textureSource), false);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	private BranchGroup	hbg;
 
 	private BranchGroup	vbg;
@@ -418,6 +435,10 @@ public class NifDisplayTester {
 	private NifJ3dSkeletonRoot				inputSkeleton;
 
 	private void display(NifJ3dVisPhysRoot nif) {
+		display(nif, true);
+	}
+
+	private void display(NifJ3dVisPhysRoot nif, boolean removePrior) {
 
 		if (nif != null) {
 
@@ -432,14 +453,16 @@ public class NifDisplayTester {
 				controllerInvokerThread.start();
 			}
 
-			modelGroup.removeAllChildren();
+			//TODO: should give each a wee transform left/right
+			if (removePrior)
+				modelGroup.removeAllChildren();
 
 			hbg = new BranchGroup();
 			hbg.setCapability(BranchGroup.ALLOW_DETACH);
-			if( havok != null) {
+			if (havok != null) {
 				hbg.addChild(havok);
 			}
-						
+
 			if (showHavok) {
 				modelGroup.addChild(hbg);
 			}
@@ -448,43 +471,40 @@ public class NifDisplayTester {
 			vbg.setCapability(BranchGroup.ALLOW_DETACH);
 			vbg.setCapability(Node.ALLOW_BOUNDS_READ);
 
-			//FIXME: notice if we start without showvisuals we can never show them, unlike havok, probably
-			// should always load and show when asked for
-			if (showVisual) {
-				// check for skins!
-				if (NifJ3dSkeletonRoot.isSkeleton(nif.getNiToJ3dData())) {
-					inputSkeleton = new NifJ3dSkeletonRoot(nif.getVisualRoot(), nif.getNiToJ3dData());
-					// create skins from the skeleton and skin nif
-					allSkins = J3dNiSkinInstance.createSkins(nif.getNiToJ3dData(), inputSkeleton);
+			// check for skins!
+			if (NifJ3dSkeletonRoot.isSkeleton(nif.getNiToJ3dData())) {
+				inputSkeleton = new NifJ3dSkeletonRoot(nif.getVisualRoot(), nif.getNiToJ3dData());
+				// create skins from the skeleton and skin nif
+				allSkins = J3dNiSkinInstance.createSkins(nif.getNiToJ3dData(), inputSkeleton);
 
-					if (allSkins.size() > 0) {
-						// add the skins to the scene
-						for (J3dNiSkinInstance j3dNiSkinInstance : allSkins) {
-							vbg.addChild(j3dNiSkinInstance);
+				if (allSkins.size() > 0) {
+					// add the skins to the scene
+					for (J3dNiSkinInstance j3dNiSkinInstance : allSkins) {
+						vbg.addChild(j3dNiSkinInstance);
+					}
+
+					PerFrameUpdateBehavior pub = new PerFrameUpdateBehavior(new CallBack() {
+						@Override
+						public void update() {
+							// must be called to update the accum transform
+							inputSkeleton.updateBones();
+							for (J3dNiSkinInstance j3dNiSkinInstance : allSkins) {
+								j3dNiSkinInstance.processSkinInstance();
+							}
 						}
 
-						PerFrameUpdateBehavior pub = new PerFrameUpdateBehavior(new CallBack() {
-							@Override
-							public void update() {
-								// must be called to update the accum transform
-								inputSkeleton.updateBones();
-								for (J3dNiSkinInstance j3dNiSkinInstance : allSkins) {
-									j3dNiSkinInstance.processSkinInstance();
-								}
-							}
-
-						});
-						vbg.addChild(inputSkeleton);
-						vbg.addChild(pub);
-						modelGroup.addChild(vbg);
-					}
-				} else {
-					vbg.addChild(nif.getVisualRoot());
-
-					//vbg.outputTraversal();
-					vbg.compile();// oddly this does NOT get called automatically
-					modelGroup.addChild(vbg);
+					});
+					vbg.addChild(inputSkeleton);
+					vbg.addChild(pub);
 				}
+			} else {
+				vbg.addChild(nif.getVisualRoot());
+				//vbg.outputTraversal();
+				vbg.compile();// oddly this does NOT get called automatically
+			}
+
+			if (showVisual) {
+				modelGroup.addChild(vbg);
 			}
 
 			simpleCameraHandler.viewBounds(vbg.getBounds());
@@ -566,7 +586,7 @@ public class NifDisplayTester {
 		System.out.println("done");
 
 	}
-	
+
 	private boolean					cycle				= true;
 
 	private long					currentFileLoadTime	= 0;
@@ -646,7 +666,7 @@ public class NifDisplayTester {
 
 	private void toggleCycling() {
 		cycle = !cycle;
-		System.out.println("cycle: " +cycle);
+		System.out.println("cycle: " + cycle);
 		/*if (cycle)
 		{
 			// awake the directory processing thread

@@ -42,30 +42,30 @@ import utils.source.file.FileMeshSource;
 
 public class NifBulletDisplay {
 
-	private HeadlessUniverse						j3dUni			= new HeadlessUniverse();
+	private HeadlessUniverse				j3dUni			= new HeadlessUniverse();
 
 	// Gravity
-	private static Vector3f							gravity			= new Vector3f(0f, 0f, -9.81f);
+	private static Vector3f					gravity			= new Vector3f(0f, 0f, -9.81f);
 
 	//private static Clock clock = new Clock();
 
 	// this is the most important class
-	private  DynamicsWorld					dynamicsWorld	= null;
+	private DynamicsWorld					dynamicsWorld	= null;
 
-	private  BroadphaseInterface				broadphase;
+	private BroadphaseInterface				broadphase;
 
-	private  CollisionDispatcher				dispatcher;
+	private CollisionDispatcher				dispatcher;
 
-	private  ConstraintSolver					solver;
+	private ConstraintSolver				solver;
 
-	private  DefaultCollisionConfiguration	collisionConfiguration;
+	private DefaultCollisionConfiguration	collisionConfiguration;
 
-	private static Preferences						prefs;
+	private static Preferences				prefs;
 
 	//TODO: can I dump these at all?
-	private static MeshSource						meshSource		= null;
-	private static TextureSource					textureSource	= null;
-	private static BsaMaterialsSource				materialsSource	= null;
+	private static MeshSource				meshSource		= null;
+	private static TextureSource			textureSource	= null;
+	private static BsaMaterialsSource		materialsSource	= null;
 
 	public NifBulletDisplay(BSAFileSetWithStatus parentBsaFileSet) {
 		new LWJGLLinker();
@@ -140,24 +140,22 @@ public class NifBulletDisplay {
 
 			// this guy will show all categories on sop
 			BulletNifModelClassifier.testNif(nifToDisplay, meshSource);
-			
-	
+
 			BulletNifModel nb = BulletNifModelClassifier.createNifBullet(nifToDisplay, meshSource, 0);
-			
-			
+
 			//Fo4: Croup Manor get visuals and phys and bullet to all move together
 			// this is not calssifiable, presumable kinematics are not finished yet
 			//Auto opening node: ArchiveFile:Fallout4 - Meshes.ba2/meshes/interiors/building/woodp/doors/bldwoodpdoorload01.nif
-			
+
 			//door are not rotating in the bullet world with the physics world for FO4 and FO76
 			//ArchiveFile:SeventySix - Meshes.ba2/meshes/interiors/hightech/animated/doors/hitdoorsm01.nif
 			//I see the filing cabinet in croup manior opening the drawer without moving visuals!!
-						
+
 			//Auto opening node: ArchiveFile:SeventySix - Meshes.ba2/meshes/interiors/hightech/animated/doors/hitdoorsm01.nif
 			// is not opening the jbullet side
-						
-			// I see the life pods missing in prewar vault 1111 , just bullet, no doubt a complex one
-			
+
+			// Pod is good, but no move bullet, like prewar doors
+
 			//phys skipping isComplexDynamic Clutter\Bones\TrollSkull.nif
 			// this has 2 rigid bodies, skull and jaw with a bhkLimitedHingeConstraint between them
 			//phys skipping isComplexDynamic Clutter\Books\BasicBook03.nif
@@ -165,36 +163,57 @@ public class NifBulletDisplay {
 			//phys skipping isComplexDynamic Clutter\Books\SpellTomeConjurationLowPoly.nif
 			// good candidates, books, 2 rigid bodies boxes and a hinge constraint
 			// the trishapes are skinned to the 3 bones connected to the 2 boxes
-		
-						
+
 			// as an aside skyrim Dungeons\Imperial\Jail\ImpJailDoorFrame01.nif is laoded in bullet but not in vis or phys
 			// loads fine in bsa display? but not in Setting cell to ID:469070
 			//ArchiveFile:Skyrim - Meshes.bsa/meshes/dungeons/imperial/jail/impjaildoorframe01.nif
-			
+
 			// in fact glossy pots, silver candles stick and the jail doors all fail to render
 			// it the env thing breaking stuff again like brass all ovver agina press L twice slowly gets them back
 			// need ot investigate the pipelines sending of shader attributes, dman it
 			// and I can't do that easily ousing BSA display
 			// unless of course I display 2 at once?? oooo....??
-			
-			
+
+			//phys skipping unknown type Skyrim Traps\BoneAlarm02\TrapBoneAlarmBHavok.nif
+			//phys skipping unknown type Skyrim Weapons\Volendrung\Volendrung.nif
+			//phys skipping unknown type Skyrim Weapons\Orcish\OrcishWarhammer.nif
+
+			//Oblivion
+			//phys skipping unknown type Weapons\Silver\LongSword.NIF
+			//phys skipping unknown type Weapons\Silver\Dagger.NIF
+			//phys skipping unknown type Weapons\Silver\Battleaxe.NIF
+			//hys skipping unknown type Dungeons\Caves\Traps\CTrapSwingMaceShort01.NIF
+			//phys skipping unknown type Dungeons\Caves\Traps\CTrapSwingMaceLong01.NIF
+
+			//fallout 3 
+			//phys skipping unknown type Clutter\Fridge\FridgeClosed01.NIF
+			//phys skipping isComplexDynamic Clutter\Junk\Bucket01.NIF
+			//phys skipping unknown type Weapons\1handGrenadeThrow\GrenadeFrag.NIF
+			//phys skipping unknown type Weapons\1HandPistol\10mmPistol.NIF
+			//phys skipping unknown type Vehicles\Motorcycle01.NIF
+
+			//FO4
+			//phys skipping unknown type SetDressing\Building\DeskFanOffice01.nif
+			//phys skipping unknown type SetDressing\Vault\Vault_OxygenTank_01.nif
+			//phys skipping unknown type Interiors\Vault\Vault111\Rooms\V111GearRoomGate01.nif
+
 			if (nb != null) {
 				nb.addToDynamicsWorld(dynamicsWorld);
 				bulletNifModels.add(nb);
 				startDisplay();
 
-				if (nb instanceof NBSimpleModel) {
+				//if (nb instanceof NBSimpleModel) {
 					NBSimpleModel nbKinematicModel = (NBSimpleModel)nb;
 					if (nbKinematicModel.getJ3dNiControllerManager() != null) {
 						BranchGroup bg = new BranchGroup();
 						bg.addChild(nbKinematicModel);
 						j3dUni.addBranchGraph(bg);
 						//note self cleaning uping
-						ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(
-								nifToDisplay, nbKinematicModel.getJ3dNiControllerManager(), null);
+						ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nifToDisplay,
+								nbKinematicModel.getJ3dNiControllerManager(), null);
 						controllerInvokerThread.start();
 					}
-				}
+				//}
 
 			}
 		} catch (Exception ex) {
