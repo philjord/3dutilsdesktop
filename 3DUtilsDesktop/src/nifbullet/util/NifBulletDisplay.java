@@ -155,6 +155,7 @@ public class NifBulletDisplay {
 			// is not opening the jbullet side
 
 			// Pod is good, but no move bullet, like prewar doors
+			//ArchiveFile:Fallout4 - Meshes.ba2/meshes/furniture/cryopod/cryopod01.nif
 
 			//phys skipping isComplexDynamic Clutter\Bones\TrollSkull.nif
 			// this has 2 rigid bodies, skull and jaw with a bhkLimitedHingeConstraint between them
@@ -176,15 +177,31 @@ public class NifBulletDisplay {
 
 			//phys skipping unknown type Skyrim Traps\BoneAlarm02\TrapBoneAlarmBHavok.nif
 			//phys skipping unknown type Skyrim Weapons\Volendrung\Volendrung.nif
-			//phys skipping unknown type Skyrim Weapons\Orcish\OrcishWarhammer.nif
+			//No Physics category for file!! meshes/weapons/orcish/orcishwarhammer.nif
+			//physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
 
+			
+			//Morrowind
+			//getNifFile nif Meshes\a\a_steel_gauntlet.nif not found in archive bsas
+			// these appear to be in ArchiveFile:Morrowind.bsa/meshes/a/a_steel_skin.nif
+
+			
+			
 			//Oblivion
-			//phys skipping unknown type Weapons\Silver\LongSword.NIF
-			//phys skipping unknown type Weapons\Silver\Dagger.NIF
-			//phys skipping unknown type Weapons\Silver\Battleaxe.NIF
+			//PhysicsDynamics skipping unknown type Plants\Dementia\SEDSwampTentacleIngred.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Clutter\Farm\Hoe01.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Clutter\Farm\Rake01.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Clutter\Farm\Hoe01.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Plants\Dementia\SEDSwampTentacleIngred.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Plants\Dementia\SEDSwampTentacleIngred.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
 			//hys skipping unknown type Dungeons\Caves\Traps\CTrapSwingMaceShort01.NIF
 			//phys skipping unknown type Dungeons\Caves\Traps\CTrapSwingMaceLong01.NIF
+			//Meshes\Dungeons\RuinInteriors\TorturedStatue\TortureStatuePedestal2.NIF java.io.IOException: Channel not open for writing - cannot extend file to required size java.base/sun.nio.ch.FileChannelImpl.map(FileChannelImpl.java:976)
+			//PhysicsDynamics skipping isComplexDynamic Armor\Fur\M\Gauntlets_gnd.NIF
+			//PhysicsDynamics skipping unknown type Dungeons\RuinInteriors\Traps\RuinsRoomColmAtrap.NIF physicsInfo rigidBodyCount 8 massedRigidBodyCount 8 nonMassedRigidBodyCount 0 transformControllerCount 1 constraintCount 0 skinAndBoneCount 0
 
+
+			
 			//fallout 3 
 			//phys skipping unknown type Clutter\Fridge\FridgeClosed01.NIF
 			//phys skipping isComplexDynamic Clutter\Junk\Bucket01.NIF
@@ -192,28 +209,29 @@ public class NifBulletDisplay {
 			//phys skipping unknown type Weapons\1HandPistol\10mmPistol.NIF
 			//phys skipping unknown type Vehicles\Motorcycle01.NIF
 
+
 			//FO4
 			//phys skipping unknown type SetDressing\Building\DeskFanOffice01.nif
 			//phys skipping unknown type SetDressing\Vault\Vault_OxygenTank_01.nif
 			//phys skipping unknown type Interiors\Vault\Vault111\Rooms\V111GearRoomGate01.nif
-
+			
 			if (nb != null) {
 				nb.addToDynamicsWorld(dynamicsWorld);
 				bulletNifModels.add(nb);
 				startDisplay();
 
-				//if (nb instanceof NBSimpleModel) {
-					NBSimpleModel nbKinematicModel = (NBSimpleModel)nb;
-					if (nbKinematicModel.getJ3dNiControllerManager() != null) {
+				if (nb instanceof NBSimpleModel) {
+					NBSimpleModel nBSimpleModel = (NBSimpleModel)nb;
+					if (nBSimpleModel.getJ3dNiControllerManager() != null) {
 						BranchGroup bg = new BranchGroup();
-						bg.addChild(nbKinematicModel);
+						bg.addChild(nBSimpleModel);
 						j3dUni.addBranchGraph(bg);
 						//note self cleaning uping
 						ControllerInvokerThread controllerInvokerThread = new ControllerInvokerThread(nifToDisplay,
-								nbKinematicModel.getJ3dNiControllerManager(), null);
+								nBSimpleModel.getJ3dNiControllerManager(), null);
 						controllerInvokerThread.start();
 					}
-				//}
+				}
 
 			}
 		} catch (Exception ex) {
