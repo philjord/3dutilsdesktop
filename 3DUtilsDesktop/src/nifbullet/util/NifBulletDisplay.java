@@ -157,15 +157,9 @@ public class NifBulletDisplay {
 			// Pod is good, but no move bullet, like prewar doors
 			//ArchiveFile:Fallout4 - Meshes.ba2/meshes/furniture/cryopod/cryopod01.nif
 
-			//phys skipping isComplexDynamic Clutter\Bones\TrollSkull.nif
-			// this has 2 rigid bodies, skull and jaw with a bhkLimitedHingeConstraint between them
-			//phys skipping isComplexDynamic Clutter\Books\BasicBook03.nif
-			//phys skipping isComplexDynamic Clutter\Books\BasicBook05a.nif			
-			//phys skipping isComplexDynamic Clutter\Books\SpellTomeConjurationLowPoly.nif
-			// good candidates, books, 2 rigid bodies boxes and a hinge constraint
-			// the trishapes are skinned to the 3 bones connected to the 2 boxes
+			
 
-			// as an aside skyrim Dungeons\Imperial\Jail\ImpJailDoorFrame01.nif is laoded in bullet but not in vis or phys
+			// as an aside skyrim Dungeons\Imperial\Jail\ImpJailDoorFrame01.nif is loaded in bullet but not in vis or phys
 			// loads fine in bsa display? but not in Setting cell to ID:469070
 			//ArchiveFile:Skyrim - Meshes.bsa/meshes/dungeons/imperial/jail/impjaildoorframe01.nif
 
@@ -175,26 +169,28 @@ public class NifBulletDisplay {
 			// and I can't do that easily ousing BSA display
 			// unless of course I display 2 at once?? oooo....??
 
-			//phys skipping unknown type Skyrim Traps\BoneAlarm02\TrapBoneAlarmBHavok.nif
-			//phys skipping unknown type Skyrim Weapons\Volendrung\Volendrung.nif
-			//No Physics category for file!! meshes/weapons/orcish/orcishwarhammer.nif
-			//physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
-
 			
 			//Morrowind
-			//getNifFile nif Meshes\a\a_steel_gauntlet.nif not found in archive bsas
-			// these appear to be in ArchiveFile:Morrowind.bsa/meshes/a/a_steel_skin.nif
-
+			// I think this is ok
+			// getNifFile nif Meshes\r\Golden Saint.kf not found in archive bsas checked: Tribunal_ktx.bsa,  checked: Bloodmoon_ktx.bsa,  checked: Morrowind_ktx.bsa,  checked: Tribunal.bsa,  checked: Bloodmoon.bsa,  checked: Morrowind.bsa, 
+			//MultipleParentException parent =[dynamicsRootBranchGroup] org.jogamp.java3d.BranchGroup@73f4fafc child = NifBullet, file: i\In_lava_1024.NIF class;NBSimpleModel
+			//Structure (ADD dynamicsRootBranchGroup-NBSimpleModel:i\In_lava_1024.NIF) update took 23ms
+			// when these happen I see no visual for lava and no havok, but bullet is added
+			// this seems ot be the same for all lava_1024 everywhere, even a single like dagon fel, vacant tower
 			
 			
 			//Oblivion
-			//PhysicsDynamics skipping unknown type Plants\Dementia\SEDSwampTentacleIngred.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Clutter\UpperClass\UpperSilverPitcher02.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//java.lang.Throwable: what is this layer being given to me for? 5 NifBullet, file: Weapons\Silver\Dagger.NIF class;NBSimpleDynamicModel
+			//	at nifbullet.dyn.NBSimpleDynamicModel.<init>(NBSimpleDynamicModel.java:110)
+			//PhysicsDynamics skipping unknown type Clutter\FightersGuild\TargetHeavy01.NIF physicsInfo rigidBodyCount 14 massedRigidBodyCount 8 nonMassedRigidBodyCount 6 transformControllerCount 0 constraintCount 9 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Clutter\Books\Broadsheet01.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+
+			
 			//PhysicsDynamics skipping unknown type Clutter\Farm\Hoe01.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
 			//PhysicsDynamics skipping unknown type Clutter\Farm\Rake01.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
-			//PhysicsDynamics skipping unknown type Clutter\Farm\Hoe01.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
 			//PhysicsDynamics skipping unknown type Plants\Dementia\SEDSwampTentacleIngred.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
-			//PhysicsDynamics skipping unknown type Plants\Dementia\SEDSwampTentacleIngred.NIF physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
-			//hys skipping unknown type Dungeons\Caves\Traps\CTrapSwingMaceShort01.NIF
+			//phys skipping unknown type Dungeons\Caves\Traps\CTrapSwingMaceShort01.NIF
 			//phys skipping unknown type Dungeons\Caves\Traps\CTrapSwingMaceLong01.NIF
 			//Meshes\Dungeons\RuinInteriors\TorturedStatue\TortureStatuePedestal2.NIF java.io.IOException: Channel not open for writing - cannot extend file to required size java.base/sun.nio.ch.FileChannelImpl.map(FileChannelImpl.java:976)
 			//PhysicsDynamics skipping isComplexDynamic Armor\Fur\M\Gauntlets_gnd.NIF
@@ -210,10 +206,40 @@ public class NifBulletDisplay {
 			//phys skipping unknown type Vehicles\Motorcycle01.NIF
 
 
+			//Skyrim 
+			//phys skipping isComplexDynamic Clutter\Bones\TrollSkull.nif
+			// this has 2 rigid bodies, skull and jaw with a bhkLimitedHingeConstraint between them
+			//phys skipping isComplexDynamic Clutter\Books\BasicBook03.nif
+			//phys skipping isComplexDynamic Clutter\Books\BasicBook05a.nif			
+			//phys skipping isComplexDynamic Clutter\Books\SpellTomeConjurationLowPoly.nif
+			// good candidates, books, 2 rigid bodies boxes and a hinge constraint
+			// the trishapes are skinned to the 3 bones connected to the 2 boxes
+
+			//phys skipping unknown type Skyrim Traps\BoneAlarm02\TrapBoneAlarmBHavok.nif
+			//phys skipping unknown type Skyrim Weapons\Volendrung\Volendrung.nif
+			//No Physics category for file!! meshes/weapons/orcish/orcishwarhammer.nif
+			//physicsInfo rigidBodyCount 1 massedRigidBodyCount 1 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+
+			
 			//FO4
 			//phys skipping unknown type SetDressing\Building\DeskFanOffice01.nif
 			//phys skipping unknown type SetDressing\Vault\Vault_OxygenTank_01.nif
 			//phys skipping unknown type Interiors\Vault\Vault111\Rooms\V111GearRoomGate01.nif
+			//PhysicsDynamics skipping unknown type Gore\GoreHumanArmR.nif physicsInfo rigidBodyCount 3 massedRigidBodyCount 3 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type SetDressing\Construction\ConstructionBarrier01Dest.nif physicsInfo rigidBodyCount 2 massedRigidBodyCount 2 nonMassedRigidBodyCount 0 transformControllerCount 0 constraintCount 0 skinAndBoneCount 0
+
+						
+			
+			
+			//FO76			
+			//PhysicsDynamics skipping unknown type SetDressing\Skeletons\SkeletonBareBody01.nif physicsInfo rigidBodyCount 18 massedRigidBodyCount 0 nonMassedRigidBodyCount 18 transformControllerCount 0 constraintCount 17 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type SetDressing\Skeletons\SkeletonClothed01.nif physicsInfo rigidBodyCount 17 massedRigidBodyCount 0 nonMassedRigidBodyCount 17 transformControllerCount 0 constraintCount 16 skinAndBoneCount 0
+			//PhysicsDynamics skipping unknown type Props\SmithingTools\SmithingToolTongs01.nif physicsInfo rigidBodyCount 2 massedRigidBodyCount 0 nonMassedRigidBodyCount 2 transformControllerCount 0 constraintCount 1 skinAndBoneCount 0
+
+			
+			
+			
+			
 			
 			if (nb != null) {
 				nb.addToDynamicsWorld(dynamicsWorld);

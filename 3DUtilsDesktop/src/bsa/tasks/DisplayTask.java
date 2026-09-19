@@ -72,7 +72,8 @@ public class DisplayTask extends Thread {
 					if (sep >= 0) {
 						String ext = fileName.substring(sep);
 						DDSImage.OUTPUT_IMAGE_DEBUG = false;//turn off, only for dds files
-						if (ext.equals(".nif")) {
+						//FO76 .bto is a nif lod
+						if (ext.equals(".nif") || ext.equals(".bto")) {
 							if (verifyOnly) {
 								NifJ3dVisRoot nr = NifToJ3d.loadShapes(fileName, new BsaMeshSource(bsaFileSet),
 										new DummyTextureSource());
