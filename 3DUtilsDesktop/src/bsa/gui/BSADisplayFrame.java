@@ -36,6 +36,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -58,26 +59,30 @@ import nif.j3d.particles.J3dNiParticleSystem;
 import nifbullet.util.NifBulletDisplay;
 import scrollsexplorer.simpleclient.settings.SetBethFoldersDialog;
 import texture.CompressedTextureLoaderExt;
+import tools.swing.DetailsFileChooser;
 
 public class BSADisplayFrame extends JFrame implements ActionListener, ItemListener {
 
 	private boolean					windowMinimized;
 
-	private JTree					tree;
+	private JTree					tree				= null;
 
-	private DefaultTreeModel		treeModel;
+	private DefaultTreeModel		treeModel			= null;
 
-	private BSAFileSetWithStatus	bsaFileSet;
+	private BSAFileSetWithStatus	bsaFileSet			= null;
 
-	private JPopupMenu				treeNodePopup	= new JPopupMenu("Unseen");
+	private DetailsFileChooser		dfc					= null;
 
-	private JCheckBoxMenuItem		cbMenuItem		= new JCheckBoxMenuItem("Load all BSA Archives");
-	private JCheckBoxMenuItem		sopErrMenuItem	= new JCheckBoxMenuItem("SOP errors only");
+	private JPopupMenu				treeNodePopup		= new JPopupMenu("Unseen");
 
-	private JMenu					menuRecentFile	= new JMenu("Recent Files");
+	private JCheckBoxMenuItem		cbMenuItem			= new JCheckBoxMenuItem("Load all BSA Archives");
+	private JCheckBoxMenuItem		sysoutErrMenuItem	= new JCheckBoxMenuItem("SOP errors only");
 
-	private JMenu					menuSkele		= new JMenu("Skeleton");
-	private JMenu					menuSkins		= new JMenu("Skins");
+	private JMenu					menuFile			= new JMenu("File");
+	private JMenu					menuRecentFile		= new JMenu("Recent Files");
+
+	private JMenu					menuSkele			= new JMenu("Skeleton");
+	private JMenu					menuSkins			= new JMenu("Skins");
 
 	public BSADisplayFrame() {
 		super("BSA test display");
@@ -122,7 +127,6 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setOpaque(true);
 
-		JMenu menuFile = new JMenu("File");
 		menuFile.setMnemonic(70);
 
 		JMenuItem menuItem = new JMenuItem("Open Archive");
@@ -139,7 +143,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		boolean loadAll = Boolean.parseBoolean(BSAToolMain.properties.getProperty("load.all"));
 		cbMenuItem.setSelected(loadAll);
 		menuFile.add(cbMenuItem);
-		menuFile.add(sopErrMenuItem);
+		menuFile.add(sysoutErrMenuItem);
 		boolean autoOpenArchive = Boolean.parseBoolean(BSAToolMain.properties.getProperty("autoOpenArchive"));
 		JCheckBoxMenuItem autoOpenArchiveMenuItem = new JCheckBoxMenuItem("Auto Open Archive");
 		autoOpenArchiveMenuItem.setSelected(autoOpenArchive);
@@ -154,6 +158,11 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		menuFile.add(autoDisplayMenuItem);
 		menuItem = new JMenuItem("Set Folders");
 		menuItem.setActionCommand("setfolders");
+		menuItem.addActionListener(this);
+		menuFile.add(menuItem);
+
+		menuItem = new JMenuItem("Open File System File");
+		menuItem.setActionCommand("openFromFileSystem");
 		menuItem.addActionListener(this);
 		menuFile.add(menuItem);
 		menuItem = new JMenuItem("Exit Program");
@@ -436,6 +445,8 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			String action = ae.getActionCommand();
 			if (action.equals("open"))
 				selectAndOpenFile();
+			else if (action.equals("openFromFileSystem"))
+				openFromFileSystem();
 			else if (action.equals("close"))
 				closeFile();
 			else if (action.equals("exit"))
@@ -447,7 +458,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			else if (action.equals("display selected"))
 				displayFiles();
 			else if (action.equals("display selected together"))
-				displayFiles(false, false, true);			
+				displayFiles(false, false, true);
 			else if (action.equals("display all"))
 				displayFiles(true);
 			else if (action.equals("verify selected"))
@@ -477,6 +488,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			BSAToolMain.logException("Exception while processing action event", exc);
 		}
 	}
+
 	//used by checkboxes/radio buttons
 	@Override
 	public void itemStateChanged(ItemEvent e) {
@@ -504,8 +516,6 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		BSAToolMain.saveProperties();
 
 	}
-
-	
 
 	private void clearAnimation() {
 		menuSkele.removeAll();
@@ -690,8 +700,6 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		return nifBulletDisplay;
 	}
 
-
-
 	private void selectAndOpenFile() throws IOException {
 
 		String currentDirectory = BSAToolMain.properties.getProperty("current.directory");
@@ -833,19 +841,20 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		tree.setModel(treeModel);
 	}
 
-	public void displayFiles() throws InterruptedException {	
-		displayFiles(false, false, false);		
+	public void displayFiles() throws InterruptedException {
+		displayFiles(false, false, false);
 	}
-	
-	public void displayFiles(boolean displayAllFiles) throws InterruptedException {	
-		displayFiles(displayAllFiles, false, false);		
+
+	public void displayFiles(boolean displayAllFiles) throws InterruptedException {
+		displayFiles(displayAllFiles, false, false);
 	}
-	
-	public void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException {	
-		displayFiles(displayAllFiles, verifyOnly, false);		
+
+	public void displayFiles(boolean displayAllFiles, boolean verifyOnly) throws InterruptedException {
+		displayFiles(displayAllFiles, verifyOnly, false);
 	}
-	
-	private void displayFiles(boolean displayAllFiles, boolean verifyOnly, boolean together) throws InterruptedException{
+
+	private void displayFiles(boolean displayAllFiles, boolean verifyOnly, boolean together)
+			throws InterruptedException {
 		if (bsaFileSet == null) {
 			JOptionPane.showMessageDialog(this, "You must open an archive file", "No archive file", 0);
 			return;
@@ -890,7 +899,7 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 			playAnimation();
 		} else {
 			DisplayTask displayTask = new DisplayTask(bsaFileSet, entries, statusDialog, verifyOnly, together,
-					sopErrMenuItem.isSelected());
+					sysoutErrMenuItem.isSelected());
 			displayTask.start();
 			statusDialog.showDialog();
 			displayTask.join();
@@ -936,6 +945,48 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 		CompressedTextureLoaderExt.clearCache();
 		// and any loaded nifs too
 		NifToJ3d.clearCache();
+	}
+
+	private void openFromFileSystem() {
+		String baseDir = BSAToolMain.properties.getProperty("NifDisplayTester.baseDir", System.getProperty("user.dir"));
+
+		dfc = new DetailsFileChooser(baseDir, new DetailsFileChooser.Listener() {
+			@Override
+			public void fileSelected(File file) {
+				BSAToolMain.properties.setProperty("NifDisplayTester.baseDir", file.getPath());
+				try {
+					showFileFromSystem(file);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
+			}
+
+			@Override
+			public void directorySelected(File dir) {
+				System.out.println("No dirs for me please.");
+			}
+		});
+
+		dfc.setFileFilter(new FileNameExtensionFilter("Nif", "nif", "btr"));
+		dfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		dfc.getSelectedFile();
+	}
+
+	private void showFileFromSystem(File file) throws InterruptedException {
+
+		if (bsaFileSet == null) {
+			JOptionPane.showMessageDialog(this, "You must open an archive file", "No archive file", 0);
+			return;
+		}
+
+		StatusDialog statusDialog = new StatusDialog(this, "Displaying files from " + bsaFileSet.getName());
+
+		DisplayTask displayTask = new DisplayTask(bsaFileSet, file, statusDialog);
+		displayTask.start();
+		statusDialog.showDialog();
+		displayTask.join();
+
 	}
 
 	private void loadAnimationMenus() {
@@ -1008,6 +1059,9 @@ public class BSADisplayFrame extends JFrame implements ActionListener, ItemListe
 
 		BSAToolMain.properties.setProperty("load.all", Boolean.toString(cbMenuItem.isSelected()));
 		BSAToolMain.saveProperties();
+
+		if (dfc != null)
+			dfc.dispose();
 		//System.exit(0);
 	}
 
